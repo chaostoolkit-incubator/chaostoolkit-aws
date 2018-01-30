@@ -124,7 +124,7 @@ the rules of the DCO before submitting a PR.
 
 [dco]: https://github.com/probot/dco#how-it-works
 
-### Develop
+### Develop
 
 If you wish to develop on this project, make sure to install the development
 dependencies. But first, [create a virtual environment][venv] and then install
