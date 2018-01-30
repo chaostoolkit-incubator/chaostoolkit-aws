@@ -75,6 +75,24 @@ Generally speaking, there are two ways of doing this:
 
   Note that the token is optional.
 
+  Then, use it as follows:
+
+
+    ```json
+    {
+        "name": "stop-an-ec2-instance",
+        "provider": {
+            "type": "python",
+            "module": "chaosaws.ec2.actions",
+            "func": "stop_instance",
+            "secrets": ["aws"],
+            "arguments": {
+                "instance_id": "i-123456"
+            }
+        }
+    }
+    ```
+
 ## Test
 
 To run the tests for the project execute the following:
