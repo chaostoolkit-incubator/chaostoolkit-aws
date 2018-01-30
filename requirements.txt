@@ -1,0 +1,2 @@
+boto3
+chaostoolkit-lib>=0.13.0
