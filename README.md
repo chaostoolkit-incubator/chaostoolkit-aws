@@ -46,7 +46,7 @@ Please explore the code to see existing probes and actions.
 
 ## Configuration
 
-### Credentials
+### Credentials
 
 This extension uses the [boto3][] library under the hood. This library expects
 that you have properly [configured][creds] your environment to connect and
