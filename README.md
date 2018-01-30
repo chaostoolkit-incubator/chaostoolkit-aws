@@ -46,6 +46,8 @@ Please explore the code to see existing probes and actions.
 
 ## Configuration
 
+### Credentials
+
 This extension uses the [boto3][] library under the hood. This library expects
 that you have properly [configured][creds] your environment to connect and
 authenticate with the AWS services.
@@ -92,6 +94,19 @@ Generally speaking, there are two ways of doing this:
         }
     }
     ```
+
+### Other AWS settings
+
+In additon to the authentication credentials, you can configure the region
+against which you want to use. At the top level of the experiment, add:
+
+```json
+{
+    "configuration": {
+        "aws_region": "us-east-1"
+    }
+}
+```
 
 ## Test
 
