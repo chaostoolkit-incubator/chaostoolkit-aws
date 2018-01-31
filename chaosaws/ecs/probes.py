@@ -18,5 +18,4 @@ def ecs_service_is_not_deploying(cluster: str,
         cluster=cluster,
         services=[service]
     )
-
     return len(response['services']['deployments']) == 1
