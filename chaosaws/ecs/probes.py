@@ -19,7 +19,7 @@ def service_is_deploying(cluster: str,
         cluster=cluster,
         services=[service]
     )
-    if len(response['services']) == 0 or \
+    if not response['services'] or \
             'deployments' not in response['services'][0]:
         raise FailedActivity('Error retrieving service data from AWS')
 
