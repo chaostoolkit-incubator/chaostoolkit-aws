@@ -29,7 +29,7 @@ def aws_client(resource_name: str, configuration: Configuration=None,
         creds["aws_secret_access_key"] = secrets.get("aws_secret_access_key")
         creds["aws_session_token"] = secrets.get("aws_session_token")
 
-    return boto3.resource(resource_name, region_name=region, **creds)
+    return boto3.client(resource_name, region_name=region, **creds)
 
 
 def discover(discover_system: bool = True) -> Discovery:
