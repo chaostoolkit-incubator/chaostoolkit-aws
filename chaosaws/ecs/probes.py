@@ -4,13 +4,13 @@ from chaoslib.types import Configuration, Secrets
 
 from chaosaws import aws_client
 
-__all__ = ["service_is_not_deploying"]
+__all__ = ["service_is_deploying"]
 
 
-def service_is_not_deploying(cluster: str,
-                             service: str,
-                             configuration: Configuration = None,
-                             secrets: Secrets = None) -> bool:
+def service_is_deploying(cluster: str,
+                         service: str,
+                         configuration: Configuration = None,
+                         secrets: Secrets = None) -> bool:
     """
     Checks to make sure there is not an in progress deployment
     """
@@ -19,7 +19,8 @@ def service_is_not_deploying(cluster: str,
         cluster=cluster,
         services=[service]
     )
-    if 'deployments' not in response['services']:
+    if not response['services'] or \
+            'deployments' not in response['services'][0]:
         raise FailedActivity('Error retrieving service data from AWS')
 
-    return len(response['services']['deployments']) == 1
+    return len(response['services'][0]['deployments']) > 1
