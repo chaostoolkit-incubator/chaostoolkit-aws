@@ -9,9 +9,9 @@ __all__ = ["stop_task"]
 
 def stop_task(cluster: str,
               task_id: str,
-              reason='Chaos Testing',
-              configuration: Configuration=None,
-              secrets: Secrets=None) -> AWSResponse:
+              reason: str = 'Chaos Testing',
+              configuration: Configuration = None,
+              secrets: Secrets = None) -> AWSResponse:
     """
     Stop a given ECS task instance
     """
