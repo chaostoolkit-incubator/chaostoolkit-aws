@@ -152,3 +152,163 @@ To run the tests for the project execute the following:
 ```
 $ pytest
 ```
+
+### Add new AWS API Support
+
+Once you have setup your environment, you can start adding new
+[AWS API support][awsapi] by adding new actions, probes and entire sub-packages
+for those.
+
+[awsapi]: https://boto3.readthedocs.io/en/latest/reference/services/index.html
+
+#### Services supported by boto
+
+This package relies on [boto3][] to wrap the API calls into a fluent Python
+API. Some newer AWS services are not yet available in boto3, in that case,
+you should read the next section.
+
+[boto3]: https://boto3.readthedocs.io/en/latest/reference/services/index.html
+
+Let's say you want to support a new action in the EC2 sub-package.
+
+Start by creating a new function in `ec2/actions.py`:
+
+```python
+from chaoslib.types import Configuration, Secrets
+
+from chaosaws import aws_client
+from chaosaws.types import AWSResponse
+
+def reboot_instance(instance_id: str, dry_run: bool=False,
+                    configuration: Configuration=None,
+                    secrets: Secrets=None) -> AWSResponse:
+    """
+    Reboot a given EC2 instance.
+    """
+    client = aws_client('ec2', configuration, secrets)
+    return client.reboot_instances(InstanceIds=[instance_id], DryRun=dry_run)
+```
+
+As you can see, the actual code is straightforward. You first create a
+[EC2 client][ec2client] and simply call the appropriate method on that client
+with the expected arguments. We return the action as-is so that it can be
+logged by the chaostoolkit, or even be used as part of a steady-state
+hypothesis probe (if this was a probe, not action that is).
+
+You could decide to make more than one AWS API call but, it is better to keep
+it simple so that composition is easier from the experiment. Nonetheless,
+you may also compose those directly into a single action as well for specific
+use-cases.
+
+Please refer to the Chaos Toolkit documentation to learn more about the
+[configuration][] and [secrets][] objects.
+
+[ec2client]: https://boto3.readthedocs.io/en/latest/reference/services/ec2.html#client
+[configuration]: http://chaostoolkit.org/reference/api/experiment/#configuration
+[secrets]: http://chaostoolkit.org/reference/api/experiment/#secrets
+
+Once you have implemented that action, you must create at least one unit test
+for it in the `tests/ec2/test_ec2_actions.py` test module. For example:
+
+```python
+from chaosaws.ec2.actions import reboot_instancex
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_reboot_instance(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    inst_id = "i-1234567890abcdef0"
+    response = reboot_instance(inst_id)
+    client.reboot_instances.assert_called_with(
+        InstanceIds=[inst_id], DryRun=False)
+```
+
+By using the [built-in Python module to mock objects][pymock], we can mock the
+EC2 client and assert we edo indeed call the appropriate method with the right
+arguments. You are encouraged to write more than a single test for various
+conditions.
+
+[pymock]: https://docs.python.org/3/library/unittest.mock.html#module-unittest.mock
+
+Finally, should you choose to add support for a new AWS API resource altogether,
+you should create the according sub-package.
+
+#### Services not supported by boto (new AWS features)
+
+If the support you want to provide is for a new AWS service that [boto][] does
+not support yet, this requires direct call to the API endpoint via the
+[requests][] package. For instance, as of April 2018, [AWS EKS][eks] is not
+yet available in boto3, so let see how we can still use it.
+
+[eks]: https://aws.amazon.com/eks/
+
+Note: at this stage, the EKS API isn't publicly documented so let's just
+assume it defines a "Terminate Worker Noder" API.
+
+```python
+from chaoslib.types import Configuration, Secrets
+
+from chaosaws import signed_api_call
+from chaosaws.types import AWSResponse
+
+def terminate_worker_node(worker_node_id: str,
+                          configuration: Configuration=None,
+                          secrets: Secrets=None) -> AWSResponse:
+    """
+    Terminate a EKS worker node.
+    """
+    params = {
+        "DryRun": True,
+        "WorkerNodeId.1": worker_node_id
+    }
+    response = signed_api_call(
+        'eks', path='/2018-01-01/worker/terminate',
+        method='POST', params=params,
+        configuration=configuration, secrets=secrets)
+    return response.json()
+```
+
+Here is an example on existing API call (as a more concrete snippet):
+
+```python
+from chaoslib.types import Configuration, Secrets
+
+from chaosaws import signed_api_call
+
+def stop_instance(instance_id: str, configuration: Configuration=None,
+                  secrets: Secrets=None) -> str:
+    response = signed_api_call(
+        'ec2',
+        configuration=configuration,
+        secrets=secrets,
+        params={
+            "Action": "StopInstances",
+            "InstanceId.1": instance_id,
+            "Version": "2013-06-15"
+        }
+    )
+
+    # this API returns XML, not JSON
+    return response.text
+```
+
+When using the `signed_api_call`, you are responsible for the right way of
+passing the parameters. Basically, look at the AWS documentation for each
+API call.
+
+**WARNING:** It should be noted that, whenever boto3 implements an API, this
+package should be updated accordingly, as boto3 is much more versatile and
+solid.
+
+#### Make your new sub-package discoverable
+
+Finally, if you have created a new sub-package entirely, you need to make its
+capability discoverable by the chaos toolkit. Simply amend the `discover`
+function in the `chaosaws/__init__.py`. For example, assuming a new `eks`
+sub-package, with actions and probes:
+
+```python
+    activities.extend(discover_actions("chaosaws.eks.actions"))
+    activities.extend(discover_probes("chaosaws.eks.probes"))
+```
+

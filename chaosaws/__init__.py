@@ -1,26 +1,32 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Dict, List
 
+from aws_requests_auth.aws_auth import AWSRequestsAuth
+from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 import boto3
+from botocore import parsers
 from chaoslib.discovery.discover import discover_actions, discover_probes, \
     initialize_discovery_result
 from chaoslib.exceptions import DiscoveryFailed
 from chaoslib.types import Configuration, Discovery, DiscoveredActivities, \
     DiscoveredSystemInfo, Secrets
 from logzero import logger
+import requests
 
-__version__ = '0.1.0'
-__all__ = ["__version__", "discover", "aws_client"]
+from chaosaws.types import AWSResponse
 
 
-def aws_client(resource_name: str, configuration: Configuration=None,
-               secrets: Secrets=None):
+__version__ = '0.2.0'
+__all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
+
+
+def get_credentials(secrets: Secrets=None) -> Dict[str, str]:
     """
-    Create a boto3 client.
-    """
-    configuration = configuration or {}
-    region = configuration.get("aws_region", "us-east-1")
+    Credentialss may be provided via the secrets object. When they aren't,
+    they will be loaded from the process environment.
 
+    See: https://boto3.readthedocs.io/en/latest/guide/configuration.html#guide-configuration
+    """  # noqa: E501
     creds = dict(
         aws_access_key_id=None, aws_secret_access_key=None,
         aws_session_token=None)
@@ -29,7 +35,90 @@ def aws_client(resource_name: str, configuration: Configuration=None,
         creds["aws_secret_access_key"] = secrets.get("aws_secret_access_key")
         creds["aws_session_token"] = secrets.get("aws_session_token")
 
+    return creds
+
+
+def aws_client(resource_name: str, configuration: Configuration=None,
+               secrets: Secrets=None):
+    """
+    Create a boto3 client for the given resource.
+    """
+    configuration = configuration or {}
+    region = configuration.get("aws_region", "us-east-1")
+    creds = get_credentials(secrets)
     return boto3.client(resource_name, region_name=region, **creds)
+
+
+def signed_api_call(service: str, path: str="/", method: str='GET',
+                    configuration: Configuration=None, secrets: Secrets=None,
+                    params: Dict[str, Any]=None) -> requests.Response:
+    """
+    Perform an API call against an AWS service.
+
+    This should only be used when boto does not already implement the service
+    itself. See https://boto3.readthedocs.io/en/latest/reference/services/index.html
+    for a list of supported services by boto. This function does not claim
+    being generic enough to support the whole range of AWS API.
+
+    The `configuration` object should look like this:
+
+    ```json
+    {
+        "aws_region": "us-east-1",
+        "aws_host": "amazonaws.com"
+    }
+    ```
+
+    While both are optional, and default to the values shown in this snippet,
+    you should make sure to be explicit about them to avoid confusion.
+
+    The endpoint being called is built from the given `service` name, the
+    given region and host as well as the `path` of the action being called on
+    the service. By default, the call is made over `HTTPS` but this can be
+    changed by setting `aws_endpoint_scheme` in the configuration dictionary.
+
+    Pass any parameters of the API itself as part of the remaining `params`
+    paramater is a dictionary. It should match the signature of the service
+    you are trying to call and will be sent as a query-string when `method` is
+    `"GET"` or `"DELETE"`, or as a JSON payload otherwise. Refer to the AWS
+    documentation for each service type.
+    """  # noqa: E501
+    configuration = configuration or {}
+    region = configuration.get("aws_region", "us-east-1") or ""
+    host = configuration.get("aws_host", "amazonaws.com")
+    scheme = configuration.get("aws_endpoint_scheme", "https")
+    host = "{s}.{r}.{h}".format(s=service, r=region, h=host)
+    endpoint = configuration.get(
+        "aws_endpoint", '{scheme}://{h}'.format(
+            scheme=scheme, h=host)).replace('..', '.')
+    endpoint = "{e}{p}".format(e=endpoint, p=path)
+    creds = get_credentials(secrets)
+
+    # when creds weren't provided via secrets, we let boto search for them
+    # from the process environment
+    if creds["aws_access_key_id"] and creds["aws_secret_access_key"]:
+        auth = AWSRequestsAuth(
+            aws_access_key=creds["aws_access_key_id"],
+            aws_secret_access_key=creds["aws_secret_access_key"],
+            aws_host=host,
+            aws_region=region,
+            aws_service=service)
+    else:
+        auth = BotoAWSRequestsAuth(
+            aws_host=host,
+            aws_region=region,
+            aws_service=service)
+
+    headers = {
+        "Accept": "application/json"
+    }
+
+    if method in ('DELETE', 'GET'):
+        return requests.request(
+            method, endpoint, headers=headers, auth=auth, params=params)
+
+    return requests.request(
+        method, endpoint,  headers=headers, auth=auth, json=params)
 
 
 def discover(discover_system: bool = True) -> Discovery:
@@ -61,12 +150,3 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.ecs.actions"))
     activities.extend(discover_probes("chaosaws.ecs.probes"))
     return activities
-
-
-def explore_aws_system() -> DiscoveredSystemInfo:
-    """
-    Fetch information from the current AWS context.
-    """
-    logger.info("Discovering AWS system")
-    # TBD
-    return {}
