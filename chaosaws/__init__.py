@@ -20,7 +20,7 @@ __version__ = '0.2.0'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
-def get_credentials(secrets: Secrets=None) -> Dict[str, str]:
+def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
     """
     Credentialss may be provided via the secrets object. When they aren't,
     they will be loaded from the process environment (for instance, read from
@@ -39,8 +39,8 @@ def get_credentials(secrets: Secrets=None) -> Dict[str, str]:
     return creds
 
 
-def aws_client(resource_name: str, configuration: Configuration=None,
-               secrets: Secrets=None):
+def aws_client(resource_name: str, configuration: Configuration = None,
+               secrets: Secrets = None):
     """
     Create a boto3 client for the given resource.
 
@@ -71,9 +71,10 @@ def aws_client(resource_name: str, configuration: Configuration=None,
     return boto3.client(resource_name, region_name=region, **creds)
 
 
-def signed_api_call(service: str, path: str="/", method: str='GET',
-                    configuration: Configuration=None, secrets: Secrets=None,
-                    params: Dict[str, Any]=None) -> requests.Response:
+def signed_api_call(service: str, path: str = "/", method: str = 'GET',
+                    configuration: Configuration = None,
+                    secrets: Secrets = None,
+                    params: Dict[str, Any] = None) -> requests.Response:
     """
     Perform an API call against an AWS service.
 
