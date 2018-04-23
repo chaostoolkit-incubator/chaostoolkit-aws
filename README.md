@@ -58,8 +58,17 @@ authenticate with the AWS services.
 Generally speaking, there are two ways of doing this:
 
 * you have [configured][creds] the environment where you will run the
-  experiment from (so either with a `~/.aws/credentials` or proper environment
-  variables)
+  experiment from (any of the [user-wide credential sources][sources] would
+  do). You may also provide a profile name to [assume a role][role].
+
+    ```json
+    {
+        "configuration": {
+            "aws_profile_name": "dev"
+        }
+    }
+    ```
+
 * you explicitely pass the correct environment variables to the experiment
   definition as follows:
 
@@ -76,9 +85,7 @@ Generally speaking, there are two ways of doing this:
     ```
 
   Note that the token is optional.
-
   Then, use it as follows:
-
 
     ```json
     {
@@ -94,6 +101,9 @@ Generally speaking, there are two ways of doing this:
         }
     }
     ```
+
+[sources]: https://boto3.readthedocs.io/en/latest/guide/configuration.html#configuring-credentials
+[role]: https://boto3.readthedocs.io/en/latest/guide/configuration.html#aws-config-file
 
 ### Other AWS settings
 
