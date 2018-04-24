@@ -20,10 +20,11 @@ __version__ = '0.2.0'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
-def get_credentials(secrets: Secrets=None) -> Dict[str, str]:
+def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
     """
     Credentialss may be provided via the secrets object. When they aren't,
-    they will be loaded from the process environment.
+    they will be loaded from the process environment (for instance, read from
+    `~/.aws/credentials`).
 
     See: https://boto3.readthedocs.io/en/latest/guide/configuration.html#guide-configuration
     """  # noqa: E501
@@ -38,20 +39,42 @@ def get_credentials(secrets: Secrets=None) -> Dict[str, str]:
     return creds
 
 
-def aws_client(resource_name: str, configuration: Configuration=None,
-               secrets: Secrets=None):
+def aws_client(resource_name: str, configuration: Configuration = None,
+               secrets: Secrets = None):
     """
     Create a boto3 client for the given resource.
-    """
+
+    You may pass the `aws_region` key in the `configuration` object to
+    be explicit about which region you want to use.
+
+    You may pass `aws_profile_name` value to the `configuration` object so that
+    we load the appropriate profile to converse with the AWS services. In that
+    case, make sure your local `~/aws/credentials` config is properly setup, as
+    per https://boto3.readthedocs.io/en/latest/guide/configuration.html#aws-config-file
+
+    Also, if you want to assume a role, you should setup that file as per
+    https://boto3.readthedocs.io/en/latest/guide/configuration.html#assume-role-provider
+    as we do not read those settings from the `secrets` object.
+    """  # noqa: E501
     configuration = configuration or {}
     region = configuration.get("aws_region", "us-east-1")
     creds = get_credentials(secrets)
+
+    if boto3.DEFAULT_SESSION is None:
+        profile_name = configuration.get("aws_profile_name")
+
+        # we must create our own session so that we can populate the profile
+        # name when it is provided. Only create the default session once.
+        boto3.setup_default_session(
+            profile_name=profile_name, region_name=region, **creds)
+
     return boto3.client(resource_name, region_name=region, **creds)
 
 
-def signed_api_call(service: str, path: str="/", method: str='GET',
-                    configuration: Configuration=None, secrets: Secrets=None,
-                    params: Dict[str, Any]=None) -> requests.Response:
+def signed_api_call(service: str, path: str = "/", method: str = 'GET',
+                    configuration: Configuration = None,
+                    secrets: Secrets = None,
+                    params: Dict[str, Any] = None) -> requests.Response:
     """
     Perform an API call against an AWS service.
 
@@ -82,6 +105,9 @@ def signed_api_call(service: str, path: str="/", method: str='GET',
     you are trying to call and will be sent as a query-string when `method` is
     `"GET"` or `"DELETE"`, or as a JSON payload otherwise. Refer to the AWS
     documentation for each service type.
+
+    This function does not support profile names so you must provide the
+    credentials in secrets.
     """  # noqa: E501
     configuration = configuration or {}
     region = configuration.get("aws_region", "us-east-1") or ""
@@ -118,7 +144,7 @@ def signed_api_call(service: str, path: str="/", method: str='GET',
             method, endpoint, headers=headers, auth=auth, params=params)
 
     return requests.request(
-        method, endpoint,  headers=headers, auth=auth, json=params)
+        method, endpoint, headers=headers, auth=auth, json=params)
 
 
 def discover(discover_system: bool = True) -> Discovery:

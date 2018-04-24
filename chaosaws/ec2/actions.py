@@ -9,9 +9,9 @@ from chaosaws.types import AWSResponse
 __all__ = ["stop_instance"]
 
 
-def stop_instance(instance_id: str, force: bool=False,
-                  configuration: Configuration=None,
-                  secrets: Secrets=None) -> AWSResponse:
+def stop_instance(instance_id: str, force: bool = False,
+                  configuration: Configuration = None,
+                  secrets: Secrets = None) -> AWSResponse:
     """
     Stop a given EC2 instance.
     """

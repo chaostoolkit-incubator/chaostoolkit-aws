@@ -2,7 +2,17 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.3.0...HEAD
+
+## [0.3.0][]
+
+[0.3.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.2.0...0.3.0
+
+### Added
+
+-   Support specifying a specific profile config to assume a role [#5][5]
+
+[5]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/5
 
 ## [0.2.0][]
 

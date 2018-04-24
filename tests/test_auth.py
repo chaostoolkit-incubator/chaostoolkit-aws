@@ -5,7 +5,7 @@ from urllib.parse import urlparse, parse_qs
 
 import requests_mock
 
-from chaosaws import signed_api_call
+from chaosaws import aws_client, get_credentials, signed_api_call
 
 
 CONFIGURATION = {
@@ -14,10 +14,14 @@ CONFIGURATION = {
     "aws_endpoint_scheme": "http",
 }
 
+CONFIG_WITH_PROFILE = {
+    "aws_profile_name": "myprofile"
+}
+
 SECRETS = {
     "aws_access_key_id": "mykey",
     "aws_secret_access_key": "mysecret",
-    "aws_session_token": "mytoken"
+    "aws_session_token": "mytoken",
 }
 
 ENDPOINT = "http://eks.us-east-1.localhost"
@@ -81,3 +85,37 @@ def test_signed_api_call_with_body():
 
         assert "NodeId.1" in body
         assert body["NodeId.1"] == "12345"
+
+
+@patch('chaosaws.boto3', autospec=True)
+def test_create_client_from_cred_keys(boto3: object):
+    boto3.DEFAULT_SESSION = None
+    creds = get_credentials(SECRETS)
+
+    aws_client('ecs', configuration=CONFIGURATION, secrets=SECRETS)
+    boto3.client.assert_called_with(
+        'ecs', region_name="us-east-1", **creds)
+
+    aws_client('ecs', configuration=CONFIGURATION, secrets=SECRETS)
+    boto3.setup_default_session.assert_called_with(
+        profile_name=None, region_name="us-east-1", **creds)
+    boto3.client.assert_called_with(
+        'ecs', region_name="us-east-1", **creds)
+
+
+@patch('chaosaws.boto3', autospec=True)
+def test_create_client_from_profile_name(boto3: object):
+    boto3.DEFAULT_SESSION = None
+    creds = get_credentials(dict())
+
+    aws_client(
+        'ecs', configuration=CONFIG_WITH_PROFILE)
+    boto3.client.assert_called_with(
+        'ecs', region_name="us-east-1", **creds)
+
+    aws_client(
+        'ecs', configuration=CONFIG_WITH_PROFILE)
+    boto3.setup_default_session.assert_called_with(
+        profile_name="myprofile", region_name="us-east-1", **creds)
+    boto3.client.assert_called_with(
+        'ecs', region_name="us-east-1", **creds)
