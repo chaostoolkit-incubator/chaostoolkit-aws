@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.3.0...HEAD
 
+### Added
+
+-   Add basic IAM Policy support
+
 ## [0.3.0][]
 
 [0.3.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.2.0...0.3.0
