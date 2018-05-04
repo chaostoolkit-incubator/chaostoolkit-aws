@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-import boto3
+from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-
-from chaosaws import aws_client
 from chaosaws.types import AWSResponse
+
+import random
+from chaosaws import aws_client
 
 
 __all__ = ["stop_instance"]
@@ -61,7 +62,7 @@ def stop_entire_az(az: str, force: bool = False,
     if instance_ids != []:
         return client.stop_instances(InstanceIds=instance_ids, Force=force)
     else:
-        return "No instances to stop in this availability zone"
+        raise FailedActivity('No instances in the availability zone: ' + az)
 
 
 def stop_instances(instance_ids, force: bool = False,
