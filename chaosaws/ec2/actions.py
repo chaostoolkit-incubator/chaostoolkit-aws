@@ -65,8 +65,8 @@ def stop_instances(instance_ids: List[str] = None, az: str = None,
             instance_ids = list_instance_ids(filters, client)
 
             if not instance_ids:
-                raise FailedActivity("No instances in availability zone: {}"
-                                     .format(az))
+                raise FailedActivity(
+                    "No instances in availability zone: {}".format(az))
 
     logger.debug(
         "Picked EC2 instances '{}' from AZ '{}' to be stopped".format(
