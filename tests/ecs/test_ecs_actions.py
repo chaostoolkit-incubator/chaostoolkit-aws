@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch, ANY
 
-from chaosaws.ecs.actions import stop_task, delete_service, delete_services, \
+from chaosaws.ecs.actions import stop_task, delete_service, \
     delete_cluster, deregister_container_instance
 
 
@@ -35,7 +35,7 @@ def test_delete_service(aws_client):
 
 
 @patch('chaosaws.ecs.actions.aws_client', autospec=True)
-def test_delete_services(aws_client):
+def test_delete_service(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     cluster = "ecs-cluster"
@@ -48,7 +48,7 @@ def test_delete_services(aws_client):
         {'serviceArns': [svc2], 'nextToken': None}
     ]
 
-    response = delete_services(cluster=cluster)
+    response = delete_service(cluster=cluster)
     client.update_service.assert_called_with(
         cluster=cluster, service=ANY, desiredCount=0,
         deploymentConfiguration={
@@ -64,7 +64,7 @@ def test_delete_services(aws_client):
 
 
 @patch('chaosaws.ecs.actions.aws_client', autospec=True)
-def test_delete_filtered_services(aws_client):
+def test_delete_filtered_service(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     cluster = "ecs-cluster"
@@ -77,7 +77,7 @@ def test_delete_filtered_services(aws_client):
         {'serviceArns': [svc2], 'nextToken': None}
     ]
 
-    response = delete_services(cluster=cluster, service_pattern="my-db")
+    response = delete_service(cluster=cluster, service_pattern="my-db")
     client.update_service.assert_called_with(
         cluster=cluster, service="my-db-service", desiredCount=0,
         deploymentConfiguration={
