@@ -85,11 +85,11 @@ def list_instance_ids(filters: List[Dict[str, Any]],
     res = client.describe_instances(Filters=filters)
     instance_ids = []
 
-    # reservations are instances that were started together
+    # reservations are instances that were started together
     for reservation in res['Reservations']:
         for inst in reservation['Instances']:
             instance_ids.append(inst['InstanceId'])
-    
+
     return instance_ids
 
 
