@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
+import random
+import re
+
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
+from logzero import logger
+
+from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-import random
-from chaosaws import aws_client
-
-__all__ = ["stop_task"]
+__all__ = ["stop_task", "delete_service", "delete_cluster",
+           "deregister_container_instance"]
 
 
 def stop_task(cluster: str,
@@ -21,75 +25,84 @@ def stop_task(cluster: str,
     return client.stop_task(cluster=cluster, task=task_id, reason=reason)
 
 
-def delete_service(cluster: str,
-                   service: str,
+def delete_service(service: str = None, cluster: str = None,
                    configuration: Configuration = None,
                    secrets: Secrets = None) -> AWSResponse:
     """
-    Delete a given ECS service
+    Update a given ECS service by updating it to set the desired
+    count of tasks to 0 then delete it.
+
+    You can specify a cluster by its ARN identifier or, if not provided, the
+    default cluster will be picked up.
     """
     client = aws_client("ecs", configuration, secrets)
-    client.update_service(cluster=cluster, service=service,
-                          desiredCount=0,
-                          deploymentConfiguration={'maximumPercent': 100,
-                                                   'minimumHealthyPercent': 0})
+
+    logger.debug("Updating ECS service: {}".format(service))
+    client.update_service(
+        cluster=cluster, service=service, desiredCount=0,
+        deploymentConfiguration={
+            'maximumPercent': 100,
+            'minimumHealthyPercent': 0
+        })
+
+    logger.debug("Deleting ECS service: {}".format(service))
     return client.delete_service(cluster=cluster, service=service)
 
 
-def delete_random_service(cluster: str,
-                          configuration: Configuration = None,
-                          secrets: Secrets = None) -> AWSResponse:
+def delete_services(cluster: str = None, service_pattern: str = None,
+                    configuration: Configuration = None,
+                    secrets: Secrets = None) -> AWSResponse:
     """
-    Delete a given ECS service
+    Update a given ECS service by updating each service to set the desired
+    count of tasks to 0 then delete it.
+
+    You may set `service_pattern` so that only service names matching the
+    pattern would be be used. This should be a valid regex.
+
+    You can specify a cluster by its ARN identifier or, if not provided, the
+    default cluster will be picked up.
     """
     client = aws_client("ecs", configuration, secrets)
 
     res = client.list_services(cluster=cluster, maxResults=10)
-    services = res["serviceArns"]
-    while "nextToken" in res:
-        token = res["nextToken"]
-        res = client.list_services(cluster=cluster, nextToken=token,
-                                   maxResults=10)
-        services.extend(res["serviceArns"])
-    x = random.randrange(0, len(services))
-    service = services[x].split("/")[1]
-    print("The service " + service + " will be deleted.")
-    client.update_service(cluster=cluster, service=service,
-                          desiredCount=0,
-                          deploymentConfiguration={'maximumPercent': 100,
-                                                   'minimumHealthyPercent': 0})
-    return client.delete_service(cluster=cluster, service=service)
+    services = res["serviceArns"][:]
+    while True:
+        next_token = res.get("nextToken")
+        if not next_token:
+            break
 
-
-def delete_random_service_filter(cluster: str,
-                                 filter: str,
-                                 configuration: Configuration = None,
-                                 secrets: Secrets = None) -> AWSResponse:
-    """
-    Delete a given ECS service
-    """
-    client = aws_client("ecs", configuration, secrets)
-    res = client.list_services(cluster=cluster, maxResults=10)
-    services = res["serviceArns"]
-    while "nextToken" in res:
-        token = res["nextToken"]
-        res = client.list_services(cluster=cluster, nextToken=token,
-                                   maxResults=10)
+        res = client.list_services(
+            cluster=cluster, nextToken=next_token, maxResults=10)
         services.extend(res["serviceArns"])
 
-    filtered = []
-    for service in services:
-        if filter in service:
-            filtered.append(service)
-    if len(filtered) <= 0:
-        raise FailedActivity('No service matching the filter: ' + filter)
-    x = random.randrange(0, len(filtered))
-    service = services[x].split("/")[1]
-    print("The service " + service + " will be deleted.")
+    if not services:
+        raise FailedActivity("No ECS services found")
+
+    # should we filter the number of services to take into account?
+    if service_pattern:
+        r = re.compile(service_pattern)
+        filtered = []
+        for service in services:
+            if r.search(service):
+                filtered.append(service)
+        services = filtered
+
+        if not services:
+            raise FailedActivity(
+                "No ECS services matching pattern: {}".format(service_pattern))
+
+    service = random.choice(services)
+    service = service.rsplit("/", 1)[1]
+
+    logger.debug("Updating ECS service: {}".format(service))
     client.update_service(cluster=cluster, service=service,
                           desiredCount=0,
-                          deploymentConfiguration={'maximumPercent': 100,
-                                                   'minimumHealthyPercent': 0})
+                          deploymentConfiguration={
+                              'maximumPercent': 100,
+                              'minimumHealthyPercent': 0
+                          })
+
+    logger.debug("Deleting ECS service: {}".format(service))
     return client.delete_service(cluster=cluster, service=service)
 
 
@@ -100,6 +113,7 @@ def delete_cluster(cluster: str,
     Delete a given ECS cluster
     """
     client = aws_client("ecs", configuration, secrets)
+    logger.debug("Deleting ECS cluster: {}".format(cluster))
     return client.delete_cluster(cluster=cluster)
 
 
@@ -109,9 +123,13 @@ def deregister_container_instance(cluster: str,
                                   configuration: Configuration = None,
                                   secrets: Secrets = None) -> AWSResponse:
     """
-    Deregister a given ECS container
+    Deregister a given ECS container. Becareful that tasks handled by this
+    instance will remain orphan.
     """
     client = aws_client("ecs", configuration, secrets)
+    logger.debug(
+        "Deregistering container instance '{}' from ECS cluster: {}".format(
+            instance_id, cluster))
     return client.deregister_container_instance(cluster=cluster,
                                                 containerInstance=instance_id,
                                                 force=force)

@@ -7,6 +7,7 @@
 ### Added
 
 -   Add basic IAM Policy support
+-   Add ECS actions to delete services, clusters and container instances
 
 ### Changed
 
