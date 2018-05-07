@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.3.0...HEAD
 
+### Added
+
+-   Add basic IAM Policy support
+
 ### Changed
 
 -   Stoping EC2 instances may not take an AZ as a parameter to pick

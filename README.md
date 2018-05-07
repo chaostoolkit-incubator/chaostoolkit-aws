@@ -37,6 +37,31 @@ experiment file:
             "instance_id": "i-123456"
         }
     }
+},
+{
+    "name": "create-a-new-policy",
+    "provider": {
+        "type": "python",
+        "module": "chaosaws.iam.actions",
+        "func": "create_policy",
+        "arguments": {
+            "name": "mypolicy",
+            "path": "user/Jane",
+            "policy": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "s3:ListAllMyBuckets",
+                            "s3:GetBucketLocation"
+                        ],
+                        "Resource": "arn:aws:s3:::*"
+                    }
+                ]
+            }
+        }
+    }
 }
 ```
 

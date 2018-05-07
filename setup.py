@@ -36,7 +36,8 @@ license = 'Apache License Version 2.0'
 packages = [
     'chaosaws',
     'chaosaws.ecs',
-    'chaosaws.ec2'
+    'chaosaws.ec2',
+    'chaosaws.iam'
 ]
 
 needs_pytest = set(['pytest', 'test']).intersection(sys.argv)
