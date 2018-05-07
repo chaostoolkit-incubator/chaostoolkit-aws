@@ -8,6 +8,11 @@
 
 -   Add basic IAM Policy support
 
+### Changed
+
+-   Stoping EC2 instances may not take an AZ as a parameter to pick
+    one or many random instances to stop within that AZ.
+
 ## [0.3.0][]
 
 [0.3.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.2.0...0.3.0
