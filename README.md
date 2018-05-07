@@ -40,6 +40,23 @@ experiment file:
 }
 ```
 
+Or select one at random from an AZ:
+
+
+```json
+{
+    "name": "stop-an-ec2-instance-in-az-at-random",
+    "provider": {
+        "type": "python",
+        "module": "chaosaws.ec2.actions",
+        "func": "stop_instance",
+        "arguments": {
+            "az": "us-west-1"
+        }
+    }
+}
+```
+
 That's it!
 
 Please explore the code to see existing probes and actions.

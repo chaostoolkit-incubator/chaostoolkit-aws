@@ -1,77 +1,103 @@
 # -*- coding: utf-8 -*-
+import random
+from typing import Any, Dict, List
+
+import boto3
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
+from logzero import logger
+
+from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-import random
-from chaosaws import aws_client
+
+__all__ = ["stop_instance", "stop_instances"]
 
 
-__all__ = ["stop_instance"]
-
-
-def stop_instance(instance_id: str, force: bool = False,
+def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
                   configuration: Configuration = None,
                   secrets: Secrets = None) -> AWSResponse:
     """
-    Stop a given EC2 instance.
+    Stop a single EC2 instance.
+
+    You may provide an instance id explicitely or, if you only specify the AZ,
+    a random instance will be selected.
     """
+    if not az and not instance_id:
+        raise FailedActivity(
+            "To stop an EC2 instance, you must specify an AZ to pick a "
+            "random instance from or the instance id to stop")
+
     client = aws_client('ec2', configuration, secrets)
+
+    if not instance_id:
+        filters = [{'Name': 'availability-zone', 'Values': [az]}]
+        instance_id = pick_random_instance(filters, client)
+
+        if not instance_id:
+            raise FailedActivity(
+                "No instances in availability zone: {}".format(az))
+
+    logger.debug(
+        "Picked EC2 instance '{}' from AZ '{}' to be stopped".format(
+            instance_id, az))
+
     return client.stop_instances(InstanceIds=[instance_id], Force=force)
 
 
-def stop_random_instance(force: bool = False,
-                         configuration: Configuration = None,
-                         secrets: Secrets = None) -> AWSResponse:
-    """
-    Stop a random EC2 instance.
-    """
-    client = aws_client('ec2', configuration, secrets)
-    res = client.describe_instances()
-    x = random.randrange(0, len(res['Reservations']))
-    instance_id = res['Reservations'][x]['Instances'][0]['InstanceId']
-    return client.stop_instances(InstanceIds=[instance_id], Force=force)
-
-
-def stop_random_instance_az(az: str, force: bool = False,
-                            configuration: Configuration = None,
-                            secrets: Secrets = None) -> AWSResponse:
-    """
-    Stop a random EC2 instance in a given availability zone.
-    """
-    client = aws_client('ec2', configuration, secrets)
-    filters = [{'Name': 'availability-zone', 'Values': [az]}]
-    res = client.describe_instances(Filters=filters)
-    x = random.randrange(0, len(res['Reservations']))
-    instance_id = res['Reservations'][x]['Instances'][0]['InstanceId']
-    return client.stop_instances(InstanceIds=[instance_id], Force=force)
-
-
-def stop_entire_az(az: str, force: bool = False,
-                   configuration: Configuration = None,
+def stop_instances(instance_ids: List[str] = None, az: str = None,
+                   force: bool = False, configuration: Configuration = None,
                    secrets: Secrets = None) -> AWSResponse:
     """
-    Stop all EC2 instances in a given availability zone.
+    Stop all the given EC2 instances or, if none is provided, all instances
+    of the given availability zone.
     """
+    if not az and not instance_ids:
+        raise FailedActivity(
+            "To stop EC2 instances, you must specify the AZ or the list of "
+            "instances to stop")
+
     client = aws_client('ec2', configuration, secrets)
-    filters = [{'Name': 'availability-zone', 'Values': [az]}]
+
+    if az:
+        filters = [{'Name': 'availability-zone', 'Values': [az]}]
+        instance_ids = list_instance_ids(filters, client)
+
+        if not instance_ids:
+            raise FailedActivity(
+                "No instances in availability zone: {}".format(az))
+
+    logger.debug(
+        "Picked EC2 instances '{}' from AZ '{}' to be stopped".format(
+            ', '.join(instance_ids), az))
+
+    return client.stop_instances(InstanceIds=instance_ids, Force=force)
+
+
+###############################################################################
+# Private functions
+###############################################################################
+def list_instance_ids(filters: List[Dict[str, Any]],
+                      client: boto3.client) -> List[str]:
+    """
+    Return of all instance ids matching the given filters.
+    """
     res = client.describe_instances(Filters=filters)
     instance_ids = []
-    for subres in res['Reservations']:
-        instance_ids.append(subres['Instances'][0]['InstanceId'])
 
-    if not instance_ids:
-        raise FailedActivity(
-            "No instances in availability zone: {}".format(az))
-        
-    return client.stop_instances(InstanceIds=instance_ids, Force=force)
+    # reservations are instances that were started together
+    for reservation in res['Reservations']:
+        for inst in reservation['Instances']:
+            instance_ids.append(inst['InstanceId'])
+    
+    return instance_ids
 
 
-def stop_instances(instance_ids, force: bool = False,
-                   configuration: Configuration = None,
-                   secrets: Secrets = None) -> AWSResponse:
+def pick_random_instance(filters: List[Dict[str, Any]],
+                         client: boto3.client) -> str:
     """
-    Stop several given EC2 instance.
+    Select an instance at random based on the returned list of instances
+    matching the given filter.
     """
-    client = aws_client('ec2', configuration, secrets)
-    return client.stop_instances(InstanceIds=instance_ids, Force=force)
+    instance_ids = list_instance_ids(filters, client)
+    return random.choice(instance_ids)
