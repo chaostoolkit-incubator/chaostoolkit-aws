@@ -59,10 +59,12 @@ def stop_entire_az(az: str, force: bool = False,
     instance_ids = []
     for subres in res['Reservations']:
         instance_ids.append(subres['Instances'][0]['InstanceId'])
-    if instance_ids != []:
-        return client.stop_instances(InstanceIds=instance_ids, Force=force)
-    else:
-        raise FailedActivity('No instances in the availability zone: ' + az)
+
+    if not instance_ids:
+        raise FailedActivity(
+            "No instances in availability zone: {}".format(az))
+        
+    return client.stop_instances(InstanceIds=instance_ids, Force=force)
 
 
 def stop_instances(instance_ids, force: bool = False,
