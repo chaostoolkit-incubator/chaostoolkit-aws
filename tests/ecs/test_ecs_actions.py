@@ -2,7 +2,7 @@
 from unittest.mock import MagicMock, patch, ANY
 
 from chaosaws.ecs.actions import stop_task, delete_service, delete_services, \
-    deregister_container_instance
+    delete_cluster, deregister_container_instance
 
 
 @patch('chaosaws.ecs.actions.aws_client', autospec=True)
@@ -96,7 +96,7 @@ def test_delete_cluster(aws_client):
     cluster = "ecs-cluster"
 
     response = delete_cluster(cluster=cluster)
-    client.delete_service.assert_called_with(cluster=cluster)
+    client.delete_cluster.assert_called_with(cluster=cluster)
 
 
 @patch('chaosaws.ecs.actions.aws_client', autospec=True)
