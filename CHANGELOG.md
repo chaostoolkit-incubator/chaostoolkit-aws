@@ -2,7 +2,16 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.4.1...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.4.2...HEAD
+
+## [0.4.2][]
+
+[0.4.2]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.4.1...0.4.2
+
+### Changed
+
+-   Read package version from source file without importing as dependencies may
+    not be deployed then
 
 ## [0.4.1][]
 
