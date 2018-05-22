@@ -20,7 +20,8 @@ def stop_task(cluster: str = None, task_id: str = None, service: str = None,
               configuration: Configuration = None,
               secrets: Secrets = None) -> AWSResponse:
     """
-    Stop a given ECS task instance. If no task_id provided, a random task of the given service is stopped.
+    Stop a given ECS task instance. If no task_id provided, a random task of
+    the given service is stopped.
 
     You can specify a cluster by its ARN identifier or, if not provided, the
     default cluster will be picked up.
@@ -53,10 +54,10 @@ def delete_service(service: str = None, cluster: str = None,
     """
     client = aws_client("ecs", configuration, secrets)
     if not service:
-        services = list_services(cluster=cluster, client=client)
+        services = list_services_arns(cluster=cluster, client=client)
         if not services:
             raise FailedActivity(
-                    "No ECS services found in cluster: {}".format(
+                "No ECS services found in cluster: {}".format(
                     cluster))
 
         # should we filter the number of services to take into account?
@@ -65,7 +66,7 @@ def delete_service(service: str = None, cluster: str = None,
                                        pattern=service_pattern)
             if not services:
                 raise FailedActivity(
-                        "No ECS services matching pattern: {}".format(
+                    "No ECS services matching pattern: {}".format(
                         service_pattern))
 
         service = random.choice(services)
@@ -111,12 +112,13 @@ def deregister_container_instance(cluster: str,
                                                 containerInstance=instance_id,
                                                 force=force)
 
+
 ###############################################################################
 # Private functions
 ###############################################################################
-def list_services(cluster: str, client: boto3.client) -> List[str]:
+def list_services_arns(cluster: str, client: boto3.client) -> List[str]:
     """
-    Return of all services in the given cluster.
+    Return of all services arns in the given cluster.
     """
     res = client.list_services(cluster=cluster, maxResults=10)
     services = res["serviceArns"][:]
@@ -141,13 +143,15 @@ def filter_services(services: List[str], pattern: str) -> List[str]:
 
 
 def list_tasks(cluster: str, service: str, client: boto3.client) -> List[str]:
-    res = client.list_tasks(cluster=cluster, serviceName=service, maxResults=100)
+    res = client.list_tasks(cluster=cluster, serviceName=service,
+                            maxResults=100)
     tasks = res['taskArns'][:]
     while True:
         next_token = res.get("nextToken")
         if not next_token:
             break
 
-        res = client.list_tasks(cluster=cluster, serviceName=service, nextToken=next_token, maxResults=100)
+        res = client.list_tasks(cluster=cluster, serviceName=service,
+                                nextToken=next_token, maxResults=100)
         tasks.extend(res["taskArns"])
     return tasks

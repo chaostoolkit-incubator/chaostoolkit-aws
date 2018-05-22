@@ -30,8 +30,9 @@ def are_all_desired_tasks_running(cluster: str, service: str,
                                   configuration: Configuration = None,
                                   secrets: Secrets = None) -> bool:
     """
-    Checks to make sure desired and running tasks counts are even
+    Checks to make sure desired and running tasks counts are equal
     """
     client = aws_client("ecs", configuration, secrets)
     response = client.describe_services(cluster=cluster, services=[service])
-    return response['services'][0]['desiredCount'] == response['services'][0]['runningCount']
+    service = response['services'][0]
+    return service['desiredCount'] == service['runningCount']
