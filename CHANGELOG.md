@@ -2,7 +2,16 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.4.2...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.5.0...HEAD
+
+## [0.5.0][]
+
+[0.5.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.4.2...0.5.0
+
+### Added
+
+-   EKS API support: create/delete clusters and describe/list clusters
+-   Various ECS activities from @cara-puce
 
 ## [0.4.2][]
 
