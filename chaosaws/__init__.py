@@ -16,7 +16,7 @@ import requests
 from chaosaws.types import AWSResponse
 
 
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
@@ -177,4 +177,6 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_probes("chaosaws.ecs.probes"))
     activities.extend(discover_actions("chaosaws.iam.actions"))
     activities.extend(discover_probes("chaosaws.iam.probes"))
+    activities.extend(discover_actions("chaosaws.eks.actions"))
+    activities.extend(discover_probes("chaosaws.eks.probes"))
     return activities
