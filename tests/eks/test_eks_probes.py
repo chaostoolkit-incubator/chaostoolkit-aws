@@ -30,4 +30,4 @@ def test_list_clusters(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     response = list_clusters()
-    client.list_clusters.assert_called()
+    client.list_clusters.assert_called_with()
