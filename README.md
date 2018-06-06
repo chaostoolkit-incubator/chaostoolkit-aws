@@ -289,13 +289,11 @@ you should create the according sub-package.
 
 If the support you want to provide is for a new AWS service that [boto][] does
 not support yet, this requires direct call to the API endpoint via the
-[requests][] package. For instance, as of April 2018, [AWS EKS][eks] is not
-yet available in boto3, so let see how we can still use it.
+[requests][] package. Say we have a new service, not yet supported by boto3
 
 [eks]: https://aws.amazon.com/eks/
-
-Note: at this stage, the EKS API isn't publicly documented so let's just
-assume it defines a "Terminate Worker Noder" API.
+[boto]: https://boto3.readthedocs.io/en/latest/index.html
+[requests]: http://docs.python-requests.org/en/master/
 
 ```python
 from chaoslib.types import Configuration, Secrets
@@ -307,14 +305,14 @@ def terminate_worker_node(worker_node_id: str,
                           configuration: Configuration=None,
                           secrets: Secrets=None) -> AWSResponse:
     """
-    Terminate a EKS worker node.
+    Terminate a worker node.
     """
     params = {
         "DryRun": True,
         "WorkerNodeId.1": worker_node_id
     }
     response = signed_api_call(
-        'eks', path='/2018-01-01/worker/terminate',
+        'some-new-service-name', path='/2018-01-01/worker/terminate',
         method='POST', params=params,
         configuration=configuration, secrets=secrets)
     return response.json()
