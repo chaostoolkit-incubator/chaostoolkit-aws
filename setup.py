@@ -48,6 +48,7 @@ packages = [
     'chaosaws',
     'chaosaws.ecs',
     'chaosaws.ec2',
+    'chaosaws.eks',
     'chaosaws.iam'
 ]
 
