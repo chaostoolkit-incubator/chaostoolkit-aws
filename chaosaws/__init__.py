@@ -16,7 +16,7 @@ import requests
 from chaosaws.types import AWSResponse
 
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
@@ -157,8 +157,6 @@ def discover(discover_system: bool = True) -> Discovery:
     discovery = initialize_discovery_result(
         "chaostoolkit-aws", __version__, "aws")
     discovery["activities"].extend(load_exported_activities())
-    if discover_system:
-        discovery["system"] = explore_aws_system()
 
     return discovery
 

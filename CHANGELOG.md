@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.5.2...HEAD
+
+## [0.5.2][]
+
+[0.5.2]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.5.1...0.5.2
+
+### Changed
+
+-   Remove the irrelevant discover system call
 
 ## [0.5.1][]
 
