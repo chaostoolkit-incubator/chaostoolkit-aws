@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
 from chaoslib.exceptions import FailedActivity
@@ -53,8 +54,9 @@ def test_stop_random_instance_in_az(aws_client):
 def test_stop_random_needs_instance_id_or_az():
     with pytest.raises(FailedActivity) as x:
         stop_instance()
-    assert "To stop an EC2 instance, you must specify an AZ to pick a " \
-           "random instance from or the instance id to stop" in str(x)
+    assert "stop an EC2 instance, you must specify either the instance id," \
+           " an AZ to pick a random instance from, or a set of filters." in \
+           str(x)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -75,8 +77,9 @@ def test_stop_all_instances_in_az(aws_client):
 def test_stop_all_instances_needs_instance_id_or_az():
     with pytest.raises(FailedActivity) as x:
         stop_instances()
-    assert "To stop EC2 instances, you must specify the AZ or the list of " \
-           "instances to stop" in str(x)
+    assert "To stop EC2 instances, you must specify either the instance ids," \
+           " an AZ to pick random instances from, or a set of filters." in \
+           str(x)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -89,3 +92,44 @@ def test_stop_all_instances_may_not_have_any_instances(aws_client):
     with pytest.raises(FailedActivity) as x:
         stop_instances(az="us-west-1")
     assert "No instances in availability zone: us-west-1" in str(x)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_stop_instance_by_specific_filters(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    inst_1_id = "i-987654321fedcba"
+    client.describe_instances.return_value = {'Reservations': 
+        [{'Instances': [{'InstanceId': inst_1_id}]}]}
+
+    filters = [
+        {
+            'Name': 'instance-state-name',
+            'Values': ['running'],
+        },
+        {
+            'Name': 'tag-key', 
+            'Values': ['eksctl.cluster.k8s.io/v1alpha1/cluster-name']
+        },
+        {
+            'Name': 'tag-value',
+            'Values': ['chaos-cluster']
+        },
+        {
+            'Name': 'tag-key', 
+            'Values': ['kubernetes.io/cluster/chaos-cluster']
+        },
+        {
+            'Name': 'tag-value',
+            'Values': ['owned']
+        }
+    ]
+
+    response = stop_instances(filters=filters, az='us-west-2')
+
+    called_filters = deepcopy(filters)
+    called_filters.append(
+        {'Name': 'availability-zone', 'Values': ['us-west-2']})
+    client.describe_instances.assert_called_with(Filters=called_filters)
+    client.stop_instances.assert_called_with(
+        InstanceIds=[inst_1_id], Force=False)

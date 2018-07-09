@@ -4,6 +4,11 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.5.2...HEAD
 
+### Added
+
+-   Pass filters to `ec2` actions so that specific instances can be selected
+    for an experiment
+
 ## [0.5.2][]
 
 [0.5.2]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.5.1...0.5.2
