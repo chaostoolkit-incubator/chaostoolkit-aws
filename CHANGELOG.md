@@ -4,6 +4,18 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.6.0...HEAD
 
+## [0.7.0][]
+
+[0.7.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.6.0...0.7.0
+
+### Added
+
+-   add `count_instances` probe which can be used to count of all instances matching filters
+
+### Changed
+
+-   Refactoring to support spot instances termination along with cancelling spot request
+
 ## [0.6.0][]
 
 [0.6.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.5.2...0.6.0

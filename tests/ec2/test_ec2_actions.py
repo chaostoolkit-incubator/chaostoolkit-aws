@@ -13,8 +13,25 @@ def test_stop_instance(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     inst_id = "i-1234567890abcdef0"
+    client.describe_instances.return_value = {'Reservations':
+            [{'Instances': [{'InstanceId': inst_id, 'InstanceLifecycle': 'normal'}]}]}
     response = stop_instance(inst_id)
     client.stop_instances.assert_called_with(
+        InstanceIds=[inst_id], Force=False)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_stop_spot_instance(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    inst_id = "i-1234567890abcdef0"
+    spot_request_id = 'sir-abcdef01'
+    client.describe_instances.return_value = {'Reservations':
+            [{'Instances': [{'InstanceId': inst_id, 'InstanceLifecycle': 'spot', 'SpotInstanceRequestId': spot_request_id}]}]}
+    response = stop_instance(inst_id)
+    client.cancel_spot_instance_requests.assert_called_with(
+        SpotInstanceRequestIds=[spot_request_id])
+    client.terminate_instances.assert_called_with(
         InstanceIds=[inst_id], Force=False)
 
 
@@ -23,8 +40,25 @@ def test_stop_instance_can_be_forced(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     inst_id = "i-1234567890abcdef0"
+    client.describe_instances.return_value = {'Reservations':
+            [{'Instances': [{'InstanceId': inst_id, 'InstanceLifecycle': 'normal'}]}]}
     response = stop_instance(inst_id, force=True)
     client.stop_instances.assert_called_with(
+        InstanceIds=[inst_id], Force=True)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_stop_spot_instance_can_be_forced(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    inst_id = "i-1234567890abcdef0"
+    spot_request_id = 'sir-abcdef01'
+    client.describe_instances.return_value = {'Reservations':
+            [{'Instances': [{'InstanceId': inst_id, 'InstanceLifecycle': 'spot', 'SpotInstanceRequestId': spot_request_id}]}]}
+    response = stop_instance(inst_id, force=True)
+    client.cancel_spot_instance_requests.assert_called_with(
+        SpotInstanceRequestIds=[spot_request_id])
+    client.terminate_instances.assert_called_with(
         InstanceIds=[inst_id], Force=True)
 
 
@@ -33,9 +67,17 @@ def test_stop_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     inst_ids = ["i-1234567890abcdef0", "i-987654321fedcba"]
+    spot_request_id = 'sir-abcdef01'
+    client.describe_instances.return_value = {'Reservations':
+        [{'Instances': [
+            {'InstanceId': inst_ids[0], 'InstanceLifecycle': 'normal'}, {'InstanceId': inst_ids[1], 'InstanceLifecycle': 'spot', 'SpotInstanceRequestId': spot_request_id}]}]}
     response = stop_instances(inst_ids)
     client.stop_instances.assert_called_with(
-        InstanceIds=inst_ids, Force=False)
+        InstanceIds=[inst_ids[0]], Force=False)
+    client.cancel_spot_instance_requests.assert_called_with(
+        SpotInstanceRequestIds=[spot_request_id])
+    client.terminate_instances.assert_called_with(
+        InstanceIds=[inst_ids[1]], Force=False)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -43,8 +85,8 @@ def test_stop_random_instance_in_az(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     inst_id = "i-987654321fedcba"
-    client.describe_instances.return_value = {'Reservations': 
-        [{'Instances': [{'InstanceId': inst_id}]}]}
+    client.describe_instances.return_value = {'Reservations':
+            [{'Instances': [{'InstanceId': inst_id, 'InstanceLifecycle': 'normal'}]}]}
 
     response = stop_instance(az="us-west-1")
     client.stop_instances.assert_called_with(
@@ -65,13 +107,18 @@ def test_stop_all_instances_in_az(aws_client):
     aws_client.return_value = client
     inst_1_id = "i-987654321fedcba"
     inst_2_id = "i-123456789abcdef"
-    client.describe_instances.return_value = {'Reservations': 
+    spot_request_id = 'sir-abcdef01'
+    client.describe_instances.return_value = {'Reservations':
         [{'Instances': [
-            {'InstanceId': inst_1_id}, {'InstanceId': inst_2_id}]}]}
+            {'InstanceId': inst_1_id, 'InstanceLifecycle': 'normal'}, {'InstanceId': inst_2_id, 'InstanceLifecycle': 'spot', 'SpotInstanceRequestId': spot_request_id}]}]}
 
     response = stop_instances(az="us-west-1")
     client.stop_instances.assert_called_with(
-        InstanceIds=[inst_1_id, inst_2_id], Force=False)
+        InstanceIds=[inst_1_id], Force=False)
+    client.cancel_spot_instance_requests.assert_called_with(
+        SpotInstanceRequestIds=[spot_request_id])
+    client.terminate_instances.assert_called_with(
+        InstanceIds=[inst_2_id], Force=False)
 
 
 def test_stop_all_instances_needs_instance_id_or_az():
@@ -86,7 +133,7 @@ def test_stop_all_instances_needs_instance_id_or_az():
 def test_stop_all_instances_may_not_have_any_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    client.describe_instances.return_value = {'Reservations': 
+    client.describe_instances.return_value = {'Reservations':
         [{'Instances': []}]}
 
     with pytest.raises(FailedActivity) as x:
@@ -99,8 +146,8 @@ def test_stop_instance_by_specific_filters(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     inst_1_id = "i-987654321fedcba"
-    client.describe_instances.return_value = {'Reservations': 
-        [{'Instances': [{'InstanceId': inst_1_id}]}]}
+    client.describe_instances.return_value = {'Reservations':
+        [{'Instances': [{'InstanceId': inst_1_id, 'InstanceLifecycle': 'normal'}]}]}
 
     filters = [
         {
