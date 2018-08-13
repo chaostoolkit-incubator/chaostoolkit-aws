@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
+from collections import OrderedDict
 
 from chaosaws.elbv2.probes import targets_health_count
 
@@ -34,7 +35,7 @@ def test_targets_health_count(aws_client):
                 'TargetHealth': {'State': 'unhealthy'}
             }]
         }
-    ]
+    ]    
     desired_response = {
         "TestTargetGroup1": {
             "healthy": 1
@@ -44,4 +45,5 @@ def test_targets_health_count(aws_client):
         }
     }
     response = targets_health_count(tg_names=tg_names)
-    assert response == desired_response
+    assert response['TestTargetGroup1']['healthy'] == desired_response['TestTargetGroup1']['healthy']
+    assert response['TestTargetGroup2']['unhealthy'] == desired_response['TestTargetGroup2']['unhealthy']
