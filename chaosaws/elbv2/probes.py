@@ -7,9 +7,10 @@ from logzero import logger
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
+from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
-__all__ = ["targets_health_count"]
+__all__ = ["targets_health_count", "all_targets_healthy"]
 
 
 def targets_health_count(tg_names: List[str],
@@ -18,10 +19,50 @@ def targets_health_count(tg_names: List[str],
     """
     Count of healthy/unhealthy targets per targetgroup
     """
+
+    if not tg_names:
+        raise FailedActivity(
+            "Non-empty list of target groups is required")
+
     client = aws_client('elbv2', configuration, secrets)
 
     return get_targets_health_count(tg_names=tg_names,
                                     client=client)
+
+
+def all_targets_healthy(tg_names: List[str],
+                        configuration: Configuration = None,
+                        secrets: Secrets = None) -> AWSResponse:
+    """
+    Return true/false based on if all targets for listed
+    target groups are healthy
+    """
+
+    if not tg_names:
+        raise FailedActivity(
+            "Non-empty list of target groups is required")
+
+    client = aws_client('elbv2', configuration, secrets)
+    logger.debug("Checking if all targets are healthy for targets: {}"
+                 .format(str(tg_names)))
+    tg_arns = get_target_group_arns(tg_names=tg_names, client=client)
+    tg_health = get_targets_health_description(tg_arns=tg_arns, client=client)
+    result = True
+
+    for tg in tg_health:
+        time_to_break = False
+
+        for health_descr in tg_health[tg]['TargetHealthDescriptions']:
+            if health_descr['TargetHealth']['State'] != 'healthy':
+                result = False
+                time_to_break = True
+
+                break
+
+        if time_to_break:
+            break
+
+    return result
 
 
 ###############################################################################

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from unittest.mock import MagicMock, patch, ANY
+from unittest.mock import MagicMock, patch
 
 from chaosaws.eks.actions import create_cluster, delete_cluster
 
@@ -14,7 +14,7 @@ def test_create_cluster(aws_client):
         "subnetIds": ["sub1"],
         "securityGroupIds": ["sg1"]
     }
-    response = create_cluster(
+    create_cluster(
         name=cluster, role_arn=arn, vpc_config=vpc_config)
     client.create_cluster.assert_called_with(
         name=cluster, roleArn=arn, version=None, resourcesVpcConfig=vpc_config)
@@ -25,5 +25,5 @@ def test_delete_cluster(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     cluster = "eks-cluster"
-    response = delete_cluster(name=cluster)
+    delete_cluster(name=cluster)
     client.delete_cluster.assert_called_with(name=cluster)

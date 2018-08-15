@@ -9,7 +9,7 @@ def test_describe_cluster(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     cluster = "eks-cluster"
-    response = describe_cluster(name=cluster)
+    describe_cluster(name=cluster)
     client.describe_cluster.assert_called_with(name=cluster)
 
 
@@ -29,5 +29,5 @@ def test_describe_missing_cluster(aws_client):
 def test_list_clusters(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    response = list_clusters()
+    list_clusters()
     client.list_clusters.assert_called_with()
