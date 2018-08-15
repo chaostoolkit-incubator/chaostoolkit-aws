@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 from unittest.mock import MagicMock, patch
 
 from chaosaws.iam.probes import get_policy
@@ -11,5 +10,5 @@ def test_get_role_policy(aws_client):
     aws_client.return_value = client
 
     arn = "aws:iam:whatever"
-    response = get_policy(arn)
+    get_policy(arn)
     client.get_policy.assert_called_with(PolicyArn=arn)
