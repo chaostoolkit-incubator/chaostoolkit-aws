@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Dict, List
 
+import boto3
+import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
-import boto3
 from botocore import parsers
-from chaoslib.discovery.discover import discover_actions, discover_probes, \
-    initialize_discovery_result
-from chaoslib.exceptions import DiscoveryFailed
-from chaoslib.types import Configuration, Discovery, DiscoveredActivities, \
-    DiscoveredSystemInfo, Secrets
-from logzero import logger
-import requests
-
 from chaosaws.types import AWSResponse
-
+from chaoslib.discovery.discover import (discover_actions, discover_probes,
+                                         initialize_discovery_result)
+from chaoslib.exceptions import DiscoveryFailed
+from chaoslib.types import (Configuration, DiscoveredActivities,
+                            DiscoveredSystemInfo, Discovery, Secrets)
+from logzero import logger
 
 __version__ = '0.7.0'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
@@ -31,6 +29,7 @@ def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
     creds = dict(
         aws_access_key_id=None, aws_secret_access_key=None,
         aws_session_token=None)
+
     if secrets:
         creds["aws_access_key_id"] = secrets.get("aws_access_key_id")
         creds["aws_secret_access_key"] = secrets.get("aws_secret_access_key")
@@ -80,6 +79,7 @@ def signed_api_call(service: str, path: str = "/", method: str = 'GET',
 
     This should only be used when boto does not already implement the service
     itself. See https://boto3.readthedocs.io/en/latest/reference/services/index.html
+
     for a list of supported services by boto. This function does not claim
     being generic enough to support the whole range of AWS API.
 
@@ -122,6 +122,7 @@ def signed_api_call(service: str, path: str = "/", method: str = 'GET',
 
     # when creds weren't provided via secrets, we let boto search for them
     # from the process environment
+
     if creds["aws_access_key_id"] and creds["aws_secret_access_key"]:
         auth = AWSRequestsAuth(
             aws_access_key=creds["aws_access_key_id"],
@@ -179,4 +180,6 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_probes("chaosaws.eks.probes"))
     activities.extend(discover_actions("chaosaws.elbv2.actions"))
     activities.extend(discover_probes("chaosaws.elbv2.probes"))
+    activities.extend(discover_probes("chaosaws.asg.probes"))
+
     return activities
