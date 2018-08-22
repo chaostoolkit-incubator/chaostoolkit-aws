@@ -14,6 +14,7 @@
 -   support for elbv2 with basic probes and action
 -   support for asg with basic probes
 -   fix asg probe to support pagination
+-   support for lambda with basic probes and action
 
 ### Changed
 
