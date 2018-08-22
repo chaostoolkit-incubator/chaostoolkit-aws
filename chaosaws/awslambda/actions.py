@@ -17,8 +17,10 @@ def put_function_concurrency(function_name: str,
     """
     client = aws_client("lambda", configuration, secrets)
     try:
-        return client.put_function_concurrency(FunctionName=function_name,
-                                               ReservedConcurrentExecutions=concurrent_executions)
+        return client.put_function_concurrency(
+            FunctionName=function_name,
+            ReservedConcurrentExecutions=concurrent_executions
+        )
     except Exception as x:
         raise FailedActivity(
             "failed throttling lambda function '{}': '{}'".format(
