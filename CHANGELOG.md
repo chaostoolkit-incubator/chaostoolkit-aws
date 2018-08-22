@@ -7,6 +7,7 @@
 ### Added
 
 -   support for elbv2 with basic probes and action
+-   support for asg with basic probes
 
 ## [0.7.0][]
 
