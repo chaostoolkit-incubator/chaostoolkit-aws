@@ -8,6 +8,7 @@
 
 -   support for elbv2 with basic probes and action
 -   support for asg with basic probes
+-   fix asg probe to support pagination
 
 ## [0.7.0][]
 

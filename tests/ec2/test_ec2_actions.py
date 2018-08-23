@@ -32,7 +32,7 @@ def test_stop_spot_instance(aws_client):
     client.cancel_spot_instance_requests.assert_called_with(
         SpotInstanceRequestIds=[spot_request_id])
     client.terminate_instances.assert_called_with(
-        InstanceIds=[inst_id], Force=False)
+        InstanceIds=[inst_id])
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -59,7 +59,7 @@ def test_stop_spot_instance_can_be_forced(aws_client):
     client.cancel_spot_instance_requests.assert_called_with(
         SpotInstanceRequestIds=[spot_request_id])
     client.terminate_instances.assert_called_with(
-        InstanceIds=[inst_id], Force=True)
+        InstanceIds=[inst_id])
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -77,7 +77,7 @@ def test_stop_instances(aws_client):
     client.cancel_spot_instance_requests.assert_called_with(
         SpotInstanceRequestIds=[spot_request_id])
     client.terminate_instances.assert_called_with(
-        InstanceIds=[inst_ids[1]], Force=False)
+        InstanceIds=[inst_ids[1]])
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -118,7 +118,7 @@ def test_stop_all_instances_in_az(aws_client):
     client.cancel_spot_instance_requests.assert_called_with(
         SpotInstanceRequestIds=[spot_request_id])
     client.terminate_instances.assert_called_with(
-        InstanceIds=[inst_2_id], Force=False)
+        InstanceIds=[inst_2_id])
 
 
 def test_stop_all_instances_needs_instance_id_or_az():
