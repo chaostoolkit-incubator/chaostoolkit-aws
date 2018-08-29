@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
 import random
+from collections import defaultdict
+from copy import deepcopy
 from typing import Any, Dict, List
 
 import boto3
-from chaoslib.exceptions import FailedActivity
-from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
-
-from collections import defaultdict
-
+from chaoslib.exceptions import FailedActivity
+from chaoslib.types import Configuration, Secrets
 
 __all__ = ["stop_instance", "stop_instances"]
 
@@ -29,6 +27,7 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
     also provide a list of filters following the documentation
     https://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.Client.describe_instances
     """
+
     if not az and not instance_id and not filters:
         raise FailedActivity(
             "To stop an EC2 instance, you must specify either the instance id,"
@@ -38,6 +37,7 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
 
     if not instance_id:
         filters = deepcopy(filters) if filters else []
+
         if az:
             filters.append({'Name': 'availability-zone', 'Values': [az]})
         instance_types = pick_random_instance(filters, client)
@@ -58,6 +58,7 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
 
 def stop_instances(instance_ids: List[str] = None, az: str = None,
                    filters: List[Dict[str, Any]] = None,
+
                    force: bool = False, configuration: Configuration = None,
                    secrets: Secrets = None) -> AWSResponse:
     """
@@ -66,6 +67,7 @@ def stop_instances(instance_ids: List[str] = None, az: str = None,
     also provide a list of filters following the documentation
     https://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.Client.describe_instances
     """
+
     if not az and not instance_ids and not filters:
         raise FailedActivity(
             "To stop EC2 instances, you must specify either the instance ids,"
@@ -79,6 +81,7 @@ def stop_instances(instance_ids: List[str] = None, az: str = None,
 
     if not instance_ids:
         filters = deepcopy(filters) if filters else []
+
         if az:
             filters.append({'Name': 'availability-zone', 'Values': [az]})
         instance_types = list_instances_by_type(filters, client)
@@ -121,7 +124,8 @@ def pick_random_instance(filters: List[Dict[str, Any]],
     """
     instances_type = list_instances_by_type(filters, client)
     random_id = random.choice([item for sublist in instances_type.values()
-                              for item in sublist])
+                               for item in sublist])
+
     for inst_type in instances_type:
         if random_id in instances_type[inst_type]:
             return {inst_type: [random_id]}
@@ -133,13 +137,15 @@ def get_instance_type_from_response(response: Dict) -> Dict:
     """
     instances_type = defaultdict(List)
     # reservations are instances that were started together
+
     for reservation in response['Reservations']:
         for inst in reservation['Instances']:
             if inst['InstanceLifecycle'] not in instances_type.keys():
                 # adding empty list (value) for new instance type (key)
                 instances_type[inst['InstanceLifecycle']] = []
             instances_type[inst['InstanceLifecycle']].append(
-                    inst['InstanceId'])
+                inst['InstanceId'])
+
     return instances_type
 
 
@@ -149,10 +155,12 @@ def get_spot_request_ids_from_response(response: Dict) -> List[str]:
     (DescribeInstances)
     """
     spot_request_ids = []
+
     for reservation in response['Reservations']:
         for inst in reservation['Instances']:
             if inst['InstanceLifecycle'] == 'spot':
                 spot_request_ids.append(inst['SpotInstanceRequestId'])
+
     return spot_request_ids
 
 
@@ -163,6 +171,7 @@ def get_instance_type_by_id(instance_ids: List[str],
     """
     instances_type = defaultdict(List)
     res = client.describe_instances(InstanceIds=instance_ids)
+
     return get_instance_type_from_response(res)
 
 
@@ -170,25 +179,27 @@ def stop_instances_any_type(instance_types: dict, force, client: boto3.client):
     """
     Stop instances regardless of the instance type (ondemand, spot)
     """
+
     if 'normal' in instance_types:
         logger.debug("Stopping instances: {}".format(instance_types['normal']))
         client.stop_instances(InstanceIds=instance_types['normal'],
                               Force=force)
+
     if 'spot' in instance_types:
         # TODO: proper support for spot fleets
         # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet.html
 
         # To properly stop spot instances have to cancel spot requests first
         spot_request_ids = get_spot_request_ids_from_response(
-                client.describe_instances(InstanceIds=instance_types['spot']))
+            client.describe_instances(InstanceIds=instance_types['spot']))
 
         logger.debug("Canceling spot requests: {}".format(spot_request_ids))
         client.cancel_spot_instance_requests(
-                SpotInstanceRequestIds=spot_request_ids)
+            SpotInstanceRequestIds=spot_request_ids)
         logger.debug("Terminating spot instances: {}".format(
             instance_types['spot']))
-        client.terminate_instances(InstanceIds=instance_types['spot'],
-                                   Force=force)
+        client.terminate_instances(InstanceIds=instance_types['spot'])
+
     if 'scheduled' in instance_types:
         # TODO: add support for scheduled inststances
         # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-scheduled-instances.html
