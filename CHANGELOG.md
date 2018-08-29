@@ -4,12 +4,6 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.7.0...HEAD
 
-### Added
-
--   support for elbv2 with basic probes and action
--   support for asg with basic probes
--   fix asg probe to support pagination
-
 ## [0.7.0][]
 
 [0.7.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.6.0...0.7.0
@@ -17,6 +11,9 @@
 ### Added
 
 -   add `count_instances` probe which can be used to count of all instances matching filters
+-   support for elbv2 with basic probes and action
+-   support for asg with basic probes
+-   fix asg probe to support pagination
 
 ### Changed
 
