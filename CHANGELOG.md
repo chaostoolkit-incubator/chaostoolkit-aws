@@ -2,7 +2,18 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.7.1...HEAD
+
+## [0.7.1][]
+
+[0.7.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.7.0...0.7.1
+
+### Changed
+
+-   add `elbv2`, `asg` and `awslambda` packages to the setup function so they
+    get packaged and distributed
+
+### Added
 
 ## [0.7.0][]
 
