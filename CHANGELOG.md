@@ -4,6 +4,15 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.7.1...HEAD
 
+### Changed
+
+-   make sure instances with no explicit lifecycle can be stopped. They are
+    assumed to be in the `normal` lifecycle as per the last
+    [line of the AWS documentation][]. [#25][25]
+
+[25]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/25
+[instlifecycledocs]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html
+
 ## [0.7.1][]
 
 [0.7.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.7.0...0.7.1

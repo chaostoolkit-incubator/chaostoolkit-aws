@@ -46,7 +46,7 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
             raise FailedActivity(
                 "No instances in availability zone: {}".format(az))
     else:
-        instance_types = get_instance_type_by_id(instance_id, client)
+        instance_types = get_instance_type_by_id([instance_id], client)
 
     logger.debug(
         "Picked EC2 instance '{}' from AZ '{}' to be stopped".format(
@@ -140,10 +140,17 @@ def get_instance_type_from_response(response: Dict) -> Dict:
 
     for reservation in response['Reservations']:
         for inst in reservation['Instances']:
-            if inst['InstanceLifecycle'] not in instances_type.keys():
+            # when this field is missing, we assume "normal"
+            # which means On-Demand or Reserved
+            # this seems what the last line of the docs imply at
+            # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html
+            lifecycle = inst.get('InstanceLifecycle', 'normal')
+
+            if lifecycle not in instances_type.keys():
                 # adding empty list (value) for new instance type (key)
-                instances_type[inst['InstanceLifecycle']] = []
-            instances_type[inst['InstanceLifecycle']].append(
+                instances_type[lifecycle] = []
+
+            instances_type[lifecycle].append(
                 inst['InstanceId'])
 
     return instances_type
@@ -158,7 +165,10 @@ def get_spot_request_ids_from_response(response: Dict) -> List[str]:
 
     for reservation in response['Reservations']:
         for inst in reservation['Instances']:
-            if inst['InstanceLifecycle'] == 'spot':
+            # when this field is missing, we assume "normal"
+            # which means On-Demand or Reserved
+            lifecycle = inst.get('InstanceLifecycle', 'normal')
+            if lifecycle == 'spot':
                 spot_request_ids.append(inst['SpotInstanceRequestId'])
 
     return spot_request_ids

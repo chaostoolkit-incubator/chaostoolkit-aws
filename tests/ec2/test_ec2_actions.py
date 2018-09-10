@@ -180,3 +180,34 @@ def test_stop_instance_by_specific_filters(aws_client):
     client.describe_instances.assert_called_with(Filters=called_filters)
     client.stop_instances.assert_called_with(
         InstanceIds=[inst_1_id], Force=False)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_stop_instance_with_no_lifecycle(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    inst_id = "i-1234567890abcdef0"
+    client.describe_instances.return_value = {
+        'Reservations':
+        [{'Instances': [{'InstanceId': inst_id}]}]
+    }
+    stop_instance(inst_id)
+    client.stop_instances.assert_called_with(
+        InstanceIds=[inst_id], Force=False)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_stop_normal_instance(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    inst_id = "i-1234567890abcdef0"
+    client.describe_instances.return_value = {
+        'Reservations':
+        [{'Instances': [{
+            'InstanceId': inst_id,
+            'InstanceLifecycle': 'normal'
+        }]}]
+    }
+    stop_instance(inst_id)
+    client.stop_instances.assert_called_with(
+        InstanceIds=[inst_id], Force=False)
