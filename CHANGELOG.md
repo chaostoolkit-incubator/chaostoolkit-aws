@@ -12,6 +12,7 @@
 
 -   add `elbv2`, `asg` and `awslambda` packages to the setup function so they
     get packaged and distributed
+-   add probes to wait for auto-scaling group to return to desired state
 
 ### Added
 
