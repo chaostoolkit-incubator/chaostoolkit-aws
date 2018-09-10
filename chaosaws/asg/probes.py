@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
+import time
 from collections import Counter
 from typing import Any, Dict, List
 
 import boto3
+from logzero import logger
+
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-__all__ = ["desired_equals_healthy", "desired_equals_healthy_tags"]
+__all__ = ["desired_equals_healthy", "desired_equals_healthy_tags",
+           "wait_desired_equals_healthy", "wait_desired_equals_healthy_tags"]
 
 
 def desired_equals_healthy(asg_names: List[str],
@@ -59,6 +62,99 @@ def desired_equals_healthy_tags(tags: List[Dict[str, str]],
             "Non-empty tags is required")
 
     client = aws_client('autoscaling', configuration, secrets)
+    groups_descr = get_asg_by_tags(tags, client)
+
+    return is_desired_equals_healthy(groups_descr)
+
+
+def wait_desired_equals_healthy(asg_names: List[str],
+                                configuration: Configuration = None,
+                                timeout: int = 300,
+                                secrets: Secrets = None) -> AWSResponse:
+    """
+    Wait until desired number matches the number of healthy instances
+
+    for each of the auto-scaling groups
+
+    Returns: Boolean, Integer (number of seconds it took to wait)
+    """
+
+    if not asg_names:
+        raise FailedActivity(
+            "Non-empty list of auto scaling groups is required")
+
+    client = aws_client('autoscaling', configuration, secrets)
+
+    start = time.time()
+
+    while True:
+        groups_descr = client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=asg_names)
+        result = is_desired_equals_healthy(groups_descr)
+
+        if not result:
+            time.sleep(0.1)
+
+            if (time.time() - start) > timeout:
+                result = False
+
+                break
+        else:
+            break
+
+    return result, int(time.time() - start)
+
+
+def wait_desired_equals_healthy_tags(tags: List[Dict[str, str]],
+                                     timeout: int = 300,
+                                     configuration: Configuration = None,
+                                     secrets: Secrets = None) -> AWSResponse:
+    """
+    Wait until desired number matches the number of healthy instances
+
+    for each of the auto-scaling groups matching tags provided
+
+    `tags` are  expected as:
+    [{
+        'Key': 'KeyName',
+        'Value': 'KeyValue'
+    },
+    ...
+    ]
+
+    Returns: Boolean, Integer (number of seconds it took to wait)
+    """
+
+    if not tags:
+        raise FailedActivity(
+            "Non-empty tags is required")
+
+    client = aws_client('autoscaling', configuration, secrets)
+
+    groups_descr = get_asg_by_tags(tags, client)
+
+    start = time.time()
+
+    while True:
+        result = is_desired_equals_healthy(groups_descr)
+
+        if not result:
+            time.sleep(0.1)
+
+            if (time.time() - start) > timeout:
+                result = False
+
+                break
+        else:
+            break
+
+    return result, int(time.time() - start)
+
+
+###############################################################################
+# Private functions
+###############################################################################
+def get_asg_by_tags(tags: dict, client: boto3.client):
 
     # The following is needed because AWS API does not support filters
     # on auto-scaling groups
@@ -88,16 +184,13 @@ def desired_equals_healthy_tags(tags: List[Dict[str, str]],
     if filtered_groups:
         groups_descr = client.describe_auto_scaling_groups(
             AutoScalingGroupNames=filtered_groups)
+
+        return groups_descr
     else:
         raise FailedActivity(
             "No auto-scaling groups matched the tags provided")
 
-    return is_desired_equals_healthy(groups_descr)
 
-
-###############################################################################
-# Private functions
-###############################################################################
 def is_desired_equals_healthy(groups_descr: Dict):
     desired_equals_healthy = False
 
