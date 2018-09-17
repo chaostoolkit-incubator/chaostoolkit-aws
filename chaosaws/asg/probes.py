@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import time
 from collections import Counter
+from sys import maxsize
 from typing import Any, Dict, List
 
 import boto3
@@ -9,7 +11,9 @@ from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
-__all__ = ["desired_equals_healthy", "desired_equals_healthy_tags"]
+__all__ = ["desired_equals_healthy", "desired_equals_healthy_tags",
+           "wait_desired_equals_healthy", "wait_desired_equals_healthy_tags",
+           "is_scaling_in_progress"]
 
 
 def desired_equals_healthy(asg_names: List[str],
@@ -59,6 +63,179 @@ def desired_equals_healthy_tags(tags: List[Dict[str, str]],
             "Non-empty tags is required")
 
     client = aws_client('autoscaling', configuration, secrets)
+    groups_descr = get_asg_by_tags(tags, client)
+
+    return is_desired_equals_healthy(groups_descr)
+
+
+def wait_desired_equals_healthy(asg_names: List[str],
+                                configuration: Configuration = None,
+                                timeout: int = 300,
+                                secrets: Secrets = None) -> AWSResponse:
+    """
+    Wait until desired number matches the number of healthy instances
+
+    for each of the auto-scaling groups
+
+    Returns: Boolean, Integer (number of seconds it took to wait)
+    """
+
+    if not asg_names:
+        raise FailedActivity(
+            "Non-empty list of auto scaling groups is required")
+
+    client = aws_client('autoscaling', configuration, secrets)
+
+    start = time.time()
+
+    while True:
+        groups_descr = client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=asg_names)
+        result = is_desired_equals_healthy(groups_descr)
+
+        if (time.time() - start) > timeout:
+            logger.debug("Timed out")
+
+            return maxsize
+
+        if result:
+            waiting_time = int(time.time() - start)
+            logger.debug("Waiting time was: {}".format(waiting_time))
+
+            return waiting_time
+        time.sleep(0.1)
+
+
+def wait_desired_not_equals_healthy_tags(tags: List[Dict[str, str]],
+                                         timeout: int = 300,
+                                         configuration: Configuration = None,
+                                         secrets: Secrets = None
+                                         ) -> AWSResponse:
+    """
+    Wait until desired number doesn't match the number of healthy instances
+
+    for each of the auto-scaling groups matching tags provided
+
+    `tags` are  expected as:
+    [{
+        'Key': 'KeyName',
+        'Value': 'KeyValue'
+    },
+    ...
+    ]
+
+    Returns: Integer (number of seconds it took to wait)
+    or sys.maxsize in case of timeout
+    """
+
+    if not tags:
+        raise FailedActivity(
+            "Non-empty tags is required")
+
+    client = aws_client('autoscaling', configuration, secrets)
+
+    start = time.time()
+
+    while True:
+        groups_descr = get_asg_by_tags(tags, client)
+        logger.debug(groups_descr)
+        result = is_desired_equals_healthy(groups_descr)
+
+        if (time.time() - start) > timeout:
+            logger.debug("Timed out")
+
+            return maxsize
+
+        if not result:
+            waiting_time = int(time.time() - start)
+            logger.debug("Waiting time was: {}".format(waiting_time))
+
+            return waiting_time
+        time.sleep(0.1)
+
+
+def wait_desired_equals_healthy_tags(tags: List[Dict[str, str]],
+                                     timeout: int = 300,
+                                     configuration: Configuration = None,
+                                     secrets: Secrets = None) -> AWSResponse:
+    """
+    Wait until desired number matches the number of healthy instances
+
+    for each of the auto-scaling groups matching tags provided
+
+    `tags` are  expected as:
+    [{
+        'Key': 'KeyName',
+        'Value': 'KeyValue'
+    },
+    ...
+    ]
+
+    Returns: Integer (number of seconds it took to wait)
+    or sys.maxsize in case of timeout
+    """
+
+    if not tags:
+        raise FailedActivity(
+            "Non-empty tags is required")
+
+    client = aws_client('autoscaling', configuration, secrets)
+
+    start = time.time()
+
+    while True:
+        groups_descr = get_asg_by_tags(tags, client)
+        logger.debug(groups_descr)
+        result = is_desired_equals_healthy(groups_descr)
+
+        if (time.time() - start) > timeout:
+            logger.debug("Timed out")
+
+            return maxsize
+
+        if result:
+            waiting_time = int(time.time() - start)
+            logger.debug("Waiting time was: {}".format(waiting_time))
+
+            return waiting_time
+
+        time.sleep(0.1)
+
+
+def is_scaling_in_progress(tags: List[Dict[str, str]],
+                           configuration: Configuration = None,
+                           secrets: Secrets = None) -> AWSResponse:
+    """
+    Check if there is any scaling activity in progress for ASG matching tags
+
+    Returns: Boolean
+    """
+
+    if not tags:
+        raise FailedActivity(
+            "Non-empty tags is required")
+
+    client = aws_client('autoscaling', configuration, secrets)
+    groups_descr = get_asg_by_tags(tags, client)
+
+    for group_descr in groups_descr['AutoScalingGroups']:
+        for instance in group_descr['Instances']:
+            if instance['LifecycleState'] != 'InService' \
+                    or instance['HealthStatus'] != 'Healthy':
+
+                logger.debug("Scaling activities in progress: {}".format(True))
+
+                return True
+
+    logger.debug("Scaling activities in progress: {}".format(False))
+
+    return False
+
+
+###############################################################################
+# Private functions
+###############################################################################
+def get_asg_by_tags(tags: dict, client: boto3.client):
 
     # The following is needed because AWS API does not support filters
     # on auto-scaling groups
@@ -88,16 +265,13 @@ def desired_equals_healthy_tags(tags: List[Dict[str, str]],
     if filtered_groups:
         groups_descr = client.describe_auto_scaling_groups(
             AutoScalingGroupNames=filtered_groups)
+
+        return groups_descr
     else:
         raise FailedActivity(
             "No auto-scaling groups matched the tags provided")
 
-    return is_desired_equals_healthy(groups_descr)
 
-
-###############################################################################
-# Private functions
-###############################################################################
 def is_desired_equals_healthy(groups_descr: Dict):
     desired_equals_healthy = False
 

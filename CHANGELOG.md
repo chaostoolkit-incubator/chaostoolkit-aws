@@ -13,6 +13,9 @@
 [25]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/25
 [instlifecycledocs]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html
 
+-   add probes to wait for auto-scaling group to have healthy/unhealthy instance
+    and a probe to check if there is any ongoing scaling activity
+
 ## [0.7.1][]
 
 [0.7.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.7.0...0.7.1

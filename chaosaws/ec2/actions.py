@@ -5,12 +5,11 @@ from copy import deepcopy
 from typing import Any, Dict, List
 
 import boto3
-from logzero import logger
-
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
+from logzero import logger
 
 __all__ = ["stop_instance", "stop_instances"]
 
@@ -168,6 +167,7 @@ def get_spot_request_ids_from_response(response: Dict) -> List[str]:
             # when this field is missing, we assume "normal"
             # which means On-Demand or Reserved
             lifecycle = inst.get('InstanceLifecycle', 'normal')
+
             if lifecycle == 'spot':
                 spot_request_ids.append(inst['SpotInstanceRequestId'])
 
@@ -185,15 +185,23 @@ def get_instance_type_by_id(instance_ids: List[str],
     return get_instance_type_from_response(res)
 
 
-def stop_instances_any_type(instance_types: dict, force, client: boto3.client):
+def stop_instances_any_type(instance_types: dict = None,
+                            force: bool = False,
+                            client: boto3.client = None
+                            ) -> List[AWSResponse]:
     """
     Stop instances regardless of the instance type (ondemand, spot)
     """
 
+    response = []
+
     if 'normal' in instance_types:
         logger.debug("Stopping instances: {}".format(instance_types['normal']))
-        client.stop_instances(InstanceIds=instance_types['normal'],
-                              Force=force)
+
+        response.append(
+            client.stop_instances(
+                InstanceIds=instance_types['normal'],
+                Force=force))
 
     if 'spot' in instance_types:
         # TODO: proper support for spot fleets
@@ -208,10 +216,14 @@ def stop_instances_any_type(instance_types: dict, force, client: boto3.client):
             SpotInstanceRequestIds=spot_request_ids)
         logger.debug("Terminating spot instances: {}".format(
             instance_types['spot']))
-        client.terminate_instances(InstanceIds=instance_types['spot'])
+
+        response.append(client.terminate_instances(
+            InstanceIds=instance_types['spot']))
 
     if 'scheduled' in instance_types:
         # TODO: add support for scheduled inststances
         # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-scheduled-instances.html
 
         raise FailedActivity("Scheduled instances support is not implemented")
+
+    return response
