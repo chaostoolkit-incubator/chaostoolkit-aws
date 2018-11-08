@@ -7,6 +7,7 @@
 ### Added
 
 -   support for Python 3.7
+-   support for cloudwatch probes and actions
 
 ## [0.8.0][]
 

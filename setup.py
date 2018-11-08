@@ -53,7 +53,8 @@ packages = [
     'chaosaws.iam',
     'chaosaws.elbv2',
     'chaosaws.asg',
-    'chaosaws.awslambda'
+    'chaosaws.awslambda',
+    'chaosaws.cloudwatch'
 ]
 
 needs_pytest = set(['pytest', 'test']).intersection(sys.argv)
