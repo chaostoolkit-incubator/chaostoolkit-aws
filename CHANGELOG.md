@@ -8,6 +8,7 @@
 
 -   support for Python 3.7
 -   support for cloudwatch probes and actions
+-   support for invoking lambdas
 
 ## [0.8.0][]
 

@@ -1,11 +1,64 @@
 # -*- coding: utf-8 -*-
+import json
+from base64 import b64encode
+from json.decoder import JSONDecodeError
+from typing import Any, Dict
+
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["put_function_concurrency", "delete_function_concurrency"]
+__all__ = ["invoke_function", "put_function_concurrency",
+           "delete_function_concurrency"]
+
+
+def invoke_function(function_name: str,
+                    function_arguments: Dict[str, Any] = None,
+                    invocation_type: str = 'RequestResponse',
+                    client_context: Dict[str, Any] = None,
+                    qualifier: str = None,
+                    configuration: Configuration = None,
+                    secrets: Secrets = None) -> AWSResponse:
+    """
+    Invokes Lambda.
+
+    More information about request arguments are available in the documentation
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/lambda.html#Lambda.Client.invoke
+    """  # noqa: E501
+    client = aws_client("lambda", configuration, secrets)
+    request_kwargs = {
+        'FunctionName': function_name,
+        'InvocationType': invocation_type,
+        'LogType': 'None'
+    }
+    if function_arguments is not None:
+        request_kwargs['Payload'] = json.dumps(function_arguments)
+    if client_context is not None:
+        client_context_jsonbytes = json.dumps(client_context).encode()
+        client_context_b64str = b64encode(client_context_jsonbytes).decode()
+        request_kwargs['ClientContext'] = client_context_b64str
+    if qualifier is not None:
+        request_kwargs['Qualifier'] = qualifier
+    try:
+        response = client.invoke(**request_kwargs)
+    except Exception as x:
+        raise FailedActivity(
+            "failed invoking function '{}': '{}'".format(
+                function_name, str(x)
+            )
+        )
+    if 'Payload' in response:
+        # The payload is of type StreamingBody and
+        # cannot be directly serialized into JSON
+        response_payload = response['Payload'].read().decode()
+        response.pop('Payload', None)
+        try:
+            response['Payload'] = json.loads(response_payload)
+        except JSONDecodeError:
+            response['Payload'] = response_payload
+    return response
 
 
 def put_function_concurrency(function_name: str,
