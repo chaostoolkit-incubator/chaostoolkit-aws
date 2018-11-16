@@ -4,6 +4,7 @@ from base64 import b64encode
 from json.decoder import JSONDecodeError
 from typing import Any, Dict
 
+import boto3
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
@@ -11,7 +12,8 @@ from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
 __all__ = ["invoke_function", "put_function_concurrency",
-           "delete_function_concurrency"]
+           "delete_function_concurrency", "put_function_timeout",
+           "put_function_memory_size"]
 
 
 def invoke_function(function_name: str,
@@ -92,3 +94,48 @@ def delete_function_concurrency(function_name: str,
     """
     client = aws_client("lambda", configuration, secrets)
     return client.delete_function_concurrency(FunctionName=function_name)
+
+
+def put_function_timeout(function_name: str, timeout: int,
+                         configuration: Configuration = None,
+                         secrets: Secrets = None) -> AWSResponse:
+    """
+    Sets the function timeout.
+
+    Input timeout argument is specified in seconds.
+    """
+    client = aws_client("lambda", configuration, secrets)
+    return _update_function_configuration(function_name=function_name,
+                                          client=client,
+                                          timeout=timeout)
+
+
+def put_function_memory_size(function_name: str, memory_size: int,
+                             configuration: Configuration = None,
+                             secrets: Secrets = None) -> AWSResponse:
+    """
+    Sets the function memory size.
+
+    Input memory_size argument is specified in megabytes.
+    """
+    client = aws_client("lambda", configuration, secrets)
+    return _update_function_configuration(function_name=function_name,
+                                          client=client,
+                                          memory_size=memory_size)
+
+
+###############################################################################
+# Private functions
+###############################################################################
+def _update_function_configuration(function_name: str,
+                                   client: boto3.client,
+                                   timeout: int = None,
+                                   memory_size: int = None) -> AWSResponse:
+    request_kwargs = {
+        'FunctionName': function_name
+    }
+    if timeout is not None:
+        request_kwargs['Timeout'] = timeout
+    if memory_size is not None:
+        request_kwargs['MemorySize'] = memory_size
+    return client.update_function_configuration(**request_kwargs)
