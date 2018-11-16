@@ -9,6 +9,7 @@
 -   support for Python 3.7
 -   support for cloudwatch probes and actions
 -   support for invoking lambdas
+-   support for getting and updating lambda timeout and memory size limits
 
 ## [0.8.0][]
 
