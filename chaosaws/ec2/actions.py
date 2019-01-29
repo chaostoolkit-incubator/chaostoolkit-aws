@@ -2,7 +2,7 @@
 import random
 from collections import defaultdict
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import boto3
 from chaosaws import aws_client
@@ -11,7 +11,8 @@ from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
-__all__ = ["stop_instance", "stop_instances"]
+__all__ = ["stop_instance", "stop_instances", "terminate_instances",
+           "terminate_instance"]
 
 
 def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
@@ -21,16 +22,24 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
     """
     Stop a single EC2 instance.
 
-    You may provide an instance id explicitely or, if you only specify the AZ,
+    You may provide an instance id explicitly or, if you only specify the AZ,
     a random instance will be selected. If you need more control, you can
     also provide a list of filters following the documentation
-    https://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_instances
     """
 
     if not az and not instance_id and not filters:
         raise FailedActivity(
             "To stop an EC2 instance, you must specify either the instance id,"
             " an AZ to pick a random instance from, or a set of filters.")
+
+    if az and not instance_id and not filters:
+        authorize = get_user_input(
+            'Based on the configuration provided, '
+            'this will stop a random instance in AZ %s. \n'
+            'Do you wish to proceed? [Y/N]:' % az)
+        if authorize.lower() != 'y':
+            raise FailedActivity("Experiment halted by user.")
 
     client = aws_client('ec2', configuration, secrets)
 
@@ -57,14 +66,13 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
 
 def stop_instances(instance_ids: List[str] = None, az: str = None,
                    filters: List[Dict[str, Any]] = None,
-
                    force: bool = False, configuration: Configuration = None,
                    secrets: Secrets = None) -> AWSResponse:
     """
     Stop the given EC2 instances or, if none is provided, all instances
     of the given availability zone. If you need more control, you can
     also provide a list of filters following the documentation
-    https://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_instances
     """
 
     if not az and not instance_ids and not filters:
@@ -73,8 +81,12 @@ def stop_instances(instance_ids: List[str] = None, az: str = None,
             " an AZ to pick random instances from, or a set of filters.")
 
     if az and not instance_ids and not filters:
-        logger.warn("""Based on configuration provided I am going to stop all
-                    instances in AZ {} !.""".format(az))
+        authorize = get_user_input(
+            'Based on the configuration provided, '
+            'this will stop all instance in AZ %s. \n'
+            'Do you wish to proceed? [Y/N]:' % az)
+        if authorize.lower() != 'y':
+            raise FailedActivity("Experiment halted by user.")
 
     client = aws_client('ec2', configuration, secrets)
 
@@ -99,14 +111,118 @@ def stop_instances(instance_ids: List[str] = None, az: str = None,
                                    force=force, client=client)
 
 
+def terminate_instance(instance_id: str = None, az: str = None,
+                       filters: List[Dict[str, Any]] = None,
+                       configuration: Configuration = None,
+                       secrets: Secrets = None) -> List[AWSResponse]:
+    """
+    Terminates a single EC2 instance.
+
+    An instance may be targeted by specifying it by instance-id. If only the
+    availability-zone is provided, a random instances in that AZ will be
+    selected and terminated. For more control, please reference the available
+    filters found:
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    """
+
+    if not any([instance_id, az, filters]):
+        raise FailedActivity('To terminate an EC2, you must specify the '
+                             'instance-id, an Availability Zone, or provide a '
+                             'set of filters')
+
+    if az and not any([instance_id, filters]):
+        authorize = get_user_input(
+            'Based on the configuration provided, '
+            'this will terminate a random instance in AZ %s. \n'
+            'Do you wish to proceed? [Y/N]:' % az)
+        if authorize.lower() != 'y':
+            raise FailedActivity("Experiment halted by user.")
+
+    client = aws_client('ec2', configuration, secrets)
+    if not instance_id:
+        filters = deepcopy(filters) or []
+
+        if az:
+            filters.append({'Name': 'availability-zone', 'Values': [az]})
+            logger.debug('Looking for instances in AZ: %s' % az)
+
+        # Randomly select an instance
+        instance_types = pick_random_instance(filters, client)
+
+        if not instance_types:
+            raise FailedActivity(
+                'No instances found matching filters: %s' % str(filters))
+
+        logger.debug('Instance selected: %s' % str(instance_types))
+    else:
+        instance_types = get_instance_type_by_id([instance_id], client)
+
+    return terminate_instances_any_type(instance_types, client)
+
+
+def terminate_instances(instance_ids: List[str] = None, az: str = None,
+                        filters: List[Dict[str, Any]] = None,
+                        configuration: Configuration = None,
+                        secrets: Secrets = None) -> List[AWSResponse]:
+    """
+    Terminates multiple EC2 instances
+
+    A set of instances may be targeted by providing them as the instance-ids.
+
+    WARNING: If  only an Availability Zone is specified, all instances in
+    that AZ will be terminated.
+
+    Additional filters may be used to narrow the scope:
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    """
+    if not any([instance_ids, az, filters]):
+        raise FailedActivity('To terminate instances, you must specify the '
+                             'instance-id, an Availability Zone, or provide a '
+                             'set of filters')
+
+    if az and not any([instance_ids, filters]):
+        authorize = get_user_input(
+            'Based on the configuration provided, '
+            'this will terminate all instance in AZ %s. \n'
+            'Do you wish to proceed? [Y/N]:' % az)
+        if authorize.lower() != 'y':
+            raise FailedActivity("Experiment halted by user.")
+
+    client = aws_client('ec2', configuration, secrets)
+    if not instance_ids:
+        filters = deepcopy(filters) or []
+
+        if az:
+            filters.append({'Name': 'availability-zone', 'Values': [az]})
+            logger.debug('Looking for instances in AZ: %s' % az)
+
+        # Select instances based on filters
+        instance_types = list_instances_by_type(filters, client)
+
+        if not instance_types:
+            raise FailedActivity(
+                'No instances found matching filters: %s' % str(filters))
+
+        logger.debug('Instances in AZ %s selected: %s}.' % (
+            az, str(instance_types)))
+    else:
+        instance_types = get_instance_type_by_id(instance_ids, client)
+
+    return terminate_instances_any_type(instance_types, client)
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
+def get_user_input(message):
+    return input(message)
+
+
 def list_instances_by_type(filters: List[Dict[str, Any]],
                            client: boto3.client) -> List[str]:
     """
     Return all instance ids matching the given filters by type
-    (InstanceLifecycle) ie spot, ondemand, etc.
+    (InstanceLifecycle) ie spot, on demand, etc.
     """
     logger.debug("EC2 instances query: {}".format(str(filters)))
     res = client.describe_instances(Filters=filters)
@@ -116,18 +232,21 @@ def list_instances_by_type(filters: List[Dict[str, Any]],
 
 
 def pick_random_instance(filters: List[Dict[str, Any]],
-                         client: boto3.client) -> str:
+                         client: boto3.client) -> Union[str, dict, None]:
     """
     Select an instance at random based on the returned list of instances
     matching the given filter.
     """
     instances_type = list_instances_by_type(filters, client)
+    if not instances_type:
+        return
+
     random_id = random.choice([item for sublist in instances_type.values()
                                for item in sublist])
 
-    for inst_type in instances_type:
-        if random_id in instances_type[inst_type]:
-            return {inst_type: [random_id]}
+    for k, v in instances_type.items():
+        if random_id in v:
+            return {k: [random_id]}
 
 
 def get_instance_type_from_response(response: Dict) -> Dict:
@@ -190,7 +309,7 @@ def stop_instances_any_type(instance_types: dict = None,
                             client: boto3.client = None
                             ) -> List[AWSResponse]:
     """
-    Stop instances regardless of the instance type (ondemand, spot)
+    Stop instances regardless of the instance type (on demand, spot)
     """
 
     response = []
@@ -221,9 +340,32 @@ def stop_instances_any_type(instance_types: dict = None,
             InstanceIds=instance_types['spot']))
 
     if 'scheduled' in instance_types:
-        # TODO: add support for scheduled inststances
+        # TODO: add support for scheduled instances
         # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-scheduled-instances.html
 
         raise FailedActivity("Scheduled instances support is not implemented")
+
+    return response
+
+
+def terminate_instances_any_type(instance_types: dict = None,
+                                 client: boto3.client = None
+                                 ) -> List[AWSResponse]:
+    """
+    Terminates instance(s) regardless of type
+    """
+    response = []
+
+    for k, v in instance_types.items():
+        logger.debug('Terminating %s instance(s): %s' % (k, instance_types[k]))
+        if k == 'spot':
+            instances = get_spot_request_ids_from_response(
+                client.describe_instances(InstanceIds=v))
+            # Cancel spot request prior to termination
+            client.cancel_spot_instance_requests(
+                SpotInstanceRequestIds=instances)
+            response.append(client.terminate_instances(InstanceIds=v))
+
+        response.append(client.terminate_instances(InstanceIds=v))
 
     return response

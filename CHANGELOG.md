@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.9.0...HEAD
 
+### Added
+
+- adding terminate_instance(s) actions to ec2/actions.py
+
 ## [0.9.0][]
 
 [0.9.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.8.0...0.9.0
