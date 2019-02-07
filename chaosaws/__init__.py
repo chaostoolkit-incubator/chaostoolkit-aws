@@ -185,5 +185,7 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_probes("chaosaws.awslambda.probes"))
     activities.extend(discover_actions("chaosaws.cloudwatch.actions"))
     activities.extend(discover_probes("chaosaws.cloudwatch.probes"))
+    activities.extend(discover_actions("chaosaws.rds.actions"))
+    activities.extend(discover_probes("chaosaws.rds.probes"))
 
     return activities
