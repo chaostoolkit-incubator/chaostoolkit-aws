@@ -68,6 +68,14 @@
 - adding action to terminate random asg instance(s)
 - adding action to detach random instances from autoscaling groups
 
+### Added
+
+- adding terminate_instance(s) actions to ec2/actions.py
+- asg actions to suspend/resume services
+- asg probe to detect if process is suspended
+- adding set_security_groups actions to elbv2
+- adding set_subnets action to elbv2
+
 ## [0.9.0][]
 
 [0.9.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.8.0...0.9.0
