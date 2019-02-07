@@ -67,7 +67,29 @@ def aws_client(resource_name: str, configuration: Configuration = None,
         boto3.setup_default_session(
             profile_name=profile_name, region_name=region, **creds)
 
-    return boto3.client(resource_name, region_name=region, **creds)
+    # default config
+    if configuration.get("aws_role_arn") is None:
+        return boto3.client(resource_name, region_name=region, **creds)
+    else:
+        # connect to sts client
+        client = boto3.client('sts', region_name=region, **creds)
+        aws_role_arn = configuration.get("aws_role_arn")
+        # get credentials for the role we want
+        response = client.assume_role(
+            RoleArn=aws_role_arn,
+            RoleSessionName="tempDetourSession")['Credentials']
+        # create new dictionary for credentials
+        newCreds = dict(
+            aws_access_key_id=None,
+            aws_secret_access_key=None,
+            aws_session_token=None)
+
+        newCreds["aws_access_key_id"] = response['AccessKeyId']
+        newCreds["aws_secret_access_key"] = response['SecretAccessKey']
+        newCreds["aws_session_token"] = response['SessionToken']
+
+        # return new client
+        return boto3.client(resource_name, region_name=region, **newCreds)
 
 
 def signed_api_call(service: str, path: str = "/", method: str = 'GET',
@@ -185,7 +207,5 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_probes("chaosaws.awslambda.probes"))
     activities.extend(discover_actions("chaosaws.cloudwatch.actions"))
     activities.extend(discover_probes("chaosaws.cloudwatch.probes"))
-    activities.extend(discover_actions("chaosaws.rds.actions"))
-    activities.extend(discover_probes("chaosaws.rds.probes"))
 
     return activities
