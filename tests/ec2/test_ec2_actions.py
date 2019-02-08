@@ -82,7 +82,6 @@ def test_stop_instances(aws_client):
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
-@patch('builtins.input', lambda *args: 'y')
 def test_stop_random_instance_in_az(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -108,22 +107,7 @@ def test_stop_random_needs_instance_id_or_az():
            str(x)
 
 
-@patch('builtins.input', lambda *args: 'n')
-def test_stop_random_instance_in_az_halt():
-    with pytest.raises(FailedActivity) as x:
-        stop_instance(az="us-west-1")
-    assert "Experiment halted by user." in str(x)
-
-
-@patch('builtins.input', lambda *args: 'n')
-def test_stop_instances_in_az_halt():
-    with pytest.raises(FailedActivity) as x:
-        stop_instances(az="us-west-1")
-    assert "Experiment halted by user." in str(x)
-
-
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
-@patch('builtins.input', lambda *args: 'y')
 def test_stop_all_instances_in_az(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -162,7 +146,6 @@ def test_stop_all_instances_needs_instance_id_or_az():
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
-@patch('builtins.input', lambda *args: 'y')
 def test_stop_all_instances_may_not_have_any_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -260,15 +243,7 @@ def test_terminate_instance_no_values():
            'an Availability Zone, or provide a set of filters' in str(x)
 
 
-@patch('builtins.input', lambda *args: 'n')
-def test_terminate_random_instance_in_az_halt():
-    with pytest.raises(FailedActivity) as x:
-        terminate_instance(az="us-west-1")
-    assert "Experiment halted by user." in str(x)
-
-
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
-@patch('builtins.input', lambda *args: 'y')
 def test_terminate_instance_az_no_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -310,7 +285,6 @@ def test_terminate_spot_instance(aws_client):
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
-@patch('builtins.input', lambda *args: 'y')
 def test_terminate_random_az_instance(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -359,15 +333,7 @@ def test_terminate_instances_no_values():
            'Availability Zone, or provide a set of filters' in str(x)
 
 
-@patch('builtins.input', lambda *args: 'n')
-def test_terminate_instances_in_az_halt():
-    with pytest.raises(FailedActivity) as x:
-        terminate_instances(az="us-west-1")
-    assert "Experiment halted by user." in str(x)
-
-
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
-@patch('builtins.input', lambda *args: 'y')
 def test_terminate_instances_az_no_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -416,7 +382,6 @@ def test_terminate_spot_instances(aws_client):
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
-@patch('builtins.input', lambda *args: 'y')
 def test_terminate_random_az_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client

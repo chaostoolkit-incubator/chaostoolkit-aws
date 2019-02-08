@@ -34,12 +34,8 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
             " an AZ to pick a random instance from, or a set of filters.")
 
     if az and not instance_id and not filters:
-        authorize = get_user_input(
-            'Based on the configuration provided, '
-            'this will stop a random instance in AZ %s. \n'
-            'Do you wish to proceed? [Y/N]:' % az)
-        if authorize.lower() != 'y':
-            raise FailedActivity("Experiment halted by user.")
+        logger.warning('Based on configuration provided I am going to '
+                       'stop a random instance in AZ %s!' % az)
 
     client = aws_client('ec2', configuration, secrets)
 
@@ -81,12 +77,8 @@ def stop_instances(instance_ids: List[str] = None, az: str = None,
             " an AZ to pick random instances from, or a set of filters.")
 
     if az and not instance_ids and not filters:
-        authorize = get_user_input(
-            'Based on the configuration provided, '
-            'this will stop all instance in AZ %s. \n'
-            'Do you wish to proceed? [Y/N]:' % az)
-        if authorize.lower() != 'y':
-            raise FailedActivity("Experiment halted by user.")
+        logger.warning('Based on configuration provided I am going to '
+                       'stop all instances in AZ %s!' % az)
 
     client = aws_client('ec2', configuration, secrets)
 
@@ -131,12 +123,8 @@ def terminate_instance(instance_id: str = None, az: str = None,
                              'set of filters')
 
     if az and not any([instance_id, filters]):
-        authorize = get_user_input(
-            'Based on the configuration provided, '
-            'this will terminate a random instance in AZ %s. \n'
-            'Do you wish to proceed? [Y/N]:' % az)
-        if authorize.lower() != 'y':
-            raise FailedActivity("Experiment halted by user.")
+        logger.warning('Based on configuration provided I am going to '
+                       'terminate a random instance in AZ %s!' % az)
 
     client = aws_client('ec2', configuration, secrets)
     if not instance_id:
@@ -181,12 +169,8 @@ def terminate_instances(instance_ids: List[str] = None, az: str = None,
                              'set of filters')
 
     if az and not any([instance_ids, filters]):
-        authorize = get_user_input(
-            'Based on the configuration provided, '
-            'this will terminate all instance in AZ %s. \n'
-            'Do you wish to proceed? [Y/N]:' % az)
-        if authorize.lower() != 'y':
-            raise FailedActivity("Experiment halted by user.")
+        logger.warning('Based on configuration provided I am going to '
+                       'terminate all instances in AZ %s!' % az)
 
     client = aws_client('ec2', configuration, secrets)
     if not instance_ids:
@@ -214,10 +198,6 @@ def terminate_instances(instance_ids: List[str] = None, az: str = None,
 ###############################################################################
 # Private functions
 ###############################################################################
-def get_user_input(message):
-    return input(message)
-
-
 def list_instances_by_type(filters: List[Dict[str, Any]],
                            client: boto3.client) -> List[str]:
     """
