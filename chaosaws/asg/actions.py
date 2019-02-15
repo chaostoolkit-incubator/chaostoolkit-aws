@@ -55,7 +55,8 @@ def suspend_processes(asg_names: List[str] = None,
         if process_names:
             params['ScalingProcesses'] = process_names
 
-        logger.debug('Suspending process(es) on %s' % a["AutoScalingGroupName"])
+        logger.debug('Suspending process(es) on %s' % (
+            a["AutoScalingGroupName"]))
         client.suspend_processes(**params)
 
     return get_asg_by_name(
