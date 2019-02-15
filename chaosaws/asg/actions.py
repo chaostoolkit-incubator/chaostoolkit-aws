@@ -161,7 +161,8 @@ def get_asg_by_tags(tags: List[Dict[str, str]],
             results.add(a['ResourceId'])
 
     if not results:
-        raise FailedActivity('No ASG(s) found with matching tag(s): %s.' % tags)
+        raise FailedActivity(
+            'No ASG(s) found with matching tag(s): %s.' % tags)
     return get_asg_by_name(list(results), client)
 
 
