@@ -2,7 +2,7 @@
 import time
 from collections import Counter
 from sys import maxsize
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import boto3
 from chaosaws import aws_client
@@ -13,15 +13,14 @@ from logzero import logger
 
 __all__ = ["desired_equals_healthy", "desired_equals_healthy_tags",
            "wait_desired_equals_healthy", "wait_desired_equals_healthy_tags",
-           "is_scaling_in_progress"]
+           "is_scaling_in_progress", "process_is_suspended"]
 
 
 def desired_equals_healthy(asg_names: List[str],
                            configuration: Configuration = None,
-                           secrets: Secrets = None) -> AWSResponse:
+                           secrets: Secrets = None) -> bool:
     """
     If desired number matches the number of healthy instances
-
     for each of the auto-scaling groups
 
     Returns: bool
@@ -41,7 +40,7 @@ def desired_equals_healthy(asg_names: List[str],
 
 def desired_equals_healthy_tags(tags: List[Dict[str, str]],
                                 configuration: Configuration = None,
-                                secrets: Secrets = None) -> AWSResponse:
+                                secrets: Secrets = None) -> bool:
     """
     If desired number matches the number of healthy instances
 
@@ -71,13 +70,13 @@ def desired_equals_healthy_tags(tags: List[Dict[str, str]],
 def wait_desired_equals_healthy(asg_names: List[str],
                                 configuration: Configuration = None,
                                 timeout: int = 300,
-                                secrets: Secrets = None) -> AWSResponse:
+                                secrets: Secrets = None) -> int:
     """
     Wait until desired number matches the number of healthy instances
-
     for each of the auto-scaling groups
 
-    Returns: Boolean, Integer (number of seconds it took to wait)
+    Returns: Integer (number of seconds it took to wait)
+    or sys.maxsize in case of timeout
     """
 
     if not asg_names:
@@ -95,13 +94,11 @@ def wait_desired_equals_healthy(asg_names: List[str],
 
         if (time.time() - start) > timeout:
             logger.debug("Timed out")
-
             return maxsize
 
         if result:
             waiting_time = int(time.time() - start)
             logger.debug("Waiting time was: {}".format(waiting_time))
-
             return waiting_time
         time.sleep(0.1)
 
@@ -109,11 +106,9 @@ def wait_desired_equals_healthy(asg_names: List[str],
 def wait_desired_not_equals_healthy_tags(tags: List[Dict[str, str]],
                                          timeout: int = 300,
                                          configuration: Configuration = None,
-                                         secrets: Secrets = None
-                                         ) -> AWSResponse:
+                                         secrets: Secrets = None) -> int:
     """
     Wait until desired number doesn't match the number of healthy instances
-
     for each of the auto-scaling groups matching tags provided
 
     `tags` are  expected as:
@@ -157,10 +152,9 @@ def wait_desired_not_equals_healthy_tags(tags: List[Dict[str, str]],
 def wait_desired_equals_healthy_tags(tags: List[Dict[str, str]],
                                      timeout: int = 300,
                                      configuration: Configuration = None,
-                                     secrets: Secrets = None) -> AWSResponse:
+                                     secrets: Secrets = None) -> int:
     """
     Wait until desired number matches the number of healthy instances
-
     for each of the auto-scaling groups matching tags provided
 
     `tags` are  expected as:
@@ -204,7 +198,7 @@ def wait_desired_equals_healthy_tags(tags: List[Dict[str, str]],
 
 def is_scaling_in_progress(tags: List[Dict[str, str]],
                            configuration: Configuration = None,
-                           secrets: Secrets = None) -> AWSResponse:
+                           secrets: Secrets = None) -> bool:
     """
     Check if there is any scaling activity in progress for ASG matching tags
 
@@ -224,18 +218,66 @@ def is_scaling_in_progress(tags: List[Dict[str, str]],
                     or instance['HealthStatus'] != 'Healthy':
 
                 logger.debug("Scaling activities in progress: {}".format(True))
-
                 return True
 
     logger.debug("Scaling activities in progress: {}".format(False))
-
     return False
+
+
+def process_is_suspended(asg_names: List[str] = None,
+                         tags: List[Dict[str, str]] = None,
+                         process_names: List[str] = None,
+                         configuration: Configuration = None,
+                         secrets: Secrets = None) -> bool:
+    """
+    Determines if one or more processes on an ASG are suspended.
+
+    :returns Boolean
+    """
+    client = aws_client('autoscaling', configuration, secrets)
+
+    if not any([asg_names, tags]):
+        raise FailedActivity(
+            'one of the following arguments are required: asg_names or tags')
+
+    if all([asg_names, tags]):
+        raise FailedActivity(
+            'only one of the following arguments are allowed: asg_names/tags')
+
+    if asg_names:
+        asgs = get_asg_by_name(asg_names, client)
+    else:
+        asgs = get_asg_by_tags(tags, client)
+
+    for a in asgs['AutoScalingGroups']:
+        suspended = [p.get('ProcessName') for p in a['SuspendedProcesses']]
+        if not all(p in suspended for p in process_names):
+            return False
+    return True
 
 
 ###############################################################################
 # Private functions
 ###############################################################################
-def get_asg_by_tags(tags: dict, client: boto3.client):
+def get_asg_by_name(asg_names: List[str],
+                    client: boto3.client) -> AWSResponse:
+    results = {'AutoScalingGroups': []}
+    paginator = client.get_paginator('describe_auto_scaling_groups')
+    for p in paginator.paginate(AutoScalingGroupNames=asg_names):
+        results['AutoScalingGroups'].extend(p['AutoScalingGroups'])
+
+    valid_asgs = [
+        a['AutoScalingGroupName'] for a in results['AutoScalingGroups']]
+    invalid_asgs = [a for a in asg_names if a not in valid_asgs]
+
+    if invalid_asgs:
+        raise FailedActivity('No ASG(s) found matching: {}'.format(
+            invalid_asgs))
+    return results
+
+
+def get_asg_by_tags(tags: Union[dict, List[Dict[str, str]]],
+                    client: boto3.client) -> AWSResponse:
 
     # The following is needed because AWS API does not support filters
     # on auto-scaling groups

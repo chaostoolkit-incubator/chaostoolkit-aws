@@ -7,6 +7,8 @@
 ### Added
 
 - adding terminate_instance(s) actions to ec2/actions.py
+- asg actions to suspend/resume services
+- asg probe to detect if process is suspended
 
 ## [0.9.0][]
 
