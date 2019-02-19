@@ -271,7 +271,8 @@ def get_asg_by_name(asg_names: List[str],
     invalid_asgs = [a for a in asg_names if a not in valid_asgs]
 
     if invalid_asgs:
-        raise FailedActivity('No ASG(s) found matching: %s' % invalid_asgs)
+        raise FailedActivity('No ASG(s) found matching: {}'.format(
+            invalid_asgs))
     return results
 
 

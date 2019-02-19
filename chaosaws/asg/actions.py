@@ -55,7 +55,7 @@ def suspend_processes(asg_names: List[str] = None,
         if process_names:
             params['ScalingProcesses'] = process_names
 
-        logger.debug('Suspending process(es) on %s' % (
+        logger.debug('Suspending process(es) on {}'.format(
             a["AutoScalingGroupName"]))
         client.suspend_processes(**params)
 
@@ -106,7 +106,7 @@ def resume_processes(asg_names: List[str] = None,
         if process_names:
             params['ScalingProcesses'] = process_names
 
-        logger.debug('Resuming process(es) %s on %s' % (
+        logger.debug('Resuming process(es) {} on {}'.format(
             process_names, a['AutoScalingGroupName']))
         client.resume_processes(**params)
 
@@ -130,18 +130,19 @@ def validate_asgs(asg_names: List[str] = None,
 
 def get_asg_by_name(asg_names: List[str],
                     client: boto3.client) -> AWSResponse:
-    logger.debug('Searching for ASG(s): %s.' % asg_names)
+    logger.debug('Searching for ASG(s): {}.'.format(asg_names))
 
     asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
 
     if not asgs.get('AutoScalingGroups', []):
         raise FailedActivity(
-            'Unable to locate ASG(s): %s' % asg_names)
+            'Unable to locate ASG(s): {}'.format(asg_names))
 
     found_asgs = [a['AutoScalingGroupName'] for a in asgs['AutoScalingGroups']]
     invalid_asgs = [a for a in asg_names if a not in found_asgs]
     if invalid_asgs:
-        raise FailedActivity('No ASG(s) found with name(s): %s' % invalid_asgs)
+        raise FailedActivity('No ASG(s) found with name(s): {}'.format(
+            invalid_asgs))
     return asgs
 
 
@@ -162,7 +163,7 @@ def get_asg_by_tags(tags: List[Dict[str, str]],
 
     if not results:
         raise FailedActivity(
-            'No ASG(s) found with matching tag(s): %s.' % tags)
+            'No ASG(s) found with matching tag(s): {}.'.format(tags))
     return get_asg_by_name(list(results), client)
 
 
@@ -173,5 +174,5 @@ def validate_processes(process_names: List[str]):
 
     invalid_processes = [p for p in process_names if p not in valid_processes]
     if invalid_processes:
-        raise FailedActivity('invalid process(es): %s not in %s.' % (
+        raise FailedActivity('invalid process(es): {} not in {}.'.format(
             invalid_processes, valid_processes))
