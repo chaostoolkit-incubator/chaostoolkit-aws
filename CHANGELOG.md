@@ -9,6 +9,8 @@
 - adding terminate_instance(s) actions to ec2/actions.py
 - asg actions to suspend/resume services
 - asg probe to detect if process is suspended
+- adding set_security_groups actions to elbv2
+- adding set_subnets action to elbv2
 
 ## [0.9.0][]
 
