@@ -176,15 +176,17 @@ def test_set_security_groups_invalid_group(aws_client):
 
 def test_set_security_group_no_subnets():
     alb_names = ['test-loadbalancer-01', 'test-loadbalancer-02']
-    with pytest.raises(FailedActivity) as x:
+    with pytest.raises(TypeError) as x:
         set_security_groups(alb_names)
-    assert 'You must specify at least 1 security group id' in str(x)
+    assert "set_security_groups() missing 1 required positional " \
+           "argument: 'security_group_ids'" in str(x)
 
 
 def test_set_security_group_no_args():
-    with pytest.raises(FailedActivity) as x:
+    with pytest.raises(TypeError) as x:
         set_security_groups()
-    assert 'You must specify at least 1 load balancer.' in str(x)
+    assert "set_security_groups() missing 2 required positional arguments: " \
+           "'load_balancer_names' and 'security_group_ids" in str(x)
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)
@@ -328,12 +330,15 @@ def test_set_subnets_invalid_subnet(aws_client):
 
 def test_set_subnet_no_subnets():
     alb_names = ['test-loadbalancer-01', 'test-loadbalancer-02']
-    with pytest.raises(FailedActivity) as x:
+    with pytest.raises(TypeError) as x:
         set_subnets(alb_names)
-    assert 'You must specify at least 1 subnet id' in str(x)
+
+    assert "set_subnets() missing 1 required " \
+           "positional argument: 'subnet_ids'" in str(x)
 
 
 def test_set_subnet_no_args():
-    with pytest.raises(FailedActivity) as x:
+    with pytest.raises(TypeError) as x:
         set_subnets()
-    assert 'You must specify at least 1 load balancer.' in str(x)
+    assert "set_subnets() missing 2 required positional " \
+           "arguments: 'load_balancer_names' and 'subnet_ids'" in str(x)

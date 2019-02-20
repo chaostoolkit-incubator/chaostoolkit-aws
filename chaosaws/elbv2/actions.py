@@ -33,8 +33,8 @@ def deregister_target(tg_name: str,
                                      Targets=[{'Id': random_target}])
 
 
-def set_security_groups(load_balancer_names: List[str] = None,
-                        security_group_ids: List[str] = None,
+def set_security_groups(load_balancer_names: List[str],
+                        security_group_ids: List[str],
                         configuration: Configuration = None,
                         secrets: Secrets = None) -> List[AWSResponse]:
     """
@@ -55,12 +55,6 @@ def set_security_groups(load_balancer_names: List[str] = None,
             ...
         ]
     """
-    if not load_balancer_names:
-        raise FailedActivity('You must specify at least 1 load balancer.')
-
-    if not security_group_ids:
-        raise FailedActivity('You must specify at least 1 security group id')
-
     security_group_ids = get_security_groups(
         security_group_ids, aws_client('ec2', configuration, secrets))
 
@@ -82,8 +76,8 @@ def set_security_groups(load_balancer_names: List[str] = None,
     return results
 
 
-def set_subnets(load_balancer_names: List[str] = None,
-                subnet_ids: List[str] = None,
+def set_subnets(load_balancer_names: List[str],
+                subnet_ids: List[str],
                 configuration: Configuration = None,
                 secrets: Secrets = None) -> List[AWSResponse]:
     """
@@ -113,12 +107,6 @@ def set_subnets(load_balancer_names: List[str] = None,
             ...
         ]
     """
-    if not load_balancer_names:
-        raise FailedActivity('You must specify at least 1 load balancer.')
-
-    if not subnet_ids:
-        raise FailedActivity('You must specify at least 1 subnet id')
-
     subnet_ids = get_subnets(
         subnet_ids, aws_client('ec2', configuration, secrets))
 
