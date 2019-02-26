@@ -14,7 +14,7 @@ def describe_instances(filters: List[Dict[str, Any]],
     """
     Describe instances following the specified filters.
 
-    Please refer to http://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    Please refer to https://bit.ly/2Sv9lmU
 
     for details on said filters.
     """  # noqa: E501
@@ -29,7 +29,7 @@ def count_instances(filters: List[Dict[str, Any]],
     """
     Return count of instances matching the specified filters.
 
-    Please refer to http://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    Please refer to https://bit.ly/2Sv9lmU
 
     for details on said filters.
     """  # noqa: E501

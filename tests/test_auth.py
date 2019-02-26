@@ -19,12 +19,12 @@ CONFIG_WITH_PROFILE = {
 }
 
 CONFIG_WITH_ARN = {
-    "aws_role_arn": "myarn"
+    "aws_assume_role_arn": "myarn"
 }
 
 CONFIG_WITH_ARN_AND_PROFILE = {
     "aws_profile_name": "myprofile",
-    "aws_role_arn": "myarn"
+    "aws_assume_role_arn": "myarn"
 }
 
 SECRETS = {

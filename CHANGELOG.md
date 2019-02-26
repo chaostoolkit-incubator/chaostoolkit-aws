@@ -4,6 +4,16 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.9.0...HEAD
 
+### Added
+
+- adding terminate_instance(s) actions to ec2/actions.py
+- asg actions to suspend/resume services
+- asg probe to detect if process is suspended
+- adding set_security_groups actions to elbv2
+- adding set_subnets action to elbv2
+- adding optional ability to dynamically assume an AWS role declared in the
+  experiment, after assuming the initial aws profile
+
 ## [0.9.0][]
 
 [0.9.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.8.0...0.9.0
