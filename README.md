@@ -160,6 +160,23 @@ against which you want to use. At the top level of the experiment, add:
 }
 ```
 
+You may also specify an AWS Role ARN to assume. This is helpful for AWS
+systems with multiple accounts, and running experiments across those accounts.
+In order to use this, the AWS profile you are initially using must have the
+permissions to assume the given role. Given those conditions are met,
+[boto3 will issue a call to the sts assume_role function][boto3sts]. This can
+be used alone, or with the "aws_profile_name" as follows:
+
+```json
+{
+  "configuration": {
+    "aws_profile_name": "dev",
+    "aws_assume_role_arn": "arn"
+  }
+}
+```
+[boto3sts]: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sts.html#STS.Client.assume_role
+     
 ## Contribute
 
 If you wish to contribute more functions to this package, you are more than

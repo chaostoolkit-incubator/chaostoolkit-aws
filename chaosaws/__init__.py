@@ -58,6 +58,7 @@ def aws_client(resource_name: str, configuration: Configuration = None,
     configuration = configuration or {}
     region = configuration.get("aws_region", "us-east-1")
     creds = get_credentials(secrets)
+    aws_assume_role_arn = configuration.get("aws_assume_role_arn")
 
     if boto3.DEFAULT_SESSION is None:
         profile_name = configuration.get("aws_profile_name")
@@ -67,7 +68,31 @@ def aws_client(resource_name: str, configuration: Configuration = None,
         boto3.setup_default_session(
             profile_name=profile_name, region_name=region, **creds)
 
-    return boto3.client(resource_name, region_name=region, **creds)
+    # default config
+    if not aws_assume_role_arn:
+        logger.debug("Using default AWS role")
+        return boto3.client(resource_name, region_name=region, **creds)
+    else:
+        logger.info("Assuming role: " + aws_assume_role_arn)
+        # connect to sts client
+        client = boto3.client('sts', region_name=region, **creds)
+
+        # get credentials for the role we want
+        response = client.assume_role(
+            RoleArn=aws_assume_role_arn,
+            RoleSessionName="tempDetourSession")['Credentials']
+        # create new dictionary for credentials
+        new_creds = dict(
+            aws_access_key_id=None,
+            aws_secret_access_key=None,
+            aws_session_token=None)
+
+        new_creds["aws_access_key_id"] = response['AccessKeyId']
+        new_creds["aws_secret_access_key"] = response['SecretAccessKey']
+        new_creds["aws_session_token"] = response['SessionToken']
+
+        # return new client
+        return boto3.client(resource_name, region_name=region, **new_creds)
 
 
 def signed_api_call(service: str, path: str = "/", method: str = 'GET',

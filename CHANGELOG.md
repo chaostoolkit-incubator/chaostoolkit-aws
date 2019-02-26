@@ -11,6 +11,8 @@
 - asg probe to detect if process is suspended
 - adding set_security_groups actions to elbv2
 - adding set_subnets action to elbv2
+- adding optional ability to dynamically assume an AWS role declared in the
+  experiment, after assuming the initial aws profile
 
 ## [0.9.0][]
 
