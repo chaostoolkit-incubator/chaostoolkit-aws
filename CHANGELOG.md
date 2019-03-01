@@ -13,6 +13,7 @@
 - adding set_subnets action to elbv2
 - adding optional ability to dynamically assume an AWS role declared in the
   experiment, after assuming the initial aws profile
+- adding action to terminate random asg instance(s)
 
 ## [0.9.0][]
 
