@@ -2,7 +2,8 @@
 from unittest.mock import MagicMock, patch
 from chaoslib.exceptions import FailedActivity
 from chaosaws.asg.actions import (
-    suspend_processes, resume_processes, terminate_random_instances)
+    suspend_processes, resume_processes, terminate_random_instances,
+    detach_random_instances)
 
 import pytest
 
@@ -493,6 +494,214 @@ def test_terminate_instances_tags(aws_client):
         try:
             client.terminate_instances.assert_called_with(
                 InstanceIds=sorted(i))
+            return True
+        except AssertionError as e:
+            ex = e.args
+    raise AssertionError(ex)
+
+
+def test_detach_instance_no_name_or_tag():
+    with pytest.raises(FailedActivity) as x:
+        detach_random_instances()
+    assert 'one of the following arguments are required: ' \
+           'asg_names or tags' in str(x)
+
+
+def test_detach_instance_both_name_and_tag_one():
+    with pytest.raises(FailedActivity) as x:
+        detach_random_instances(
+            asg_names=['AutoScalingGroup-A'],
+            tags=[{"Key": "TagKey", "Values": ["TagValues"]}])
+    assert 'only one of the following arguments are allowed: ' \
+           'asg_names/tags' in str(x)
+
+
+def test_detach_instance_no_count():
+    with pytest.raises(FailedActivity) as x:
+        detach_random_instances(
+            asg_names=['AutoScalingGroup-A'])
+    assert 'You must specify either "instance_count" or ' \
+           '"instance_percent"' in str(x)
+
+
+@patch('chaosaws.asg.actions.aws_client', autospec=True)
+def test_detach_instances_invalid_count(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A']
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "Instances": [
+                    {
+                        "InstanceId": "i-00000000000000001",
+                        "AvailabilityZone": "us-east-1a",
+                        "LifecycleState": "InService"
+                    },
+                    {
+                        "InstanceId": "i-00000000000000002",
+                        "AvailabilityZone": "us-east-1b",
+                        "LifecycleState": "InService"
+                    }
+                ]
+            }
+        ]
+    }
+    with pytest.raises(FailedActivity) as x:
+        detach_random_instances(asg_names, instance_count=3)
+    assert 'You are attempting to detach more instances than exist on ' \
+           'asg %s' % asg_names[0] in str(x)
+
+
+@patch('chaosaws.asg.actions.aws_client', autospec=True)
+def test_detach_instances_count(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A']
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "Instances": [
+                    {
+                        "InstanceId": "i-00000000000000001",
+                        "AvailabilityZone": "us-east-1a",
+                        "LifecycleState": "InService"
+                    },
+                    {
+                        "InstanceId": "i-00000000000000002",
+                        "AvailabilityZone": "us-east-1b",
+                        "LifecycleState": "InService"
+                    },
+                    {
+                        "InstanceId": "i-00000000000000003",
+                        "AvailabilityZone": "us-east-1c",
+                        "LifecycleState": "InService"
+                    },
+                ]
+            }
+        ]
+    }
+    detach_random_instances(asg_names, instance_count=2)
+
+    instance_calls = [
+        ['i-00000000000000001', 'i-00000000000000002'],
+        ['i-00000000000000001', 'i-00000000000000003'],
+        ['i-00000000000000002', 'i-00000000000000003']]
+
+    ex = None
+    for i in instance_calls:
+        try:
+            client.detach_instances.assert_called_with(
+                AutoScalingGroupName=asg_names[0],
+                InstanceIds=sorted(i),
+                ShouldDecrementDesiredCapacity=False)
+            return True
+        except AssertionError as e:
+            ex = str(e.args)
+    raise AssertionError(ex)
+
+
+@patch('chaosaws.asg.actions.aws_client', autospec=True)
+def test_detach_instances_percent(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A']
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "Instances": [
+                    {
+                        "InstanceId": "i-00000000000000001",
+                        "AvailabilityZone": "us-east-1a",
+                        "LifecycleState": "InService"
+                    },
+                    {
+                        "InstanceId": "i-00000000000000002",
+                        "AvailabilityZone": "us-east-1b",
+                        "LifecycleState": "InService"
+                    },
+                    {
+                        "InstanceId": "i-00000000000000003",
+                        "AvailabilityZone": "us-east-1c",
+                        "LifecycleState": "InService"
+                    },
+                ]
+            }
+        ]
+    }
+    detach_random_instances(asg_names, instance_percent=67)
+
+    instance_calls = [
+        ['i-00000000000000001', 'i-00000000000000002'],
+        ['i-00000000000000001', 'i-00000000000000003'],
+        ['i-00000000000000002', 'i-00000000000000003']]
+
+    ex = None
+    for i in instance_calls:
+        try:
+            client.detach_instances.assert_called_with(
+                AutoScalingGroupName=asg_names[0],
+                InstanceIds=sorted(i),
+                ShouldDecrementDesiredCapacity=False)
+            return True
+        except AssertionError as e:
+            ex = str(e.args)
+    raise AssertionError(ex)
+
+
+@patch('chaosaws.asg.actions.aws_client', autospec=True)
+def test_detach_instances_tags(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    tags = [{'Key': 'TargetKey', 'Value': 'TargetValue'}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        'Tags': [{
+            'ResourceId': 'AutoScalingGroup-A',
+            'ResourceType': 'auto-scaling-group',
+            'Key': 'TargetKey',
+            'Value': 'TargetValue',
+            'PropagateAtLaunch': False}]
+    }]
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Instances": [
+                {
+                    "InstanceId": "i-00000000000000001",
+                    "AvailabilityZone": "us-east-1a",
+                    "LifecycleState": "InService"
+                },
+                {
+                    "InstanceId": "i-00000000000000002",
+                    "AvailabilityZone": "us-east-1b",
+                    "LifecycleState": "InService"
+                },
+                {
+                    "InstanceId": "i-00000000000000003",
+                    "AvailabilityZone": "us-east-1c",
+                    "LifecycleState": "InService"
+                },
+            ]
+        }]
+    }
+    detach_random_instances(tags=tags, instance_count=2)
+
+    instance_calls = [
+        ['i-00000000000000001', 'i-00000000000000002'],
+        ['i-00000000000000001', 'i-00000000000000003'],
+        ['i-00000000000000002', 'i-00000000000000003']
+    ]
+
+    ex = None
+    for i in instance_calls:
+        try:
+            client.detach_instances.assert_called_with(
+                AutoScalingGroupName='AutoScalingGroup-A',
+                InstanceIds=sorted(i),
+                ShouldDecrementDesiredCapacity=False)
             return True
         except AssertionError as e:
             ex = e.args
