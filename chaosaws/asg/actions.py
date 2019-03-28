@@ -200,12 +200,12 @@ def resume_processes(asg_names: List[str] = None,
 
 
 def detach_random_instances(asg_names: List[str] = None,
-                           tags: List[dict] = None,
-                           instance_count: int = None,
-                           instance_percent: int = None,
-                           decrement_capacity: bool = False,
-                           configuration: Configuration = None,
-                           secrets: Secrets = None) -> AWSResponse:
+                            tags: List[dict] = None,
+                            instance_count: int = None,
+                            instance_percent: int = None,
+                            decrement_capacity: bool = False,
+                            configuration: Configuration = None,
+                            secrets: Secrets = None) -> AWSResponse:
     """
     Detaches one or more random instances from an autoscaling group
 
