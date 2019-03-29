@@ -2,6 +2,10 @@
 
 ## [Unreleased][]
 
+### Added
+
+- adding delete action to elbv2 module
+
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.10.0...HEAD
 
 ## [0.10.0][]
@@ -18,6 +22,7 @@
 - adding optional ability to dynamically assume an AWS role declared in the
   experiment, after assuming the initial aws profile
 - adding action to terminate random asg instance(s)
+- adding action to detach random instances from autoscaling groups
 
 ## [0.9.0][]
 
