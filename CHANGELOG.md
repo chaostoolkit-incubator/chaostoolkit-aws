@@ -18,6 +18,7 @@
 - adding optional ability to dynamically assume an AWS role declared in the
   experiment, after assuming the initial aws profile
 - adding action to terminate random asg instance(s)
+- adding action to detach random instances from autoscaling groups
 
 ## [0.9.0][]
 
