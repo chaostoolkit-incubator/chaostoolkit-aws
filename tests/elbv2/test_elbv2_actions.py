@@ -4,9 +4,8 @@ import pytest
 from unittest.mock import MagicMock, patch, call
 
 from chaoslib.exceptions import FailedActivity
-from chaosaws.elbv2.actions import (deregister_target,
-                                    set_subnets,
-                                    set_security_groups)
+from chaosaws.elbv2.actions import (deregister_target, delete_load_balancer,
+                                    set_subnets, set_security_groups)
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)
@@ -342,3 +341,35 @@ def test_set_subnet_no_args():
         set_subnets()
     assert "set_subnets() missing 2 required positional " \
            "arguments: 'load_balancer_names' and 'subnet_ids'" in str(x)
+
+
+def test_delete_load_balancer_invalid():
+    with pytest.raises(TypeError) as x:
+        delete_load_balancer()
+    assert "delete_load_balancer() missing 1 required positional argument: " \
+           "'load_balancer_names'" in str(x)
+
+
+@patch('chaosaws.elbv2.actions.aws_client', autospec=True)
+def test_delete_load_balancr(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    alb_names = ['test-loadbalancer-01']
+    lb_arn = 'arn:aws:elasticloadbalancing:us-east-1:' \
+             '000000000000:loadbalancer/app/' \
+             'test-loadbalancer-01/0f158eab895ab000'
+
+    client.describe_load_balancers.return_value = {
+        'LoadBalancers': [
+            {
+                'LoadBalancerArn': lb_arn,
+                'State': {'Code': 'active'},
+                'Type': 'application',
+                'LoadBalancerName': alb_names[0]
+            }
+        ]
+    }
+    delete_load_balancer(alb_names)
+
+    client.describe_load_balancers.assert_called_with(Names=alb_names)
+    client.delete_load_balancer.assert_called_with(LoadBalancerArn=lb_arn)

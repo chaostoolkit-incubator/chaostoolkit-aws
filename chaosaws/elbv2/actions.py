@@ -12,7 +12,8 @@ from chaosaws.types import AWSResponse
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
-__all__ = ["deregister_target", "set_security_groups", "set_subnets"]
+__all__ = ["deregister_target", "set_security_groups", "set_subnets",
+           "delete_load_balancer"]
 
 
 def deregister_target(tg_name: str,
@@ -124,6 +125,27 @@ def set_subnets(load_balancer_names: List[str],
         response['LoadBalancerArn'] = l
         results.append(response)
     return results
+
+
+def delete_load_balancer(load_balancer_names: List[str],
+                         configuration: Configuration = None,
+                         secrets: Secrets = None):
+    """
+    Deletes the provided load balancer(s).
+
+    Parameters:
+        - load_balancer_names: a list of load balancer names
+    """
+    client = aws_client('elbv2', configuration, secrets)
+    load_balancers = get_load_balancer_arns(load_balancer_names, client)
+
+    for k, v in load_balancers.items():
+        if k not in ('application', 'network'):
+            continue
+
+        for l in v:
+            logger.debug('Deleting load balancer %s' % l)
+            client.delete_load_balancer(LoadBalancerArn=l)
 
 
 ###############################################################################

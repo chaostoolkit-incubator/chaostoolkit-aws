@@ -2,6 +2,10 @@
 
 ## [Unreleased][]
 
+### Added
+
+- adding delete action to elbv2 module
+
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.10.0...HEAD
 
 ## [0.10.0][]
