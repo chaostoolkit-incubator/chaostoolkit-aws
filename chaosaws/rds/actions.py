@@ -139,7 +139,7 @@ def delete_db_instance(db_instance_identifier: str,
             db_instance_identifier, e.response['Error']['Message']))
 
 
-def delete_db_cluster(db_cluster_identifier = str,
+def delete_db_cluster(db_cluster_identifier: str,
                       skip_final_snapshot: bool = True,
                       db_snapshot_identifier: str = None,
                       configuration: Configuration = None,
@@ -198,20 +198,6 @@ def describe_db_cluster(cluster_id: str, client: boto3.client) -> AWSResponse:
     try:
         return client.describe_db_clusters(
             DBClusterIdentifier=cluster_id)['DBClusters'][0]
-    except ClientError as e:
-        raise FailedActivity('unable to identify cluster %s: %s' % (
-            cluster_id, e.response['Error']['Message']))
-
-
-def describe_db_clusters(filters: List[Dict[str, Any]],
-                         client: boto3.client) -> List[AWSResponse]:
-    paginator = client.get_paginator('describe_db_clusters')
-    results = []
-    for p in paginator.paginate(Filters=filters):
-        results.extend([c for c in p['DBClusters']])
-    try:
-        return client.describe_db_clusters(
-            Filters=filters)['DBClusters']
     except ClientError as e:
         raise FailedActivity('unable to identify cluster %s: %s' % (
             cluster_id, e.response['Error']['Message']))
