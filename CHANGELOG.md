@@ -5,6 +5,9 @@
 ### Added
 
 - adding delete action to elbv2 module
+- adding stop db instance action
+- adding delete db instance/cluster actions
+- adding delete db cluster endpoint action
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.10.0...HEAD
 
