@@ -4,13 +4,12 @@ from typing import Dict, List
 
 import boto3
 from botocore.exceptions import ClientError
-
 from logzero import logger
 
-from chaosaws import aws_client
-from chaosaws.types import AWSResponse
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
+from chaosaws import aws_client
+from chaosaws.types import AWSResponse
 
 __all__ = ["deregister_target", "set_security_groups", "set_subnets",
            "delete_load_balancer"]
