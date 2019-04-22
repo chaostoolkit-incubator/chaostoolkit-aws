@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from chaoslib.exceptions import FailedActivity
 from chaosaws.asg.actions import (
     suspend_processes, resume_processes, terminate_random_instances,
-    detach_random_instances)
+    detach_random_instances, change_subnets)
 
 import pytest
 
@@ -706,3 +706,53 @@ def test_detach_instances_tags(aws_client):
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)
+
+
+@patch('chaosaws.asg.actions.aws_client', autospec=True)
+def test_change_subnets_valid_names(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A']
+    params = dict(
+        asg_names=asg_names,
+        subnets=['subnet-123456789', 'subnet-23456789a'])
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"}]}
+    change_subnets(**params)
+    client.update_auto_scaling_group.assert_called_with(
+        AutoScalingGroupName=asg_names[0],
+        VPCZoneIdentifier="subnet-123456789,subnet-23456789a")
+
+
+@patch('chaosaws.asg.actions.aws_client', autospec=True)
+def test_change_subnets_valid_tags(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    tags = [{'Key': 'TargetKey','Value': 'TargetValue'}]
+    params = dict(
+        tags=tags,
+        subnets=['subnet-123456789', 'subnet-23456789a'])
+    client.get_paginator.return_value.paginate.return_value = [{
+        'Tags': [{
+            'ResourceId': 'AutoScalingGroup-A',
+            'ResourceType': 'auto-scaling-group',
+            'Key': 'TargetKey',
+            'Value': 'TargetValue'}]}]
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"}]}
+    change_subnets(**params)
+
+    client.update_auto_scaling_group.assert_called_with(
+        AutoScalingGroupName="AutoScalingGroup-A",
+        VPCZoneIdentifier="subnet-123456789,subnet-23456789a")
+
+
+def test_change_subnets_no_subnet():
+    asg_names = ['AutoScalingGroup-A']
+    with pytest.raises(TypeError) as x:
+        change_subnets(asg_names=asg_names)
+    assert "missing 1 required positional argument: 'subnets'" in str(x)

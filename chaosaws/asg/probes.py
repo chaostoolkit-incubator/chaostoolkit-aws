@@ -13,7 +13,7 @@ from logzero import logger
 
 __all__ = ["desired_equals_healthy", "desired_equals_healthy_tags",
            "wait_desired_equals_healthy", "wait_desired_equals_healthy_tags",
-           "is_scaling_in_progress", "process_is_suspended"]
+           "is_scaling_in_progress", "process_is_suspended", "has_subnets"]
 
 
 def desired_equals_healthy(asg_names: List[str],
@@ -256,6 +256,37 @@ def process_is_suspended(asg_names: List[str] = None,
     return True
 
 
+def has_subnets(subnets: List[str],
+                asg_names: List[str] = None,
+                tags: List[Dict[str, str]] = None,
+                configuration: Configuration= None,
+                secrets: Secrets = None) -> bool:
+    """
+    Determines if the provided autoscaling groups are in the provided subnets
+
+    :returns boolean
+    """
+    client = aws_client('autoscaling', configuration, secrets)
+
+    if not any([asg_names, tags]):
+        raise FailedActivity(
+            'one of the following arguments are required: asg_names or tags')
+
+    if all([asg_names, tags]):
+        raise FailedActivity(
+            'only one of the following arguments are allowed: asg_names/tags')
+
+    if asg_names:
+        asgs = get_asg_by_name(asg_names, client)
+    else:
+        asgs = get_asg_by_tags(tags, client)
+
+    for a in asgs['AutoScalingGroups']:
+        if sorted(a['VPCZoneIdentifier'].split(',')) != sorted(subnets):
+            return False
+    return True
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
@@ -286,10 +317,13 @@ def get_asg_by_tags(tags: Union[dict, List[Dict[str, str]]],
     page_iterator = client.get_paginator(
         'describe_auto_scaling_groups').paginate(
         PaginationConfig={'PageSize': 100})
+
     asg_descrs = {'AutoScalingGroups': []}
 
     for page in page_iterator:
         asg_descrs['AutoScalingGroups'].extend(page['AutoScalingGroups'])
+
+    print(asg_descrs)
 
     filter_set = set(map(lambda x: "=".join([x['Key'], x['Value']]), tags))
 
