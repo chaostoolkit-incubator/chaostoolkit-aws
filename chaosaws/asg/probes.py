@@ -259,7 +259,7 @@ def process_is_suspended(asg_names: List[str] = None,
 def has_subnets(subnets: List[str],
                 asg_names: List[str] = None,
                 tags: List[Dict[str, str]] = None,
-                configuration: Configuration= None,
+                configuration: Configuration = None,
                 secrets: Secrets = None) -> bool:
     """
     Determines if the provided autoscaling groups are in the provided subnets

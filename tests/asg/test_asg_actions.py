@@ -730,7 +730,7 @@ def test_change_subnets_valid_names(aws_client):
 def test_change_subnets_valid_tags(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    tags = [{'Key': 'TargetKey','Value': 'TargetValue'}]
+    tags = [{'Key': 'TargetKey', 'Value': 'TargetValue'}]
     params = dict(
         tags=tags,
         subnets=['subnet-123456789', 'subnet-23456789a'])
