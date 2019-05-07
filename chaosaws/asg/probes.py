@@ -323,8 +323,6 @@ def get_asg_by_tags(tags: Union[dict, List[Dict[str, str]]],
     for page in page_iterator:
         asg_descrs['AutoScalingGroups'].extend(page['AutoScalingGroups'])
 
-    print(asg_descrs)
-
     filter_set = set(map(lambda x: "=".join([x['Key'], x['Value']]), tags))
 
     group_sets = list(map(lambda g: {
