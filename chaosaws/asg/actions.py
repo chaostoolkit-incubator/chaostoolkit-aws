@@ -13,7 +13,8 @@ from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
 __all__ = ["suspend_processes", "resume_processes",
-           "terminate_random_instances", "detach_random_instances"]
+           "terminate_random_instances", "detach_random_instances",
+           "change_subnets"]
 
 
 def terminate_random_instances(asg_names: List[str] = None,
@@ -264,6 +265,42 @@ def detach_random_instances(asg_names: List[str] = None,
             ShouldDecrementDesiredCapacity=decrement_capacity)
         results.setdefault('Activities', []).extend(response['Activities'])
     return results
+
+
+def change_subnets(subnets: List[str],
+                   asg_names: List[str] = None,
+                   tags: List[dict] = None,
+                   configuration: Configuration = None,
+                   secrets: Secrets = None):
+    """
+    Adds/removes subnets on autoscaling groups
+
+    Parameters:
+        One of:
+            asg_names: a list of one or more asg names
+            tags: a list of key/value pair to identify asg(s) by
+
+        subnets: a list of subnet IDs to associate to the ASG
+
+    `tags` are expected as a list of dictionary objects:
+    [
+        {'Key': 'TagKey1', 'Value': 'TagValue1'},
+        {'Key': 'TagKey2', 'Value': 'TagValue2'},
+        ...
+    ]
+    """
+    validate_asgs(asg_names, tags)
+    client = aws_client('autoscaling', configuration, secrets)
+
+    if asg_names:
+        asgs = get_asg_by_name(asg_names, client)
+    else:
+        asgs = get_asg_by_tags(tags, client)
+
+    for a in asgs['AutoScalingGroups']:
+        client.update_auto_scaling_group(
+            AutoScalingGroupName=a['AutoScalingGroupName'],
+            VPCZoneIdentifier=','.join(subnets))
 
 
 ###############################################################################

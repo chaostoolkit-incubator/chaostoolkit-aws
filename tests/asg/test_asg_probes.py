@@ -10,7 +10,7 @@ from chaosaws.asg.probes import (desired_equals_healthy,
                                  wait_desired_equals_healthy,
                                  wait_desired_equals_healthy_tags,
                                  wait_desired_not_equals_healthy_tags,
-                                 process_is_suspended)
+                                 process_is_suspended, has_subnets)
 from chaoslib.exceptions import FailedActivity
 
 
@@ -687,3 +687,156 @@ def test_is_process_suspended_tags(aws_client):
             }]}]}
     assert process_is_suspended(
         tags=tags, process_names=process_names) is True
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_has_subnets_names_valid(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A', 'AutoScalingGroup-B']
+    client.get_paginator.return_value.paginate.return_value = [{
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-A",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}, {
+            "AutoScalingGroupName": "AutoScalingGroup-B",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-B",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}]}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"},
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-B",
+                "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"}]}]
+    response = has_subnets(
+        subnets=['subnet-012345678', 'subnet-123456789'],
+        asg_names=asg_names)
+    assert response is True
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_has_subnets_tags_valid(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    tags = [{'Key': 'TestKey', 'Value': 'TestValue'}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-A",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}, {
+            "AutoScalingGroupName": "AutoScalingGroup-B",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-B",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}]}]
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "VPCZoneIdentifier": "subnet-012345678,subnet-123456789",
+                "Tags": [{
+                    "ResourceId": "AutoScalingGroup-A",
+                    "Key": "TestKey",
+                    "Value": "TestValue"}]
+            },
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-B",
+                "VPCZoneIdentifier": "subnet-012345678,subnet-123456789",
+                "Tags": [{
+                    "ResourceId": "AutoScalingGroup-B",
+                    "Key": "TestKey",
+                    "Value": "TestValue"}]
+            }
+        ]}
+    response = has_subnets(
+        subnets=['subnet-012345678', 'subnet-123456789'],
+        tags=tags)
+    assert response is True
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_has_subnets_names_invalid(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A', 'AutoScalingGroup-B']
+    client.get_paginator.return_value.paginate.return_value = [{
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-A",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}, {
+            "AutoScalingGroupName": "AutoScalingGroup-B",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-B",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}]}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"},
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-B",
+                "VPCZoneIdentifier": "subnet-012345678,subnet-23456789a"}]}]
+    response = has_subnets(
+        subnets=['subnet-012345678', 'subnet-123456789'],
+        asg_names=asg_names)
+    assert response is False
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_has_subnets_tags_invalid(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    tags = [{'Key': 'TestKey', 'Value': 'TestValue'}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-A",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}, {
+            "AutoScalingGroupName": "AutoScalingGroup-B",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-B",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}]}]
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "VPCZoneIdentifier": "subnet-012345678,subnet-123456789",
+                "Tags": [{
+                    "ResourceId": "AutoScalingGroup-A",
+                    "Key": "TestKey",
+                    "Value": "TestValue"}]
+            },
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-B",
+                "VPCZoneIdentifier": "subnet-012345678,subnet-23456789a",
+                "Tags": [{
+                    "ResourceId": "AutoScalingGroup-B",
+                    "Key": "TestKey",
+                    "Value": "TestValue"}]
+            }
+        ]}
+    response = has_subnets(
+        subnets=['subnet-012345678', 'subnet-123456789'],
+        tags=tags)
+    assert response is False
+
+
+def test_has_subnets_no_subnet():
+    asg_names = ['AutoScalingGroup-A']
+    with pytest.raises(TypeError) as x:
+        has_subnets(asg_names=asg_names)
+    assert "missing 1 required positional argument: 'subnets'" in str(x)
