@@ -13,8 +13,7 @@ function build () {
 
 function run-test () {
     echo "Running the tests"
-    pip install -e .
-    pytest
+    python setup.py test
 }
 
 function release () {
