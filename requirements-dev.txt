@@ -4,6 +4,6 @@ pycodestyle
 # pin until https://github.com/pytest-dev/pluggy/issues/205
 pluggy<0.10.0
 pytest==3.5.1
-pytest-cov<=3
+pytest-cov<=2.6.0
 pytest-sugar
 requests_mock
