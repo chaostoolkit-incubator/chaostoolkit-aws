@@ -5,7 +5,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from chaosaws.ec2.actions import (
-    stop_instance, stop_instances, terminate_instance, terminate_instances)
+    stop_instance, stop_instances, terminate_instance, terminate_instances,
+    start_instances, restart_instances)
+
 from chaoslib.exceptions import FailedActivity
 
 
@@ -422,3 +424,123 @@ def test_terminate_instances_by_filters(aws_client):
         {'Name': 'availability-zone', 'Values': ['us-west-2']})
     client.describe_instances.assert_called_with(Filters=called_filters)
     client.terminate_instances.assert_called_with(InstanceIds=instance_ids)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_start_instances_by_id(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba', 'i-392024ac3252ecb']
+    client.describe_instances.return_value = {
+        'Reservations': [{'Instances': [
+            {'InstanceId': instance_ids[0], 'InstanceLifecycle': 'normal'},
+            {'InstanceId': instance_ids[1], 'InstanceLifecycle': 'normal'},
+        ]}]}
+    start_instances(instance_ids=instance_ids)
+    client.describe_instances.assert_called_with(InstanceIds=instance_ids)
+    client.start_instances.assert_called_with(InstanceIds=instance_ids)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_start_instances_by_filter(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba', 'i-abcdef123456789']
+    client.describe_instances.return_value = {
+        'Reservations': [{'Instances': [
+            {'InstanceId': instance_ids[0], 'InstanceLifecycle': 'normal'},
+            {'InstanceId': instance_ids[1], 'InstanceLifecycle': 'normal'},
+        ]}]}
+
+    filters = [
+        {'Name': 'instance-state-name', 'Values': ['running']},
+        {'Name': 'tag-value', 'Values': ['chaos-cluster']},
+        {'Name': 'tag-key', 'Values': ['kubernetes.io/cluster/chaos-cluster']},
+        {'Name': 'tag-value', 'Values': ['owned']},
+        {'Name': 'tag-key',
+         'Values': ['eksctl.cluster.k8s.io/v1alpha1/cluster-name']},
+    ]
+    start_instances(filters=filters, az='us-west-2')
+
+    called_filters = deepcopy(filters)
+    called_filters.append(
+        {'Name': 'availability-zone', 'Values': ['us-west-2']})
+    client.describe_instances.assert_called_with(Filters=called_filters)
+    client.start_instances.assert_called_with(InstanceIds=instance_ids)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_start_instances_by_az(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba', 'i-abcdef123456789']
+    client.describe_instances.return_value = {
+        'Reservations': [{'Instances': [
+            {'InstanceId': instance_ids[0], 'InstanceLifecycle': 'normal'},
+            {'InstanceId': instance_ids[1], 'InstanceLifecycle': 'normal'},
+        ]}]}
+    start_instances(az='us-west-2')
+
+    az_filter = [{'Name': 'availability-zone', 'Values': ['us-west-2']}]
+    client.describe_instances.assert_called_with(Filters=az_filter)
+    client.start_instances.assert_called_with(InstanceIds=instance_ids)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_restart_instances_by_id(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba', 'i-392024ac3252ecb']
+    client.describe_instances.return_value = {
+        'Reservations': [{'Instances': [
+            {'InstanceId': instance_ids[0], 'InstanceLifecycle': 'normal'},
+            {'InstanceId': instance_ids[1], 'InstanceLifecycle': 'normal'},
+        ]}]}
+    restart_instances(instance_ids=instance_ids)
+    client.describe_instances.assert_called_with(InstanceIds=instance_ids)
+    client.reboot_instances.assert_called_with(InstanceIds=instance_ids)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_restart_instances_by_filter(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba', 'i-abcdef123456789']
+    client.describe_instances.return_value = {
+        'Reservations': [{'Instances': [
+            {'InstanceId': instance_ids[0], 'InstanceLifecycle': 'normal'},
+            {'InstanceId': instance_ids[1], 'InstanceLifecycle': 'normal'},
+        ]}]}
+
+    filters = [
+        {'Name': 'instance-state-name', 'Values': ['running']},
+        {'Name': 'tag-value', 'Values': ['chaos-cluster']},
+        {'Name': 'tag-key', 'Values': ['kubernetes.io/cluster/chaos-cluster']},
+        {'Name': 'tag-value', 'Values': ['owned']},
+        {'Name': 'tag-key',
+         'Values': ['eksctl.cluster.k8s.io/v1alpha1/cluster-name']},
+    ]
+    restart_instances(filters=filters, az='us-west-2')
+
+    called_filters = deepcopy(filters)
+    called_filters.append(
+        {'Name': 'availability-zone', 'Values': ['us-west-2']})
+    client.describe_instances.assert_called_with(Filters=called_filters)
+    client.reboot_instances.assert_called_with(InstanceIds=instance_ids)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_restart_instances_by_az(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba', 'i-abcdef123456789']
+    client.describe_instances.return_value = {
+        'Reservations': [{'Instances': [
+            {'InstanceId': instance_ids[0], 'InstanceLifecycle': 'normal'},
+            {'InstanceId': instance_ids[1], 'InstanceLifecycle': 'normal'},
+        ]}]}
+    restart_instances(az='us-west-2')
+
+    az_filter = [{'Name': 'availability-zone', 'Values': ['us-west-2']}]
+    client.describe_instances.assert_called_with(Filters=az_filter)
+    client.reboot_instances.assert_called_with(InstanceIds=instance_ids)
