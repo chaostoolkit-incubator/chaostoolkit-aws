@@ -12,7 +12,7 @@ from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
 __all__ = ["stop_instance", "stop_instances", "terminate_instances",
-           "terminate_instance", "start_instances", "reboot_instances"]
+           "terminate_instance", "start_instances", "restart_instances"]
 
 
 def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
@@ -237,7 +237,7 @@ def start_instances(instance_ids: List[str] = None, az: str = None,
             az, str(instance_types)))
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
-    return start_instances_any_type(instance_types,client)
+    return start_instances_any_type(instance_types, client)
 
 
 def restart_instances(instance_ids: List[str] = None, az: str = None,
