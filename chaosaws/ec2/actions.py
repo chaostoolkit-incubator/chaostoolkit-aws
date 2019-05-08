@@ -12,13 +12,13 @@ from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
 __all__ = ["stop_instance", "stop_instances", "terminate_instances",
-           "terminate_instance"]
+           "terminate_instance", "start_instances", "restart_instances"]
 
 
 def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
                   filters: List[Dict[str, Any]] = None,
                   configuration: Configuration = None,
-                  secrets: Secrets = None) -> AWSResponse:
+                  secrets: Secrets = None) -> List[AWSResponse]:
     """
     Stop a single EC2 instance.
 
@@ -63,7 +63,7 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
 def stop_instances(instance_ids: List[str] = None, az: str = None,
                    filters: List[Dict[str, Any]] = None,
                    force: bool = False, configuration: Configuration = None,
-                   secrets: Secrets = None) -> AWSResponse:
+                   secrets: Secrets = None) -> List[AWSResponse]:
     """
     Stop the given EC2 instances or, if none is provided, all instances
     of the given availability zone. If you need more control, you can
@@ -195,11 +195,101 @@ def terminate_instances(instance_ids: List[str] = None, az: str = None,
     return terminate_instances_any_type(instance_types, client)
 
 
+def start_instances(instance_ids: List[str] = None, az: str = None,
+                    filters: List[Dict[str, Any]] = None,
+                    configuration: Configuration = None,
+                    secrets: Secrets = None) -> List[AWSResponse]:
+    """
+    Starts one or more EC2 instances.
+
+    WARNING: If only an Availability Zone is provided, all instances in the
+    provided AZ will be started.
+
+    Additional filters may be used to narrow the scope:
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    """
+    if not any([instance_ids, az, filters]):
+        raise FailedActivity('To start instances, you must specify the '
+                             'instance-id, an Availability Zone, or provide a '
+                             'set of filters')
+
+    if az and not any([instance_ids, filters]):
+        logger.warning('Based on configuration provided I am going to '
+                       'start all instances in AZ %s!' % az)
+
+    client = aws_client('ec2', configuration, secrets)
+
+    if not instance_ids:
+        filters = deepcopy(filters) or []
+
+        if az:
+            filters.append({'Name': 'availability-zone', 'Values': [az]})
+            logger.debug('Looking for instances in AZ: %s' % az)
+
+        # Select instances based on filters
+        instance_types = list_instances_by_type(filters, client)
+
+        if not instance_types:
+            raise FailedActivity(
+                'No instances found matching filters: %s' % str(filters))
+
+        logger.debug('Instances in AZ %s selected: %s}.' % (
+            az, str(instance_types)))
+    else:
+        instance_types = get_instance_type_by_id(instance_ids, client)
+    return start_instances_any_type(instance_types, client)
+
+
+def restart_instances(instance_ids: List[str] = None, az: str = None,
+                      filters: List[Dict[str, Any]] = None,
+                      configuration: Configuration = None,
+                      secrets: Secrets = None) -> List[AWSResponse]:
+    """
+    Restarts one or more EC2 instances.
+
+    WARNING: If only an Availability Zone is provided, all instances in the
+    provided AZ will be restarted.
+
+    Additional filters may be used to narrow the scope:
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    """
+    if not any([instance_ids, az, filters]):
+        raise FailedActivity('To restart instances, you must specify the '
+                             'instance-id, an Availability Zone, or provide a '
+                             'set of filters')
+
+    if az and not any([instance_ids, filters]):
+        logger.warning('Based on configuration provided I am going to '
+                       'restart all instances in AZ %s!' % az)
+
+    client = aws_client('ec2', configuration, secrets)
+
+    if not instance_ids:
+        filters = deepcopy(filters) or []
+
+        if az:
+            filters.append({'Name': 'availability-zone', 'Values': [az]})
+            logger.debug('Looking for instances in AZ: %s' % az)
+
+        # Select instances based on filters
+        instance_types = list_instances_by_type(filters, client)
+
+        if not instance_types:
+            raise FailedActivity(
+                'No instances found matching filters: %s' % str(filters))
+
+        logger.debug('Instances in AZ %s selected: %s}.' % (
+            az, str(instance_types)))
+    else:
+        instance_types = get_instance_type_by_id(instance_ids, client)
+    return restart_instances_any_type(instance_types, client)
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
 def list_instances_by_type(filters: List[Dict[str, Any]],
-                           client: boto3.client) -> List[str]:
+                           client: boto3.client) -> Dict[str, Any]:
     """
     Return all instance ids matching the given filters by type
     (InstanceLifecycle) ie spot, on demand, etc.
@@ -293,7 +383,6 @@ def stop_instances_any_type(instance_types: dict = None,
     """
 
     response = []
-
     if 'normal' in instance_types:
         logger.debug("Stopping instances: {}".format(instance_types['normal']))
 
@@ -322,9 +411,7 @@ def stop_instances_any_type(instance_types: dict = None,
     if 'scheduled' in instance_types:
         # TODO: add support for scheduled instances
         # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-scheduled-instances.html
-
         raise FailedActivity("Scheduled instances support is not implemented")
-
     return response
 
 
@@ -345,7 +432,31 @@ def terminate_instances_any_type(instance_types: dict = None,
             client.cancel_spot_instance_requests(
                 SpotInstanceRequestIds=instances)
             response.append(client.terminate_instances(InstanceIds=v))
-
+            continue
         response.append(client.terminate_instances(InstanceIds=v))
-
     return response
+
+
+def start_instances_any_type(instance_types: dict,
+                             client: boto3.client) -> List[AWSResponse]:
+    """
+    Starts one or more instances regardless of type
+    """
+    results = []
+    for k, v in instance_types.items():
+        logger.debug('Starting %s instance(s): %s' % (k, v))
+        response = client.start_instances(InstanceIds=v)
+        results.extend(response.get('StartingInstances', []))
+    return results
+
+
+def restart_instances_any_type(instance_types: dict,
+                               client: boto3.client):
+    """
+    Restarts one or more instances regardless of type
+    """
+    results = []
+    for k, v in instance_types.items():
+        logger.debug('Restarting %s instance(s): %s' % (k, v))
+        client.reboot_instances(InstanceIds=v)
+    return results
