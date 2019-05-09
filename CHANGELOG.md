@@ -12,6 +12,8 @@
 - adding has_subnets probe to asg
 - adding start_instances and reboot_instances actions to ec2
 - adding instance_state probe to ec2
+- adding action detach_random_volume to asg
+- adding action detach_random_volume to ec2
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.10.0...HEAD
 

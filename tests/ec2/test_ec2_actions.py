@@ -6,7 +6,7 @@ import pytest
 
 from chaosaws.ec2.actions import (
     stop_instance, stop_instances, terminate_instance, terminate_instances,
-    start_instances, restart_instances)
+    start_instances, restart_instances, detach_random_volume, attach_volume)
 
 from chaoslib.exceptions import FailedActivity
 
@@ -569,3 +569,199 @@ def test_restart_instances_by_az(aws_client):
     az_filter = [{'Name': 'availability-zone', 'Values': ['us-west-2']}]
     client.describe_instances.assert_called_with(Filters=az_filter)
     client.reboot_instances.assert_called_with(InstanceIds=instance_ids)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_detach_random_volume_ec2_id(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba']
+    client.describe_instances.return_value = {
+        'Reservations': [{
+            'Instances': [{
+                'InstanceId': 'i-987654321fedcba',
+                'BlockDeviceMappings': [
+                    {
+                        'DeviceName': '/dev/xvda',
+                        'Ebs': {'VolumeId': 'vol-00000001'}
+                    },
+                    {
+                        'DeviceName': '/dev/sdc',
+                        'Ebs': {'VolumeId': 'vol-00000002'}
+                    }]}]}]}
+    client.detach_volume.return_value = {
+        'Device': '/dev/sdc',
+        'InstanceId': 'i-987654321fedcba',
+        'State': 'detaching',
+        'VolumeId': 'vol-00000002'}
+
+    results = detach_random_volume(instance_ids=instance_ids)
+
+    client.describe_instances.assert_called_with(
+        InstanceIds=['i-987654321fedcba'])
+    client.detach_volume.assert_called_with(
+        Device='/dev/sdc',
+        Force=True,
+        InstanceId='i-987654321fedcba',
+        VolumeId='vol-00000002')
+    assert results[0]['Device'] == '/dev/sdc'
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_detach_random_volume_ec2_filter(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    filters = [{
+        'Name': 'block-device-mapping.device-name',
+        'Values': ['/dev/sdb']}]
+    client.describe_instances.return_value = {
+        'Reservations': [{
+            'Instances': [{
+                'InstanceId': 'i-987654321fedcba',
+                'BlockDeviceMappings': [
+                    {
+                        'DeviceName': '/dev/xvda',
+                        'Ebs': {'VolumeId': 'vol-00000001'}
+                    },
+                    {
+                        'DeviceName': '/dev/sdb',
+                        'Ebs': {'VolumeId': 'vol-00000002'}
+                    }]}]}]}
+    client.detach_volume.return_value = {
+        'Device': '/dev/sdb',
+        'InstanceId': 'i-987654321fedcba',
+        'State': 'detaching',
+        'VolumeId': 'vol-00000002'}
+
+    results = detach_random_volume(filters=filters)
+
+    client.describe_instances.assert_called_with(
+        Filters=filters)
+    client.detach_volume.assert_called_with(
+        Device='/dev/sdb',
+        Force=True,
+        InstanceId='i-987654321fedcba',
+        VolumeId='vol-00000002')
+    assert results[0]['Device'] == '/dev/sdb'
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_detach_random_volume_ec2_invalid_id(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba']
+    client.describe_instances.return_value = {'Reservations': []}
+
+    with pytest.raises(FailedActivity) as x:
+        detach_random_volume(instance_ids=instance_ids)
+    assert "no instances found matching: {'InstanceIds': %s}" % (
+        instance_ids) in str(x)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_detach_random_volume_ec2_invalid_filters(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    filters = [{
+        'Name': 'block-device-mapping.device-name',
+        'Values': ['/dev/sdb']}]
+    client.describe_instances.return_value = {'Reservations': []}
+
+    with pytest.raises(FailedActivity) as x:
+        detach_random_volume(filters=filters)
+    assert "no instances found matching: {'Filters': %s}" % (
+        filters) in str(x)
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_attach_volume_ec2_id(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba']
+    client.describe_instances.return_value = {
+            'Reservations': [
+                {'Instances': [{'InstanceId': 'i-987654321fedcba'}]}]}
+
+    client.get_paginator.return_value.paginate.return_value = [{
+            'Volumes': [
+                {
+                    'VolumeId': 'vol-00000001',
+                    'Tags': [{
+                        'Key': 'ChaosToolkitDetached',
+                        'Value': 'DeviceName=/dev/sdc;InstanceId=%s' % (
+                            instance_ids[0])}]
+                },
+                {
+                    'VolumeId': 'vol-00000002',
+                    'Tags': [{
+                        'Key': 'ChaosToolkitDetached',
+                        'Value': 'DeviceName=/dev/sdb;InstanceId='
+                                 'i-987654321fabcde'
+                    }]}]}]
+
+    client.attach_volume.return_value = {
+        'DeviceName': '/dev/sdc',
+        'InstanceId': instance_ids[0],
+        'State': 'attaching',
+        'VolumeId': 'vol-00000001'}
+
+    results = attach_volume(instance_ids=instance_ids)
+
+    client.describe_instances.assert_called_with(InstanceIds=instance_ids)
+    client.get_paginator.return_value.paginate.assert_called_with(Filters={
+        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+    client.attach_volume.assert_called_with(
+        Device='/dev/sdc',
+        InstanceId=instance_ids[0],
+        VolumeId='vol-00000001')
+    assert results[0]['DeviceName'] == '/dev/sdc'
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_attach_volume_ec2_filter(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    instance_ids = ['i-987654321fedcba']
+    filters = [{'Name': 'instance-state-name', 'Values': ['running']}]
+    client.describe_instances.return_value = {
+            'Reservations': [
+                {'Instances': [{
+                    'InstanceId': 'i-987654321fedcba',
+                    'State': {
+                        'Code': 16,
+                        'Name': 'running'
+                    }}]}]}
+
+    client.get_paginator.return_value.paginate.return_value = [{
+            'Volumes': [
+                {
+                    'VolumeId': 'vol-00000001',
+                    'Tags': [{
+                        'Key': 'ChaosToolkitDetached',
+                        'Value': 'DeviceName=/dev/sdb;InstanceId=%s' % (
+                            instance_ids[0])}]
+                },
+                {
+                    'VolumeId': 'vol-00000002',
+                    'Tags': [{
+                        'Key': 'ChaosToolkitDetached',
+                        'Value': 'DeviceName=/dev/sdb;InstanceId='
+                                 'i-987654321fabcde'
+                    }]}]}]
+
+    client.attach_volume.return_value = {
+        'DeviceName': '/dev/sdb',
+        'InstanceId': instance_ids[0],
+        'State': 'attaching',
+        'VolumeId': 'vol-00000001'}
+
+    results = attach_volume(filters=filters)
+
+    client.describe_instances.assert_called_with(Filters=filters)
+    client.get_paginator.return_value.paginate.assert_called_with(Filters={
+        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+    client.attach_volume.assert_called_with(
+        Device='/dev/sdb',
+        InstanceId=instance_ids[0],
+        VolumeId='vol-00000001')
+    assert results[0]['DeviceName'] == '/dev/sdb'
