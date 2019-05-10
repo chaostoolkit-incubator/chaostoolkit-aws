@@ -275,11 +275,10 @@ def test_terminate_instance_az_no_instances(aws_client):
     az = 'us-west-2'
     client.describe_instances.return_value = {
         'Reservations': [{'Instances': []}]}
-
+    filters = [{'Name': 'availability-zone', 'Values': ['us-west-2']}]
     with pytest.raises(FailedActivity) as x:
         terminate_instance(az=az)
-    assert "No instances found matching filters: [" \
-           "{'Name': 'availability-zone', 'Values': ['us-west-2']}]" in str(x)
+    assert "No instances found matching filters: %s" % filters in str(x)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -364,13 +363,13 @@ def test_terminate_instances_az_no_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     az = 'us-west-2'
+    filters = [{'Name': 'availability-zone', 'Values': ['us-west-2']}]
     client.describe_instances.return_value = {
         'Reservations': [{'Instances': []}]}
 
     with pytest.raises(FailedActivity) as x:
         terminate_instances(az=az)
-    assert "No instances found matching filters: [" \
-           "{'Name': 'availability-zone', 'Values': ['us-west-2']}]" in str(x)
+    assert "No instances found matching filters: %s" % filters in str(x)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -670,7 +669,7 @@ def test_detach_random_volume_ec2_invalid_filters(aws_client):
     with pytest.raises(FailedActivity) as x:
         detach_random_volume(filters=filters)
     assert "no instances found matching: {'Filters': %s}" % (
-        filters) in str(x)
+        filters) in str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
