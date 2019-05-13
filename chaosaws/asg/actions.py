@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import boto3
 import random
@@ -14,7 +14,7 @@ from logzero import logger
 
 __all__ = ["suspend_processes", "resume_processes",
            "terminate_random_instances", "detach_random_instances",
-           "change_subnets"]
+           "change_subnets", "detach_random_volume", "attach_volume"]
 
 
 def terminate_random_instances(asg_names: List[str] = None,
@@ -303,6 +303,105 @@ def change_subnets(subnets: List[str],
             VPCZoneIdentifier=','.join(subnets))
 
 
+def detach_random_volume(asg_names: List[str] = None,
+                         tags: List[Dict[str, str]] = None,
+                         force: bool = True,
+                         configuration: Configuration = None,
+                         secrets: Secrets = None) -> List[AWSResponse]:
+    """
+        Detaches a random (non root) ebs volume from ec2 instances
+        associated to an ASG
+
+        Parameters:
+            One of:
+                asg_names: a list of one or more asg names
+                tags: a list of key/value pair to identify asg(s) by
+
+            force: force detach volume (default: true)
+
+        `tags` are expected as a list of dictionary objects:
+        [
+            {'Key': 'TagKey1', 'Value': 'TagValue1'},
+            {'Key': 'TagKey2', 'Value': 'TagValue2'},
+            ...
+        ]
+    """
+    validate_asgs(asg_names, tags)
+    client = aws_client('autoscaling', configuration, secrets)
+
+    if asg_names:
+        asgs = get_asg_by_name(asg_names, client)
+    else:
+        asgs = get_asg_by_tags(tags, client)
+
+    ec2_client = aws_client('ec2', configuration, secrets)
+    results = []
+    for a in asgs['AutoScalingGroups']:
+        instances = [e['InstanceId'] for e in a['Instances']]
+        if not instances:
+            raise FailedActivity('no instances found for asg: %s' % (
+                a['AutoScalingGroupName']))
+        volumes = get_random_instance_volume(ec2_client, instances)
+
+        for v in volumes:
+            results.append(detach_instance_volume(
+                ec2_client, force, a['AutoScalingGroupName'], v))
+    return results
+
+
+def attach_volume(asg_names: List[str] = None,
+                  tags: List[Dict[str, str]] = None,
+                  configuration: Configuration = None,
+                  secrets: Secrets = None) -> List[AWSResponse]:
+    """
+    Attaches ebs volumes that have been previously detached by CTK
+
+    Parameters:
+        One of:
+            asg_names: list: one or more asg names
+            tags: list: key/value pairs to identify asgs by
+
+    `tags` are expected as a list of dictionary objects:
+        [
+            {'Key': 'TagKey1', 'Value': 'TagValue1'},
+            {'Key': 'TagKey2', 'Value': 'TagValue2'},
+            ...
+        ]
+    """
+    validate_asgs(asg_names, tags)
+    client = aws_client('autoscaling', configuration, secrets)
+
+    if asg_names:
+        asgs = get_asg_by_name(asg_names, client)
+    else:
+        asgs = get_asg_by_tags(tags, client)
+
+    ec2_client = aws_client('ec2', configuration, secrets)
+    volumes = get_detached_volumes(ec2_client)
+    if not volumes:
+        raise FailedActivity('No volumes detached by ChaosTookit found')
+
+    results = []
+    for volume in volumes:
+        for t in volume['Tags']:
+            if t['Key'] != 'ChaosToolkitDetached':
+                continue
+            attach_data = t['Value'].split(';')
+            if len(attach_data) != 3:
+                continue
+
+            device_name = attach_data[0].split('=')[-1]
+            instance_id = attach_data[1].split('=')[-1]
+            asg_name = attach_data[2].split('=')[-1]
+
+            if asg_name not in [a['AutoScalingGroupName'] for a in asgs[
+                    'AutoScalingGroups']]:
+                continue
+            results.append(attach_instance_volume(
+                client, instance_id, volume['VolumeId'], device_name))
+    return results
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
@@ -356,6 +455,36 @@ def get_asg_by_tags(tags: List[Dict[str, str]],
     return get_asg_by_name(list(results), client)
 
 
+def get_random_instance_volume(
+        client: boto3.client, instance_ids: List[str]) -> List[Dict[str, str]]:
+    results = {}
+    try:
+        response = client.describe_instances(
+            InstanceIds=instance_ids)['Reservations']
+        for r in response:
+            for e in r.get('Instances', []):
+                instance_id = e['InstanceId']
+                bdm = e.get('BlockDeviceMappings', [])
+                for b in bdm:
+                    # skip root devices
+                    if b['DeviceName'] in ('/dev/sda1', '/dev/xvda'):
+                        continue
+                    results.setdefault(instance_id, []).append(
+                        {b['DeviceName']: b['Ebs']['VolumeId']})
+
+        volumes = []
+        for r in results:
+            # select 1 volume at random
+            volume = random.sample(results[r], 1)[0]
+            for k, v in volume.items():
+                volumes.append(
+                    {'InstanceId': r, 'DeviceName': k, 'VolumeId': v})
+        return volumes
+    except ClientError as e:
+        raise FailedActivity('Unable to describe asg instances: %s' % (
+            e.response['Error']['Message']))
+
+
 def validate_processes(process_names: List[str]):
     valid_processes = ['Launch', 'Terminate', 'HealthCheck', 'AZRebalance',
                        'AlarmNotification', 'ScheduledActions',
@@ -365,3 +494,64 @@ def validate_processes(process_names: List[str]):
     if invalid_processes:
         raise FailedActivity('invalid process(es): {} not in {}.'.format(
             invalid_processes, valid_processes))
+
+
+def detach_instance_volume(client: boto3.client,
+                           force: bool,
+                           asg_name: str,
+                           volume_data: Dict[str, str]) -> AWSResponse:
+    try:
+        response = client.detach_volume(
+            Device=volume_data['DeviceName'],
+            InstanceId=volume_data['InstanceId'],
+            VolumeId=volume_data['VolumeId'],
+            Force=force)
+
+        # tag volume with instance information (to reattach on rollback)
+        client.create_tags(
+            Resources=[volume_data['VolumeId']],
+            Tags=[
+                {
+                    'Key': 'ChaosToolkitDetached',
+                    'Value': 'DeviceName=%s;InstanceId=%s;ASG=%s' % (
+                        volume_data['DeviceName'], volume_data['InstanceId'],
+                        asg_name)
+                }])
+        return response
+    except ClientError as e:
+        raise FailedActivity('unable to detach volume %s from %s: %s' % (
+            volume_data['VolumeId'], volume_data['InstanceId'],
+            e.response['Error']['Message']))
+
+
+def get_detached_volumes(client: boto3.client,
+                         next_token: str = None,
+                         results: List[Dict[str, Any]] = None):
+    results = results or []
+    params = dict(
+        Filters={'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+    if next_token:
+        params['NextToken'] = next_token
+    response = client.describe_volumes(**params)
+    results.extend([r for r in response['Volumes']])
+    if response.get('NextToken'):
+        get_detached_volumes(response['NextToken'], results)
+    return results
+
+
+def attach_instance_volume(client: boto3.client,
+                           instance_id: str,
+                           volume_id: str,
+                           mount_point: str) -> AWSResponse:
+    try:
+        response = client.attach_volume(
+            Device=mount_point,
+            InstanceId=instance_id,
+            VolumeId=volume_id)
+        logger.debug('Attached volume %s to instance %s' % (
+            volume_id, instance_id))
+    except ClientError as e:
+        raise FailedActivity(
+            'Unable to attach volume %s to instance %s: %s' % (
+                volume_id, instance_id, e.response['Error']['Message']))
+    return response

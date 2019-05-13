@@ -5,6 +5,7 @@ from copy import deepcopy
 from typing import Any, Dict, List, Union
 
 import boto3
+from botocore.exceptions import ClientError
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 from chaoslib.exceptions import FailedActivity
@@ -12,7 +13,8 @@ from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
 __all__ = ["stop_instance", "stop_instances", "terminate_instances",
-           "terminate_instance", "start_instances", "restart_instances"]
+           "terminate_instance", "start_instances", "restart_instances",
+           "detach_random_volume", "attach_volume"]
 
 
 def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
@@ -285,6 +287,84 @@ def restart_instances(instance_ids: List[str] = None, az: str = None,
     return restart_instances_any_type(instance_types, client)
 
 
+def detach_random_volume(instance_ids: List[str] = None,
+                         filters: List[Dict[str, Any]] = None,
+                         force: bool = True,
+                         configuration: Configuration = None,
+                         secrets: Secrets = None) -> List[AWSResponse]:
+    """
+        Detaches a random ebs volume (non root) from one or more EC2 instances
+
+        Parameters:
+            One of:
+                instance_ids: a list of one or more ec2 instance ids
+                filters: a list of key/value pairs to pull ec2 instances
+
+            force: force detach volume (default: true)
+
+        Additional filters may be used to narrow the scope:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_instances
+    """
+    if not any([instance_ids, filters]):
+        raise FailedActivity('To detach volumes, you must specify the '
+                             'instance_id or provide a set of filters')
+
+    client = aws_client('ec2', configuration, secrets)
+
+    if not instance_ids:
+        filters = deepcopy(filters) or []
+        instances = list_instance_volumes(client, filters=filters)
+    else:
+        instances = list_instance_volumes(client, instance_ids=instance_ids)
+
+    results = []
+    for e in instances:
+        results.append(detach_instance_volume(client, force, e))
+    return results
+
+
+def attach_volume(instance_ids: List[str] = None,
+                  filters: List[Dict[str, Any]] = None,
+                  configuration: Configuration = None,
+                  secrets: Secrets = None) -> List[AWSResponse]:
+    """
+    Attaches a previously detached EBS volume to its associated EC2 instance.
+
+    If neither 'instance_ids' or 'filters' are provided, all detached volumes
+    will be reattached to their respective instances
+
+    Parameters:
+        One of:
+            instance_ids: list: instance ids
+            filters: list: key/value pairs to pull ec2 instances
+    """
+    client = aws_client('ec2', configuration, secrets)
+
+    if not instance_ids and not filters:
+        instances = []
+    elif not instance_ids and filters:
+        filters = deepcopy(filters) or []
+        instances = list_instances(client, filters=filters)
+    else:
+        instances = list_instances(client, instance_ids=instance_ids)
+
+    volumes = get_detached_volumes(client)
+    results = []
+    for volume in volumes:
+        for t in volume['Tags']:
+            if t['Key'] != 'ChaosToolkitDetached':
+                continue
+            attach_data = t['Value'].split(';')
+            device_name = attach_data[0].split('=')[-1]
+            instance_id = attach_data[1].split('=')[-1]
+
+            if not instances or instance_id in [
+                    e['InstanceId'] for e in instances]:
+                results.append(attach_instance_volume(
+                    client, instance_id, volume['VolumeId'], device_name))
+    return results
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
@@ -299,6 +379,66 @@ def list_instances_by_type(filters: List[Dict[str, Any]],
     logger.debug("Instances matching the filter query: {}".format(str(res)))
 
     return get_instance_type_from_response(res)
+
+
+def list_instances(client: boto3.client,
+                   filters: List[Dict[str, Any]] = None,
+                   instance_ids: List[str] = None) -> List[Dict[str, Any]]:
+    """
+    Return all instance ids matching either the filters or provided list of ids
+
+    Does not group instances by type
+    """
+    if filters:
+        params = dict(Filters=filters)
+    else:
+        params = dict(InstanceIds=instance_ids)
+
+    results = []
+    response = client.describe_instances(**params)['Reservations']
+    for r in response:
+        for e in r['Instances']:
+            results.append(e)
+    return results
+
+
+def list_instance_volumes(
+        client: boto3.client,
+        instance_ids: List[str] = None,
+        filters: List[Dict[str, Any]] = None) -> List[AWSResponse]:
+    """
+    Return all (non root) instance volumes for instances matching either
+    the provided filters or instance ids (do not group by type)
+    """
+    if filters:
+        params = dict(Filters=filters)
+    else:
+        params = dict(InstanceIds=instance_ids)
+
+    response = client.describe_instances(**params)['Reservations']
+
+    if not response:
+        raise FailedActivity('no instances found matching: %s' % str(params))
+
+    results = {}
+    for r in response:
+        for e in r['Instances']:
+            instance_id = e['InstanceId']
+            bdm = e.get('BlockDeviceMappings', [])
+            for b in bdm:
+                if b['DeviceName'] in ('/dev/sda1', '/dev/xvda'):
+                    continue
+                results.setdefault(instance_id, []).append(
+                    {b['DeviceName']: b['Ebs']['VolumeId']})
+
+    volumes = []
+    for r in results:
+        # select 1 volume at random
+        volume = random.sample(results[r], 1)[0]
+        for k, v in volume.items():
+            volumes.append(
+                {'InstanceId': r, 'DeviceName': k, 'VolumeId': v})
+    return volumes
 
 
 def pick_random_instance(filters: List[Dict[str, Any]],
@@ -460,3 +600,60 @@ def restart_instances_any_type(instance_types: dict,
         logger.debug('Restarting %s instance(s): %s' % (k, v))
         client.reboot_instances(InstanceIds=v)
     return results
+
+
+def detach_instance_volume(client: boto3.client,
+                           force: bool,
+                           volume: Dict[str, str]) -> AWSResponse:
+    """
+    Detach volume from an instance
+    """
+    try:
+        response = client.detach_volume(
+            Device=volume['DeviceName'],
+            InstanceId=volume['InstanceId'],
+            VolumeId=volume['VolumeId'],
+            Force=force)
+
+        # tag volume with instance information (to reattach on rollback)
+        client.create_tags(
+            Resources=[volume['VolumeId']],
+            Tags=[
+                {
+                    'Key': 'ChaosToolkitDetached',
+                    'Value': 'DeviceName=%s;InstanceId=%s' % (
+                        volume['DeviceName'], volume['InstanceId'])
+                }])
+        return response
+    except ClientError as e:
+        raise FailedActivity('unable to detach volume %s from %s: %s' % (
+            volume['VolumeId'], volume['InstanceId'],
+            e.response['Error']['Message']))
+
+
+def get_detached_volumes(client: boto3.client):
+    results = []
+    paginator = client.get_paginator('describe_volumes')
+    for p in paginator.paginate(
+            Filters={'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}):
+        for v in p['Volumes']:
+            results.append(v)
+    return results
+
+
+def attach_instance_volume(client: boto3.client,
+                           instance_id: str,
+                           volume_id: str,
+                           mount_point: str) -> AWSResponse:
+    try:
+        response = client.attach_volume(
+            Device=mount_point,
+            InstanceId=instance_id,
+            VolumeId=volume_id)
+        logger.debug('Attached volume %s to instance %s' % (
+            volume_id, instance_id))
+    except ClientError as e:
+        raise FailedActivity(
+            'Unable to attach volume %s to instance %s: %s' % (
+                volume_id, instance_id, e.response['Error']['Message']))
+    return response
