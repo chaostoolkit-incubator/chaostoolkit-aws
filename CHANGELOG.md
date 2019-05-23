@@ -14,6 +14,9 @@
 - adding instance_state probe to ec2
 - adding action detach_random_volume to asg
 - adding action detach_random_volume to ec2
+- adding action reboot_cache_cluster to elasticache
+- adding action delete_cache_cluster to elasticache
+- adding action delete_replication_group to elasticache
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.10.0...HEAD
 
