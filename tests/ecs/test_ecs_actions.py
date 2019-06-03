@@ -1,9 +1,140 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import ANY, MagicMock, patch
-
+from chaoslib.exceptions import FailedActivity
+import pytest
 from chaosaws.ecs.actions import (delete_cluster, delete_service,
-                                  deregister_container_instance, stop_task)
+                                  deregister_container_instance, stop_task,
+                                  stop_random_tasks)
 
+def test_stop_random_tasks_no_cluster():
+    with pytest.raises(FailedActivity) as x:
+        stop_random_tasks(service='ecs-service')
+    assert 'A cluster name is required' in str(x.value)
+
+def test_stop_random_tasks_no_count_or_percent():
+    with pytest.raises(FailedActivity) as x:
+        stop_random_tasks(cluster='ecs-cluster')
+    assert 'Must specify one of "task_count", "task_percent"' in str(x.value)
+
+def test_stop_random_tasks_both_count_and_percent():
+    with pytest.raises(FailedActivity) as x:
+        stop_random_tasks(cluster='ecs-cluster', task_count=1, task_percent=1)
+    assert 'Must specify one of "task_count", "task_percent"' in str(x.value)
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_stop_random_tasks_count_too_high(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    cluster = "ecs-cluster"
+    task_count = 3
+    reason = "unit-test"
+    client.list_tasks.side_effect = [
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"], 'nextToken': 'token0'},
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"], 'nextToken': None}
+    ]
+
+    with pytest.raises(FailedActivity) as x:
+        stop_random_tasks(cluster=cluster, task_count=task_count, reason=reason)
+    assert 'Not enough running tasks in ecs-cluster to satisfy stop count 3 (2)' in str(x.value)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_stop_random_tasks_count_no_service(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    cluster = "ecs-cluster"
+    task_count = 2
+    reason = "unit-test"
+    client.list_tasks.side_effect = [
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"], 'nextToken': 'token0'},
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"], 'nextToken': None}
+    ]
+    stop_random_tasks(cluster=cluster, task_count=task_count, reason=reason)
+
+    assert client.stop_task.call_count == 2
+    client.stop_task.assert_any_call(cluster=cluster, task="arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da", reason=reason)
+    client.stop_task.assert_any_call(cluster=cluster, task="arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk", reason=reason)
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_stop_random_tasks_percent_no_service(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    cluster = "ecs-cluster"
+    task_percent = 50
+    reason = "unit-test"
+    client.list_tasks.side_effect = [
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"], 'nextToken': 'token0'},
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"], 'nextToken': None}
+    ]
+    stop_random_tasks(cluster=cluster, task_percent=task_percent, reason=reason)
+
+    assert client.stop_task.call_count == 1
+    task_calls = ["arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da", "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"]
+
+    ex = None
+    for i in task_calls:
+        try:
+            client.stop_task.assert_called_with(
+                cluster=cluster, reason=reason, task=i)
+            return True
+        except AssertionError as e:
+            ex = e.args
+    raise AssertionError(ex)
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_stop_random_tasks_percent_yes_service(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    cluster = "ecs-cluster"
+    task_percent = 50
+    reason = "unit-test"
+    service = "ecs-service"
+    client.list_tasks.side_effect = [
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"], 'nextToken': 'token0'},
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"], 'nextToken': None}
+    ]
+    stop_random_tasks(cluster=cluster, service=service, task_percent=task_percent, reason=reason)
+
+    assert client.stop_task.call_count == 1
+    task_calls = ["arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da", "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"]
+
+    ex = None
+    for i in task_calls:
+        try:
+            client.stop_task.assert_called_with(
+                cluster=cluster, reason=reason, task=i)
+            return True
+        except AssertionError as e:
+            ex = e.args
+    raise AssertionError(ex)
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_stop_random_tasks_count_yes_service(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    cluster = "ecs-cluster"
+    task_count = 2
+    reason = "unit-test"
+    service = "ecs-service"
+    client.list_tasks.side_effect = [
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"], 'nextToken': 'token0'},
+        {'taskArns': [
+            "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"], 'nextToken': None}
+    ]
+    stop_random_tasks(cluster=cluster, service=service, task_count=task_count, reason=reason)
+
+    assert client.stop_task.call_count == 2
+    client.stop_task.assert_any_call(cluster=cluster, task="arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da", reason=reason)
+    client.stop_task.assert_any_call(cluster=cluster, task="arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk", reason=reason)
 
 @patch('chaosaws.ecs.actions.aws_client', autospec=True)
 def test_stop_task(aws_client):

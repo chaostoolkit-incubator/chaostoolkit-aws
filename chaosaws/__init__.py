@@ -14,7 +14,7 @@ from chaoslib.types import (Configuration, DiscoveredActivities,
                             DiscoveredSystemInfo, Discovery, Secrets)
 from logzero import logger
 
-__version__ = '0.11.1'
+__version__ = '0.11.3'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
@@ -214,5 +214,7 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.rds.actions"))
     activities.extend(discover_probes("chaosaws.rds.probes"))
     activities.extend(discover_actions("chaosaws.elasticache.actions"))
+    activities.extend(discover_actions("chaosaws.ec2_os.actions"))
+    activities.extend(discover_actions("chaosaws.ec2_os.probes"))
 
     return activities

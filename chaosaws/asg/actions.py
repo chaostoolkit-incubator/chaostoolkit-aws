@@ -12,7 +12,7 @@ from chaoslib.types import Configuration, Secrets
 
 from logzero import logger
 
-__all__ = ["suspend_processes", "resume_processes",
+__all__ = ["suspend_processes", "resume_processes", "stop_random_instances",
            "terminate_random_instances", "detach_random_instances",
            "change_subnets", "detach_random_volume", "attach_volume"]
 
@@ -93,6 +93,91 @@ def terminate_random_instances(asg_names: List[str] = None,
             results.append({
                 'AutoScalingGroupName': a['AutoScalingGroupName'],
                 'TerminatingInstances': response['TerminatingInstances']})
+        except ClientError as e:
+            raise FailedActivity(e.response['Error']['Message'])
+    return results
+
+
+def stop_random_instances(asg_names: List[str] = None,
+                          tags: List[Dict[str, str]] = None,
+                          instance_count: int = None,
+                          instance_percent: int = None,
+                          az: str = None,
+                          force: bool = False,
+                          configuration: Configuration = None,
+                          secrets: Secrets = None) -> List[AWSResponse]:
+    """
+    Terminates one or more random healthy instances associated to an ALB
+
+    A healthy instance is considered one with a status of 'InService'
+
+    Parameters:
+        - force: force stop the instances (default: False)
+
+        One Of:
+            - asg_names: a list of one or more asg names to target
+            - tags: a list of key/value pairs to identify the asgs by
+
+        One Of:
+            - instance_count: the number of instances to terminate
+            - instance_percent: the percentage of instances to terminate
+            - az: the availability zone to terminate instances
+
+    `tags` are expected as a list of dictionary objects:
+    [
+        {'Key': 'TagKey1', 'Value': 'TagValue1'},
+        {'Key': 'TagKey2', 'Value': 'TagValue2'},
+        ...
+    ]
+    """
+    validate_asgs(asg_names, tags)
+
+    if not any([instance_count, instance_percent, az]) or all(
+            [instance_percent, instance_count, az]):
+        raise FailedActivity(
+            'Must specify one of "instance_count", "instance_percent", "az"')
+
+    client = aws_client('autoscaling', configuration, secrets)
+
+    if asg_names:
+        asgs = get_asg_by_name(asg_names, client)
+    else:
+        asgs = get_asg_by_tags(tags, client)
+
+    results = []
+    for a in asgs['AutoScalingGroups']:
+        # Filter out all instances not currently 'InService'
+        instances = [e for e in a['Instances'] if e[
+            'LifecycleState'] == 'InService']
+
+        if az:
+            instances = [e for e in instances if e['AvailabilityZone'] == az]
+
+            if not instances:
+                raise FailedActivity(
+                    'No instances found in Availability Zone: {}'.format(az))
+        else:
+            if instance_percent:
+                instance_count = int(float(
+                    len(instances) * float(instance_percent)) / 100)
+
+            if len(instances) < instance_count:
+                raise FailedActivity(
+                    'Not enough healthy instances in %s to satisfy '
+                    'stop count %s (%s)' % (a['AutoScalingGroupName'],
+                                            instance_count,
+                                            len(instances)))
+
+            instances = random.sample(instances, instance_count)
+
+        client = aws_client('ec2', configuration, secrets)
+        try:
+            response = client.stop_instances(
+                InstanceIds=sorted([e['InstanceId'] for e in instances]),
+                Force=force)
+            results.append({
+                'AutoScalingGroupName': a['AutoScalingGroupName'],
+                'StoppingInstances': response['StoppingInstances']})
         except ClientError as e:
             raise FailedActivity(e.response['Error']['Message'])
     return results
@@ -443,7 +528,7 @@ def get_asg_by_tags(tags: List[Dict[str, str]],
             {'Name': 'value', 'Values': [t['Value']]}])
     paginator = client.get_paginator('describe_tags')
     results = set()
-    for p in paginator.paginate(Filters=tags):
+    for p in paginator.paginate(Filters=params):
         for a in p['Tags']:
             if a['ResourceType'] != 'auto-scaling-group':
                 continue
@@ -529,7 +614,7 @@ def get_detached_volumes(client: boto3.client,
                          results: List[Dict[str, Any]] = None):
     results = results or []
     params = dict(
-        Filters={'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+        Filters=[{'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}])
     if next_token:
         params['NextToken'] = next_token
     response = client.describe_volumes(**params)

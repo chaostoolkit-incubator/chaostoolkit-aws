@@ -30,7 +30,7 @@ def test_instance_state_no_state():
     instance_ids = ['i-987654321fedcba', 'i-392024ac3252ecb']
     with pytest.raises(TypeError) as x:
         instance_state(instance_ids=instance_ids)
-    assert "missing 1 required positional argument: 'state'" in str(x)
+    assert "missing 1 required positional argument: 'state'" in str(x.value)
 
 
 def test_instance_state_no_query():
@@ -38,7 +38,7 @@ def test_instance_state_no_query():
     with pytest.raises(FailedActivity) as x:
         instance_state(state='running')
     assert 'Probe "instance_state" missing required parameter ' \
-           '"instance_ids" or "filters"' in str(x)
+           '"instance_ids" or "filters"' in str(x.value)
 
 
 @patch('chaosaws.ec2.probes.aws_client', autospec=True)

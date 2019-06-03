@@ -119,7 +119,7 @@ def test_set_security_groups_invalid_alb_type(aws_client):
     }
     with pytest.raises(FailedActivity) as x:
         set_security_groups(alb_names, security_group_ids)
-    assert 'Cannot change security groups of network load balancers.' in str(x)
+    assert 'Cannot change security groups of network load balancers.' in str(x.value)
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)
@@ -151,7 +151,7 @@ def test_set_security_group_invalid_alb_name(aws_client):
     with pytest.raises(FailedActivity) as x:
         set_security_groups(alb_names, security_group_ids)
     assert 'Unable to locate load balancer(s): {}'.format(
-        [alb_names[1]]) in str(x)
+        [alb_names[1]]) in str(x.value)
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)
@@ -170,7 +170,7 @@ def test_set_security_groups_invalid_group(aws_client):
     with pytest.raises(FailedActivity) as x:
         set_security_groups(alb_names, security_group_ids)
     assert 'Invalid security group id(s): {}'.format(
-        [security_group_ids[1]]) in str(x)
+        [security_group_ids[1]]) in str(x.value)
 
 
 def test_set_security_group_no_subnets():
@@ -178,14 +178,14 @@ def test_set_security_group_no_subnets():
     with pytest.raises(TypeError) as x:
         set_security_groups(alb_names)
     assert "set_security_groups() missing 1 required positional " \
-           "argument: 'security_group_ids'" in str(x)
+           "argument: 'security_group_ids'" in str(x.value)
 
 
 def test_set_security_group_no_args():
     with pytest.raises(TypeError) as x:
         set_security_groups()
     assert "set_security_groups() missing 2 required positional arguments: " \
-           "'load_balancer_names' and 'security_group_ids" in str(x)
+           "'load_balancer_names' and 'security_group_ids" in str(x.value)
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)
@@ -274,7 +274,7 @@ def test_set_subnets_invalid_alb_type(aws_client):
     }
     with pytest.raises(FailedActivity) as x:
         set_subnets(alb_names, subnet_ids)
-    assert 'Cannot change subnets of network load balancers.' in str(x)
+    assert 'Cannot change subnets of network load balancers.' in str(x.value)
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)
@@ -306,7 +306,7 @@ def test_set_subnets_invalid_alb_name(aws_client):
     with pytest.raises(FailedActivity) as x:
         set_subnets(alb_names, subnet_ids)
     assert 'Unable to locate load balancer(s): {}'.format(
-        [alb_names[1]]) in str(x)
+        [alb_names[1]]) in str(x.value)
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)
@@ -324,7 +324,7 @@ def test_set_subnets_invalid_subnet(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         set_subnets(alb_names, subnet_ids)
-    assert 'Invalid subnet id(s): {}'.format([subnet_ids[1]]) in str(x)
+    assert 'Invalid subnet id(s): {}'.format([subnet_ids[1]]) in str(x.value)
 
 
 def test_set_subnet_no_subnets():
@@ -333,21 +333,21 @@ def test_set_subnet_no_subnets():
         set_subnets(alb_names)
 
     assert "set_subnets() missing 1 required " \
-           "positional argument: 'subnet_ids'" in str(x)
+           "positional argument: 'subnet_ids'" in str(x.value)
 
 
 def test_set_subnet_no_args():
     with pytest.raises(TypeError) as x:
         set_subnets()
     assert "set_subnets() missing 2 required positional " \
-           "arguments: 'load_balancer_names' and 'subnet_ids'" in str(x)
+           "arguments: 'load_balancer_names' and 'subnet_ids'" in str(x.value)
 
 
 def test_delete_load_balancer_invalid():
     with pytest.raises(TypeError) as x:
         delete_load_balancer()
     assert "delete_load_balancer() missing 1 required positional argument: " \
-           "'load_balancer_names'" in str(x)
+           "'load_balancer_names'" in str(x.value)
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)

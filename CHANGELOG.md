@@ -2,7 +2,29 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.1...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.2...HEAD
+
+### Added
+
+- adding action stop_random_instances to asg actions
+- adding describe_auto_scaling_groups to asg probes
+- correcting annotation for ec2 probe count_instances
+- correcting annotation for timeout parameter in asg actions
+- fix tests to match new pytest's API for accessing exceptions' values [#52][52]
+- adding action stop_random_tasks to ecs actions
+- adding describe_service, describe_tasks, & describe_cluster to ecs probes
+
+[52]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/52
+
+## [0.11.2][]
+
+[0.11.2]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.1...0.11.2
+
+### Added
+
+- correcting paginator [#49][49]
+
+[49]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/pull/49
 
 ## [0.11.1][]
 

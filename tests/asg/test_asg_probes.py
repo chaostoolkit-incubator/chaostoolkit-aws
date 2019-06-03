@@ -4,50 +4,48 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from chaosaws.asg.probes import (desired_equals_healthy,
-                                 desired_equals_healthy_tags,
-                                 is_scaling_in_progress,
-                                 wait_desired_equals_healthy,
-                                 wait_desired_equals_healthy_tags,
-                                 wait_desired_not_equals_healthy_tags,
-                                 process_is_suspended, has_subnets)
+from chaosaws.asg.probes import (
+    desired_equals_healthy, desired_equals_healthy_tags, has_subnets,
+    is_scaling_in_progress, wait_desired_equals_healthy, process_is_suspended,
+    wait_desired_equals_healthy_tags, wait_desired_not_equals_healthy_tags,
+    describe_auto_scaling_groups)
 from chaoslib.exceptions import FailedActivity
 
 
 def test_desired_equals_healthy_needs_asg_names():
     with pytest.raises(FailedActivity) as x:
         desired_equals_healthy([])
-    assert "Non-empty list of auto scaling groups is required" in str(x)
+    assert "Non-empty list of auto scaling groups is required" in str(x.value)
 
 
 def test_wait_desired_equals_healthy_asg_names():
     with pytest.raises(FailedActivity) as x:
         wait_desired_equals_healthy([])
-    assert "Non-empty list of auto scaling groups is required" in str(x)
+    assert "Non-empty list of auto scaling groups is required" in str(x.value)
 
 
 def test_desired_equals_healthy_tags_needs_tags():
     with pytest.raises(FailedActivity) as x:
         desired_equals_healthy_tags([])
-    assert "Non-empty tags is required" in str(x)
+    assert "Non-empty tags is required" in str(x.value)
 
 
 def test_wait_desired_equals_healthy_tags_needs_tags():
     with pytest.raises(FailedActivity) as x:
         wait_desired_equals_healthy_tags([])
-    assert "Non-empty tags is required" in str(x)
+    assert "Non-empty tags is required" in str(x.value)
 
 
 def test_wait_desired_not_equals_healthy_tags_needs_tags():
     with pytest.raises(FailedActivity) as x:
         wait_desired_not_equals_healthy_tags([])
-    assert "Non-empty tags is required" in str(x)
+    assert "Non-empty tags is required" in str(x.value)
 
 
 def test_is_scaling_in_progress():
     with pytest.raises(FailedActivity) as x:
         is_scaling_in_progress([])
-    assert "Non-empty tags is required" in str(x)
+    assert "Non-empty tags is required" in str(x.value)
 
 
 @patch('chaosaws.asg.probes.aws_client', autospec=True)
@@ -839,4 +837,62 @@ def test_has_subnets_no_subnet():
     asg_names = ['AutoScalingGroup-A']
     with pytest.raises(TypeError) as x:
         has_subnets(asg_names=asg_names)
-    assert "missing 1 required positional argument: 'subnets'" in str(x)
+    assert "missing 1 required positional argument: 'subnets'" in str(x.value)
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_describe_auto_scaling_groups_names(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A']
+    client.get_paginator.return_value.paginate.return_value = [{
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-A",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}]}]
+    describe_auto_scaling_groups(asg_names=asg_names)
+    client.get_paginator.return_value.paginate.assert_called_with(
+        AutoScalingGroupNames=asg_names)
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_describe_auto_scaling_groups_tags(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    tags = [{'Key': 'TestKey', 'Value': 'TestValue'}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-A",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}, {
+            "AutoScalingGroupName": "AutoScalingGroup-B",
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-B",
+                "Key": "TestKey",
+                "Value": "TestValue"}]}]}]
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "Instances": [],
+                "Tags": [{
+                    "ResourceId": "AutoScalingGroup-A",
+                    "Key": "TestKey",
+                    "Value": "TestValue"}]
+            },
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-B",
+                "Instances": [],
+                "Tags": [{
+                    "ResourceId": "AutoScalingGroup-B",
+                    "Key": "TestKey",
+                    "Value": "TestValue"}]
+            }
+        ]}
+    describe_auto_scaling_groups(tags=tags)
+    client.describe_auto_scaling_groups.assert_called_with(
+        AutoScalingGroupNames=["AutoScalingGroup-A", "AutoScalingGroup-B"])

@@ -129,7 +129,7 @@ def test_stop_random_needs_instance_id_or_az():
         stop_instance()
     assert "stop an EC2 instance, you must specify either the instance id," \
            " an AZ to pick a random instance from, or a set of filters." in \
-           str(x)
+           str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -167,7 +167,7 @@ def test_stop_all_instances_needs_instance_id_or_az():
         stop_instances()
     assert "To stop EC2 instances, you must specify either the instance ids," \
            " an AZ to pick random instances from, or a set of filters." in \
-           str(x)
+           str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -179,7 +179,7 @@ def test_stop_all_instances_may_not_have_any_instances(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         stop_instances(az="us-west-1")
-    assert "No instances in availability zone: us-west-1" in str(x)
+    assert "No instances in availability zone: us-west-1" in str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -265,7 +265,7 @@ def test_terminate_instance_no_values():
     with pytest.raises(FailedActivity) as x:
         terminate_instance()
     assert 'To terminate an EC2, you must specify the instance-id, ' \
-           'an Availability Zone, or provide a set of filters' in str(x)
+           'an Availability Zone, or provide a set of filters' in str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -278,7 +278,7 @@ def test_terminate_instance_az_no_instances(aws_client):
     filters = [{'Name': 'availability-zone', 'Values': ['us-west-2']}]
     with pytest.raises(FailedActivity) as x:
         terminate_instance(az=az)
-    assert "No instances found matching filters: %s" % filters in str(x)
+    assert "No instances found matching filters: %s" % filters in str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -355,7 +355,7 @@ def test_terminate_instances_no_values():
     with pytest.raises(FailedActivity) as x:
         terminate_instances()
     assert 'To terminate instances, you must specify the instance-id, an ' \
-           'Availability Zone, or provide a set of filters' in str(x)
+           'Availability Zone, or provide a set of filters' in str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -369,7 +369,7 @@ def test_terminate_instances_az_no_instances(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         terminate_instances(az=az)
-    assert "No instances found matching filters: %s" % filters in str(x)
+    assert "No instances found matching filters: %s" % filters in str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -654,7 +654,7 @@ def test_detach_random_volume_ec2_invalid_id(aws_client):
     with pytest.raises(FailedActivity) as x:
         detach_random_volume(instance_ids=instance_ids)
     assert "no instances found matching: {'InstanceIds': %s}" % (
-        instance_ids) in str(x)
+        instance_ids) in str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)
@@ -707,8 +707,8 @@ def test_attach_volume_ec2_id(aws_client):
     results = attach_volume(instance_ids=instance_ids)
 
     client.describe_instances.assert_called_with(InstanceIds=instance_ids)
-    client.get_paginator.return_value.paginate.assert_called_with(Filters={
-        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+    client.get_paginator.return_value.paginate.assert_called_with(Filters=[{
+        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}])
     client.attach_volume.assert_called_with(
         Device='/dev/sdc',
         InstanceId=instance_ids[0],
@@ -757,8 +757,8 @@ def test_attach_volume_ec2_filter(aws_client):
     results = attach_volume(filters=filters)
 
     client.describe_instances.assert_called_with(Filters=filters)
-    client.get_paginator.return_value.paginate.assert_called_with(Filters={
-        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+    client.get_paginator.return_value.paginate.assert_called_with(Filters=[{
+        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}])
     client.attach_volume.assert_called_with(
         Device='/dev/sdb',
         InstanceId=instance_ids[0],

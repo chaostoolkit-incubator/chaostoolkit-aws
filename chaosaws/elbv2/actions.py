@@ -12,7 +12,23 @@ from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
 __all__ = ["deregister_target", "set_security_groups", "set_subnets",
-           "delete_load_balancer"]
+           "delete_load_balancer", "register_target"]
+
+
+def register_target(tg_name: str,
+                    instance_id: str,
+                    configuration: Configuration = None,
+                    secrets: Secrets = None) -> AWSResponse:
+    """
+    Registers one specific target to target group
+    """
+    client = aws_client('elbv2', configuration, secrets)
+    tg_arn = get_target_group_arns(tg_names=[tg_name], client=client)
+    logger.warning("Registering target {} to target group {}".format(
+        instance_id, tg_name))
+
+    return client.register_targets(TargetGroupArn=tg_arn[tg_name],
+                                   Targets=[{'Id': instance_id}])
 
 
 def deregister_target(tg_name: str,
