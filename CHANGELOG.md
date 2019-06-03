@@ -2,7 +2,17 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.1...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.2...HEAD
+
+## [0.11.2][]
+
+[0.11.2]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.1...0.11.2
+
+### Added
+
+- correcting paginator [#49][49]
+
+[49]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/pull/49
 
 ## [0.11.1][]
 
