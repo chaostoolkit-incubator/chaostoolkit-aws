@@ -2,6 +2,20 @@
 
 ## [Unreleased][]
 
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.1...HEAD
+
+## [0.11.1][]
+
+[0.11.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.0...0.11.1
+
+### Added
+
+- ensure readme is properly rendered in Pypi
+
+## [0.11.0][]
+
+[0.11.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.10.0...0.11.0
+
 ### Added
 
 - adding delete action to elbv2 module
@@ -17,8 +31,6 @@
 - adding action reboot_cache_cluster to elasticache
 - adding action delete_cache_cluster to elasticache
 - adding action delete_replication_group to elasticache
-
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.10.0...HEAD
 
 ## [0.10.0][]
 
