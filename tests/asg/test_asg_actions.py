@@ -971,7 +971,10 @@ def test_attach_volume_asg_tags(aws_client):
 
     client.describe_auto_scaling_groups.assert_called_with(
         AutoScalingGroupNames=asg_names)
-    client.get_paginator.return_value.paginate.assert_called_with(Filters=tags)
+    client.get_paginator.return_value.paginate.assert_called_with(
+        Filters=[
+            {'Name': 'key', 'Values': ['TargetKey']},
+            {'Name': 'value', 'Values': ['TargetValue']}])
     client.describe_volumes.assert_called_with(
         Filters={'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
     client.attach_volume.assert_called_with(

@@ -443,7 +443,7 @@ def get_asg_by_tags(tags: List[Dict[str, str]],
             {'Name': 'value', 'Values': [t['Value']]}])
     paginator = client.get_paginator('describe_tags')
     results = set()
-    for p in paginator.paginate(Filters=tags):
+    for p in paginator.paginate(Filters=params):
         for a in p['Tags']:
             if a['ResourceType'] != 'auto-scaling-group':
                 continue
