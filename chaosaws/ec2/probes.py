@@ -26,7 +26,7 @@ def describe_instances(filters: List[Dict[str, Any]],
 
 def count_instances(filters: List[Dict[str, Any]],
                     configuration: Configuration = None,
-                    secrets: Secrets = None) -> AWSResponse:
+                    secrets: Secrets = None) -> int:
     """
     Return count of instances matching the specified filters.
 

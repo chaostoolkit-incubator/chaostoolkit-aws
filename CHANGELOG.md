@@ -4,6 +4,13 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.2...HEAD
 
+### Added
+
+- adding action stop_random_instances to asg actions
+- adding describe_auto_scaling_groups to asg probes
+- correcting annotation for ec2 probe count_instances
+- correcting annotation for timeout parameter in asg actions
+
 ## [0.11.2][]
 
 [0.11.2]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.1...0.11.2
