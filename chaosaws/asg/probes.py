@@ -13,7 +13,37 @@ from logzero import logger
 
 __all__ = ["desired_equals_healthy", "desired_equals_healthy_tags",
            "wait_desired_equals_healthy", "wait_desired_equals_healthy_tags",
-           "is_scaling_in_progress", "process_is_suspended", "has_subnets"]
+           "is_scaling_in_progress", "process_is_suspended", "has_subnets",
+           "describe_auto_scaling_groups",
+           "wait_desired_not_equals_healthy_tags"]
+
+
+def describe_auto_scaling_groups(asg_names: List[str] = None,
+                                 tags: List[Dict[str, Any]] = None,
+                                 configuration: Configuration = None,
+                                 secrets: Secrets = None) -> AWSResponse:
+    """
+    Returns AWS descriptions for provided ASG(s)
+
+    Params:
+        OneOf:
+            - asg_names: a list of asg names to describe
+            - tags: a list of key/value pairs to collect ASG(s)
+
+    `tags` are expected as a list of dictionary objects:
+    [
+        {'Key': 'TagKey1', 'Value': 'TagValue1'},
+        {'Key': 'TagKey2', 'Value': 'TagValue2'},
+        ...
+    ]
+    """
+    client = aws_client('autoscaling', configuration, secrets)
+    if asg_names:
+        return get_asg_by_name(asg_names, client)
+    elif tags:
+        return get_asg_by_tags(tags, client)
+    else:
+        raise FailedActivity('Must specify either "asg_names" or "tags"')
 
 
 def desired_equals_healthy(asg_names: List[str],
@@ -69,7 +99,7 @@ def desired_equals_healthy_tags(tags: List[Dict[str, str]],
 
 def wait_desired_equals_healthy(asg_names: List[str],
                                 configuration: Configuration = None,
-                                timeout: int = 300,
+                                timeout: Union[int, float] = 300,
                                 secrets: Secrets = None) -> int:
     """
     Wait until desired number matches the number of healthy instances
@@ -104,7 +134,7 @@ def wait_desired_equals_healthy(asg_names: List[str],
 
 
 def wait_desired_not_equals_healthy_tags(tags: List[Dict[str, str]],
-                                         timeout: int = 300,
+                                         timeout: Union[int, float] = 300,
                                          configuration: Configuration = None,
                                          secrets: Secrets = None) -> int:
     """
@@ -150,7 +180,7 @@ def wait_desired_not_equals_healthy_tags(tags: List[Dict[str, str]],
 
 
 def wait_desired_equals_healthy_tags(tags: List[Dict[str, str]],
-                                     timeout: int = 300,
+                                     timeout: Union[int, float] = 300,
                                      configuration: Configuration = None,
                                      secrets: Secrets = None) -> int:
     """
@@ -309,11 +339,11 @@ def get_asg_by_name(asg_names: List[str],
 
 def get_asg_by_tags(tags: Union[dict, List[Dict[str, str]]],
                     client: boto3.client) -> AWSResponse:
-
     # The following is needed because AWS API does not support filters
     # on auto-scaling groups
 
     # fetch all ASGs using paginator
+    # TODO: simplify this function (similar to actions) & update unit tests
     page_iterator = client.get_paginator(
         'describe_auto_scaling_groups').paginate(
         PaginationConfig={'PageSize': 100})
@@ -346,9 +376,8 @@ def get_asg_by_tags(tags: Union[dict, List[Dict[str, str]]],
             "No auto-scaling groups matched the tags provided")
 
 
-def is_desired_equals_healthy(groups_descr: Dict):
-    desired_equals_healthy = False
-
+def is_desired_equals_healthy(groups_descr: Dict) -> bool:
+    result = False
     for group_descr in groups_descr['AutoScalingGroups']:
         healthy_cnt = Counter()
 
@@ -356,16 +385,10 @@ def is_desired_equals_healthy(groups_descr: Dict):
             if instance['LifecycleState'] == 'InService':
                 healthy_cnt[instance['HealthStatus']] += 1
 
-        if healthy_cnt['Healthy']:
-            if group_descr['DesiredCapacity'] == healthy_cnt['Healthy']:
-                desired_equals_healthy = True
-            else:
-                desired_equals_healthy = False
+        if healthy_cnt['Healthy'] and group_descr[
+                'DesiredCapacity'] == healthy_cnt['Healthy']:
+            result = True
+            continue
 
-                break
-        else:
-            desired_equals_healthy = False
-
-            break
-
-    return desired_equals_healthy
+        return False
+    return result
