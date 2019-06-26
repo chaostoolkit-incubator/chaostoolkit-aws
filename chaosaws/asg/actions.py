@@ -529,7 +529,7 @@ def get_detached_volumes(client: boto3.client,
                          results: List[Dict[str, Any]] = None):
     results = results or []
     params = dict(
-        Filters={'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+        Filters=[{'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}])
     if next_token:
         params['NextToken'] = next_token
     response = client.describe_volumes(**params)

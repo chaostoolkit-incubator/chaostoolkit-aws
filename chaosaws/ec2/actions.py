@@ -635,7 +635,7 @@ def get_detached_volumes(client: boto3.client):
     results = []
     paginator = client.get_paginator('describe_volumes')
     for p in paginator.paginate(
-            Filters={'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}):
+            Filters=[{'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}]):
         for v in p['Volumes']:
             results.append(v)
     return results
