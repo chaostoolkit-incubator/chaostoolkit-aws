@@ -4,7 +4,7 @@ from chaoslib.exceptions import FailedActivity
 from chaosaws.asg.actions import (
     suspend_processes, resume_processes, terminate_random_instances,
     detach_random_instances, change_subnets, detach_random_volume,
-    attach_volume)
+    attach_volume, stop_random_instances)
 
 import pytest
 
@@ -982,3 +982,97 @@ def test_attach_volume_asg_tags(aws_client):
         InstanceId='i-00000000000000001',
         VolumeId='vol-00000001')
     assert results[0]['DeviceName'] == '/dev/sdb'
+
+
+@patch('chaosaws.asg.actions.aws_client', autospec=True)
+def test_asg_stop_random_instance_name(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A']
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [
+            {
+                "AutoScalingGroupName": "AutoScalingGroup-A",
+                "Instances": [
+                    {
+                        "InstanceId": "i-00000000000000001",
+                        "AvailabilityZone": "us-east-1a",
+                        "LifecycleState": "InService"
+                    },
+                    {
+                        "InstanceId": "i-00000000000000002",
+                        "AvailabilityZone": "us-east-1b",
+                        "LifecycleState": "InService"
+                    },
+                    {
+                        "InstanceId": "i-00000000000000003",
+                        "AvailabilityZone": "us-east-1c",
+                        "LifecycleState": "InService"
+                    },
+                ]
+            }
+        ]
+    }
+    stop_random_instances(asg_names=asg_names, instance_percent=50)
+
+    instance_calls = [
+        'i-00000000000000001', 'i-00000000000000002', 'i-00000000000000003']
+
+    ex = None
+    for i in instance_calls:
+        try:
+            client.stop_instances.assert_called_with(
+                Force=False, InstanceIds=[i])
+            return True
+        except AssertionError as e:
+            ex = e.args
+    raise AssertionError(ex)
+
+
+@patch('chaosaws.asg.actions.aws_client', autospec=True)
+def test_asg_stop_random_instance_tags(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    tags = [{'Key': 'TargetKey', 'Value': 'TargetValue'}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        'Tags': [{
+            'ResourceId': 'AutoScalingGroup-A',
+            'ResourceType': 'auto-scaling-group',
+            'Key': 'TargetKey',
+            'Value': 'TargetValue',
+            'PropagateAtLaunch': False}]}]
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Instances": [
+                {
+                    "InstanceId": "i-00000000000000001",
+                    "AvailabilityZone": "us-east-1a",
+                    "LifecycleState": "InService"
+                },
+                {
+                    "InstanceId": "i-00000000000000002",
+                    "AvailabilityZone": "us-east-1b",
+                    "LifecycleState": "InService"
+                },
+                {
+                    "InstanceId": "i-00000000000000003",
+                    "AvailabilityZone": "us-east-1c",
+                    "LifecycleState": "InService"
+                }]}]}
+    stop_random_instances(tags=tags, instance_count=2)
+
+    instance_calls = [
+        ['i-00000000000000001', 'i-00000000000000002'],
+        ['i-00000000000000001', 'i-00000000000000003'],
+        ['i-00000000000000002', 'i-00000000000000003']]
+
+    ex = None
+    for i in instance_calls:
+        try:
+            client.stop_instances.assert_called_with(
+                Force=False, InstanceIds=sorted(i))
+            return True
+        except AssertionError as e:
+            ex = e.args
+    raise AssertionError(ex)
