@@ -15,37 +15,37 @@ from chaoslib.exceptions import FailedActivity
 def test_desired_equals_healthy_needs_asg_names():
     with pytest.raises(FailedActivity) as x:
         desired_equals_healthy([])
-    assert "Non-empty list of auto scaling groups is required" in str(x)
+    assert "Non-empty list of auto scaling groups is required" in str(x.value)
 
 
 def test_wait_desired_equals_healthy_asg_names():
     with pytest.raises(FailedActivity) as x:
         wait_desired_equals_healthy([])
-    assert "Non-empty list of auto scaling groups is required" in str(x)
+    assert "Non-empty list of auto scaling groups is required" in str(x.value)
 
 
 def test_desired_equals_healthy_tags_needs_tags():
     with pytest.raises(FailedActivity) as x:
         desired_equals_healthy_tags([])
-    assert "Non-empty tags is required" in str(x)
+    assert "Non-empty tags is required" in str(x.value)
 
 
 def test_wait_desired_equals_healthy_tags_needs_tags():
     with pytest.raises(FailedActivity) as x:
         wait_desired_equals_healthy_tags([])
-    assert "Non-empty tags is required" in str(x)
+    assert "Non-empty tags is required" in str(x.value)
 
 
 def test_wait_desired_not_equals_healthy_tags_needs_tags():
     with pytest.raises(FailedActivity) as x:
         wait_desired_not_equals_healthy_tags([])
-    assert "Non-empty tags is required" in str(x)
+    assert "Non-empty tags is required" in str(x.value)
 
 
 def test_is_scaling_in_progress():
     with pytest.raises(FailedActivity) as x:
         is_scaling_in_progress([])
-    assert "Non-empty tags is required" in str(x)
+    assert "Non-empty tags is required" in str(x.value)
 
 
 @patch('chaosaws.asg.probes.aws_client', autospec=True)
@@ -837,7 +837,7 @@ def test_has_subnets_no_subnet():
     asg_names = ['AutoScalingGroup-A']
     with pytest.raises(TypeError) as x:
         has_subnets(asg_names=asg_names)
-    assert "missing 1 required positional argument: 'subnets'" in str(x)
+    assert "missing 1 required positional argument: 'subnets'" in str(x.value)
 
 
 @patch('chaosaws.asg.probes.aws_client', autospec=True)

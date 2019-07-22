@@ -116,10 +116,10 @@ def test_all_targets_healthy_false(aws_client):
 def test_targets_health_count_needs_tg_names():
     with pytest.raises(FailedActivity) as x:
         targets_health_count([])
-    assert "Non-empty list of target groups is required" in str(x)
+    assert "Non-empty list of target groups is required" in str(x.value)
 
 
 def test_all_targets_healthy_needs_tg_names():
     with pytest.raises(FailedActivity) as x:
         all_targets_healthy([])
-    assert "Non-empty list of target groups is required" in str(x)
+    assert "Non-empty list of target groups is required" in str(x.value)

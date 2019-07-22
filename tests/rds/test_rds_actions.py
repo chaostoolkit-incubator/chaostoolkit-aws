@@ -109,7 +109,7 @@ def test_stop_db_instance_exception():
     with pytest.raises(TypeError) as x:
         stop_db_instance()
     assert "stop_db_instance() missing 1 required positional argument: " \
-           "'db_instance_identifier'" in str(x)
+           "'db_instance_identifier'" in str(x.value)
 
 
 @patch('chaosaws.rds.actions.aws_client', autospec=True)
@@ -125,7 +125,7 @@ def test_stop_db_cluster_exception():
     with pytest.raises(TypeError) as x:
         stop_db_cluster()
     assert "stop_db_cluster() missing 1 required positional argument: " \
-           "'db_cluster_identifier'" in str(x)
+           "'db_cluster_identifier'" in str(x.value)
 
 
 @patch('chaosaws.rds.actions.aws_client', autospec=True)

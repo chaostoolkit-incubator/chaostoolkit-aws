@@ -10,14 +10,14 @@ def test_reboot_cache_clusters_invalid():
     with pytest.raises(TypeError) as x:
         reboot_cache_clusters()
     assert "reboot_cache_clusters() missing 1 required positional " \
-           "argument: 'cluster_ids'" in str(x)
+           "argument: 'cluster_ids'" in str(x.value)
 
 
 def test_delete_cache_clusters_no_cluster():
     with pytest.raises(TypeError) as x:
         delete_cache_clusters(final_snapshot_id='MyClusterFinalSnapshot')
     assert "delete_cache_clusters() missing 1 required positional " \
-           "argument: 'cluster_ids'" in str(x)
+           "argument: 'cluster_ids'" in str(x.value)
 
 
 @patch('chaosaws.elasticache.actions.aws_client', autospec=True)
