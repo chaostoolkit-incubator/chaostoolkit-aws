@@ -707,8 +707,8 @@ def test_attach_volume_ec2_id(aws_client):
     results = attach_volume(instance_ids=instance_ids)
 
     client.describe_instances.assert_called_with(InstanceIds=instance_ids)
-    client.get_paginator.return_value.paginate.assert_called_with(Filters={
-        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+    client.get_paginator.return_value.paginate.assert_called_with(Filters=[{
+        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}])
     client.attach_volume.assert_called_with(
         Device='/dev/sdc',
         InstanceId=instance_ids[0],
@@ -757,8 +757,8 @@ def test_attach_volume_ec2_filter(aws_client):
     results = attach_volume(filters=filters)
 
     client.describe_instances.assert_called_with(Filters=filters)
-    client.get_paginator.return_value.paginate.assert_called_with(Filters={
-        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+    client.get_paginator.return_value.paginate.assert_called_with(Filters=[{
+        'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}])
     client.attach_volume.assert_called_with(
         Device='/dev/sdb',
         InstanceId=instance_ids[0],

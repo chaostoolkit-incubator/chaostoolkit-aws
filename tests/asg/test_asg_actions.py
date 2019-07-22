@@ -917,7 +917,7 @@ def test_attach_volume_asg_name(aws_client):
     client.describe_auto_scaling_groups.assert_called_with(
         AutoScalingGroupNames=asg_names)
     client.describe_volumes.assert_called_with(
-        Filters={'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+        Filters=[{'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}])
     client.attach_volume.assert_called_with(
         Device='/dev/sdc',
         InstanceId='i-987654321fabcde',
@@ -976,7 +976,7 @@ def test_attach_volume_asg_tags(aws_client):
             {'Name': 'key', 'Values': ['TargetKey']},
             {'Name': 'value', 'Values': ['TargetValue']}])
     client.describe_volumes.assert_called_with(
-        Filters={'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']})
+        Filters=[{'Name': 'tag-key', 'Values': ['ChaosToolkitDetached']}])
     client.attach_volume.assert_called_with(
         Device='/dev/sdb',
         InstanceId='i-00000000000000001',
