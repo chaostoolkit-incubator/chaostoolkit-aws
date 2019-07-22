@@ -13,7 +13,7 @@ def test_suspend_process_no_name_or_tag():
     with pytest.raises(FailedActivity) as x:
         suspend_processes()
     assert 'one of the following arguments are required: ' \
-           'asg_names or tags' in str(x)
+           'asg_names or tags' in str(x.value)
 
 
 def test_suspend_process_both_name_and_tag_one():
@@ -22,7 +22,7 @@ def test_suspend_process_both_name_and_tag_one():
             asg_names=['AutoScalingGroup-A'],
             tags=[{"Key": "TagKey", "Values": ["TagValues"]}])
     assert 'only one of the following arguments are allowed: ' \
-           'asg_names/tags' in str(x)
+           'asg_names/tags' in str(x.value)
 
 
 def test_suspend_process_invalid_process():
@@ -30,7 +30,7 @@ def test_suspend_process_invalid_process():
         suspend_processes(
             asg_names=['AutoScalingGroup-A'],
             process_names=['Lunch'])
-    assert "invalid process(es): ['Lunch'] not in" in str(x)
+    assert "invalid process(es): ['Lunch'] not in" in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -92,7 +92,7 @@ def test_suspend_process_asg_invalid_names(aws_client):
         "AutoScalingGroups": []}
     with pytest.raises(FailedActivity) as x:
         suspend_processes(asg_names=asg_names, process_names=["Launch"])
-    assert 'Unable to locate ASG(s): %s' % asg_names in str(x)
+    assert 'Unable to locate ASG(s): %s' % asg_names in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -113,7 +113,7 @@ def test_suspend_process_asg_invalid_name(aws_client):
     }
     with pytest.raises(FailedActivity) as x:
         suspend_processes(asg_names=asg_names, process_names=["Launch"])
-    assert 'No ASG(s) found with name(s): %s' % ([asg_names[1]]) in str(x)
+    assert 'No ASG(s) found with name(s): %s' % ([asg_names[1]]) in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -124,14 +124,14 @@ def test_suspend_process_asg_invalid_tags(aws_client):
     client.get_paginator.return_value.paginate.return_value = [{'Tags': []}]
     with pytest.raises(FailedActivity) as x:
         suspend_processes(tags=tags)
-    assert 'No ASG(s) found with matching tag(s): %s.' % tags in str(x)
+    assert 'No ASG(s) found with matching tag(s): %s.' % tags in str(x.value)
 
 
 def test_resume_process_no_name_or_tag():
     with pytest.raises(FailedActivity) as x:
         resume_processes()
     assert 'one of the following arguments are required: ' \
-           'asg_names or tags' in str(x)
+           'asg_names or tags' in str(x.value)
 
 
 def test_resume_process_both_name_and_tag():
@@ -140,7 +140,7 @@ def test_resume_process_both_name_and_tag():
             asg_names=['AutoScalingGroup-A'],
             tags=[{"Key": "TagKey", "Values": ["TagValues"]}])
     assert 'only one of the following arguments are allowed: ' \
-           'asg_names/tags' in str(x)
+           'asg_names/tags' in str(x.value)
 
 
 def test_resume_process_invalid_process():
@@ -148,7 +148,7 @@ def test_resume_process_invalid_process():
         resume_processes(
             asg_names=['AutoScalingGroup-A'],
             process_names=['Lunch'])
-    assert "invalid process(es): ['Lunch'] not in" in str(x)
+    assert "invalid process(es): ['Lunch'] not in" in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -210,7 +210,7 @@ def test_resume_process_asg_invalid_tags(aws_client):
     client.get_paginator.return_value.paginate.return_value = [{'Tags': []}]
     with pytest.raises(FailedActivity) as x:
         resume_processes(tags=tags)
-    assert 'No ASG(s) found with matching tag(s): %s.' % tags in str(x)
+    assert 'No ASG(s) found with matching tag(s): %s.' % tags in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -222,7 +222,7 @@ def test_resume_process_asg_invalid_names(aws_client):
         "AutoScalingGroups": []}
     with pytest.raises(FailedActivity) as x:
         resume_processes(asg_names=asg_names, process_names=["Launch"])
-    assert 'Unable to locate ASG(s): ' in str(x)
+    assert 'Unable to locate ASG(s): ' in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -243,14 +243,14 @@ def test_resume_process_asg_invalid_name(aws_client):
     }
     with pytest.raises(FailedActivity) as x:
         resume_processes(asg_names=asg_names, process_names=["Launch"])
-    assert 'No ASG(s) found with name(s): %s' % ([asg_names[1]]) in str(x)
+    assert 'No ASG(s) found with name(s): %s' % ([asg_names[1]]) in str(x.value)
 
 
 def test_terminate_instances_no_asgs():
     with pytest.raises(FailedActivity) as x:
         terminate_random_instances(instance_count=10)
     assert 'one of the following arguments are required: ' \
-           'asg_names or tags' in str(x)
+           'asg_names or tags' in str(x.value)
 
 
 def test_terminate_instances_no_numbers():
@@ -258,7 +258,7 @@ def test_terminate_instances_no_numbers():
     with pytest.raises(FailedActivity) as x:
         terminate_random_instances(asg_names)
     assert 'Must specify one of "instance_count", ' \
-           '"instance_percent", "az"' in str(x)
+           '"instance_percent", "az"' in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -419,7 +419,7 @@ def test_terminate_instances_invalid_az(aws_client):
     }
     with pytest.raises(FailedActivity) as x:
         terminate_random_instances(asg_names=asg_names, az='us-east-1d')
-    assert 'No instances found in Availability Zone: us-east-1d' in str(x)
+    assert 'No instances found in Availability Zone: us-east-1d' in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -444,7 +444,7 @@ def test_terminate_instances_invalid_count(aws_client):
     with pytest.raises(FailedActivity) as x:
         terminate_random_instances(asg_names=asg_names, instance_count=2)
     assert 'Not enough healthy instances in {} to satisfy ' \
-           'termination count {} ({})'.format(asg_names[0], 2, 1) in str(x)
+           'termination count {} ({})'.format(asg_names[0], 2, 1) in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -505,7 +505,7 @@ def test_detach_instance_no_name_or_tag():
     with pytest.raises(FailedActivity) as x:
         detach_random_instances()
     assert 'one of the following arguments are required: ' \
-           'asg_names or tags' in str(x)
+           'asg_names or tags' in str(x.value)
 
 
 def test_detach_instance_both_name_and_tag_one():
@@ -514,7 +514,7 @@ def test_detach_instance_both_name_and_tag_one():
             asg_names=['AutoScalingGroup-A'],
             tags=[{"Key": "TagKey", "Values": ["TagValues"]}])
     assert 'only one of the following arguments are allowed: ' \
-           'asg_names/tags' in str(x)
+           'asg_names/tags' in str(x.value)
 
 
 def test_detach_instance_no_count():
@@ -522,7 +522,7 @@ def test_detach_instance_no_count():
         detach_random_instances(
             asg_names=['AutoScalingGroup-A'])
     assert 'You must specify either "instance_count" or ' \
-           '"instance_percent"' in str(x)
+           '"instance_percent"' in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -552,7 +552,7 @@ def test_detach_instances_invalid_count(aws_client):
     with pytest.raises(FailedActivity) as x:
         detach_random_instances(asg_names, instance_count=3)
     assert 'You are attempting to detach more instances than exist on ' \
-           'asg %s' % asg_names[0] in str(x)
+           'asg %s' % asg_names[0] in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -756,7 +756,7 @@ def test_change_subnets_no_subnet():
     asg_names = ['AutoScalingGroup-A']
     with pytest.raises(TypeError) as x:
         change_subnets(asg_names=asg_names)
-    assert "missing 1 required positional argument: 'subnets'" in str(x)
+    assert "missing 1 required positional argument: 'subnets'" in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -863,7 +863,7 @@ def test_detach_random_volume_asg_invalid_name(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         detach_random_volume(asg_names=asg_names)
-    assert "Unable to locate ASG(s): %s" % asg_names in str(x)
+    assert "Unable to locate ASG(s): %s" % asg_names in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)
@@ -875,7 +875,7 @@ def test_detach_random_volume_asg_invalid_tags(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         detach_random_volume(tags=tags)
-    assert "No ASG(s) found with matching tag(s): %s" % tags in str(x)
+    assert "No ASG(s) found with matching tag(s): %s" % tags in str(x.value)
 
 
 @patch('chaosaws.asg.actions.aws_client', autospec=True)

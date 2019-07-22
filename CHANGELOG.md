@@ -10,6 +10,9 @@
 - adding describe_auto_scaling_groups to asg probes
 - correcting annotation for ec2 probe count_instances
 - correcting annotation for timeout parameter in asg actions
+- fix tests to match new pytest's API for accessing exceptions' values [#52][52]
+
+[52]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/52
 
 ## [0.11.2][]
 

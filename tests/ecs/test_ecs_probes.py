@@ -61,4 +61,4 @@ def test_error_checking_ecs_service_is_not_deploying(aws_client):
         service_is_deploying(cluster, service)
 
     client.describe_services.assert_called_with(cluster=cluster, services=[service])
-    assert 'Error retrieving service data from AWS' in str(exceptionInfo)
+    assert 'Error retrieving service data from AWS' in str(exceptionInfo.value)
