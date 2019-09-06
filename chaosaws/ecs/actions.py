@@ -11,9 +11,67 @@ from logzero import logger
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["stop_task", "delete_service", "delete_cluster",
+__all__ = ["stop_random_tasks", "stop_task", "delete_service", "delete_cluster",
            "deregister_container_instance"]
 
+def stop_random_tasks(cluster: str = None,
+              task_count: int = None,
+              task_percent: int = None,
+              service: str = None,
+              reason: str = 'Chaos Testing',
+              configuration: Configuration = None,
+              secrets: Secrets = None) -> AWSResponse:
+    """
+    Stop a random number of tasks based on given task_count or task_percent
+
+    You can specify a cluster by its ARN identifier or, if not provided, the
+    default cluster will be picked up.
+
+    Parameters:
+                Required:
+                    - cluster: name of the cluster to stop tasks in
+
+                Optional:
+                    - service: name of the service to stop tasks in
+
+                One Of:
+                    - task_count: the number of tasks to stop
+                    - task_percent: the percentage of tasks to stop
+    """
+    client = aws_client("ecs", configuration, secrets)
+
+    if not cluster:
+        raise FailedActivity(
+            "A cluster name is required")
+
+    if not any([task_count, task_percent]) or all([task_count, task_percent]):
+        raise FailedActivity(
+            'Must specify one of "task_count", "task_percent"')
+
+    tasks = list_running_tasks_in_cluster(cluster=cluster, client=client, service=service)
+
+    if task_percent:
+        task_count = int(float(
+            len(tasks) * float(task_percent)) / 100)
+
+    if len(tasks) < task_count:
+        raise FailedActivity(
+            'Not enough running tasks in {} to satisfy '
+            'stop count {} ({})'.format(
+                cluster, task_count,
+                len(tasks)))
+
+    tasks = random.sample(tasks, task_count)
+
+    results = []
+    for task in tasks:
+        logger.debug("Stopping ECS task: {}".format(task))
+        response = client.stop_task(cluster=cluster, task=task, reason=reason)
+        results.append({
+            'Task_Id': response['task']['taskArn'],
+            'Desired_Status': response['task']['desiredStatus']
+        })
+    return results
 
 def stop_task(cluster: str = None, task_id: str = None, service: str = None,
               reason: str = 'Chaos Testing',
@@ -28,7 +86,7 @@ def stop_task(cluster: str = None, task_id: str = None, service: str = None,
     """
     client = aws_client("ecs", configuration, secrets)
     if not task_id and service:
-        tasks = list_tasks(cluster=cluster, service=service, client=client)
+        tasks = list_tasks(cluster=cluster, client=client, service=service)
         if not tasks:
             raise FailedActivity(
                     "No ECS tasks found for service: {}".format(service))
@@ -153,5 +211,33 @@ def list_tasks(cluster: str, service: str, client: boto3.client) -> List[str]:
 
         res = client.list_tasks(cluster=cluster, serviceName=service,
                                 nextToken=next_token, maxResults=100)
+        tasks.extend(res["taskArns"])
+    return tasks
+
+def list_running_tasks_in_cluster(cluster: str, client: boto3.client, service: str = None):
+    if service:
+        res = client.list_tasks(cluster=cluster, serviceName=service,
+                                    maxResults=100,
+                                    desiredStatus='RUNNING')
+    else:
+        res = client.list_tasks(cluster=cluster,
+                                    maxResults=100,
+                                    desiredStatus='RUNNING')
+    tasks = res['taskArns'][:]
+    while True:
+        next_token = res.get("nextToken")
+        if not next_token:
+            break
+
+        if service:
+            res = client.list_tasks(cluster=cluster, serviceName=service,
+                                        nextToken=next_token,
+                                        maxResults=100,
+                                        desiredStatus='RUNNING')
+        else:
+            res = client.list_tasks(cluster=cluster,
+                                        nextToken=next_token,
+                                        maxResults=100,
+                                        desiredStatus='RUNNING')
         tasks.extend(res["taskArns"])
     return tasks

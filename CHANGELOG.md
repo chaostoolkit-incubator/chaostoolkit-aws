@@ -11,6 +11,7 @@
 - correcting annotation for ec2 probe count_instances
 - correcting annotation for timeout parameter in asg actions
 - fix tests to match new pytest's API for accessing exceptions' values [#52][52]
+- adding action stop_random_tasks to ecs actions
 
 [52]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/52
 
