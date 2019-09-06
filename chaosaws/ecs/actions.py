@@ -11,16 +11,17 @@ from logzero import logger
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["stop_random_tasks", "stop_task", "delete_service", "delete_cluster",
-           "deregister_container_instance"]
+__all__ = ["stop_random_tasks", "stop_task", "delete_service",
+           "delete_cluster", "deregister_container_instance"]
+
 
 def stop_random_tasks(cluster: str = None,
-              task_count: int = None,
-              task_percent: int = None,
-              service: str = None,
-              reason: str = 'Chaos Testing',
-              configuration: Configuration = None,
-              secrets: Secrets = None) -> AWSResponse:
+                      task_count: int = None,
+                      task_percent: int = None,
+                      service: str = None,
+                      reason: str = 'Chaos Testing',
+                      configuration: Configuration = None,
+                      secrets: Secrets = None) -> AWSResponse:
     """
     Stop a random number of tasks based on given task_count or task_percent
 
@@ -48,7 +49,8 @@ def stop_random_tasks(cluster: str = None,
         raise FailedActivity(
             'Must specify one of "task_count", "task_percent"')
 
-    tasks = list_running_tasks_in_cluster(cluster=cluster, client=client, service=service)
+    tasks = list_running_tasks_in_cluster(cluster=cluster, client=client,
+                                          service=service)
 
     if task_percent:
         task_count = int(float(
@@ -72,6 +74,7 @@ def stop_random_tasks(cluster: str = None,
             'Desired_Status': response['task']['desiredStatus']
         })
     return results
+
 
 def stop_task(cluster: str = None, task_id: str = None, service: str = None,
               reason: str = 'Chaos Testing',
@@ -214,15 +217,17 @@ def list_tasks(cluster: str, service: str, client: boto3.client) -> List[str]:
         tasks.extend(res["taskArns"])
     return tasks
 
-def list_running_tasks_in_cluster(cluster: str, client: boto3.client, service: str = None):
+
+def list_running_tasks_in_cluster(cluster: str, client: boto3.client,
+                                  service: str = None):
     if service:
         res = client.list_tasks(cluster=cluster, serviceName=service,
-                                    maxResults=100,
-                                    desiredStatus='RUNNING')
+                                maxResults=100,
+                                desiredStatus='RUNNING')
     else:
         res = client.list_tasks(cluster=cluster,
-                                    maxResults=100,
-                                    desiredStatus='RUNNING')
+                                maxResults=100,
+                                desiredStatus='RUNNING')
     tasks = res['taskArns'][:]
     while True:
         next_token = res.get("nextToken")
@@ -231,13 +236,13 @@ def list_running_tasks_in_cluster(cluster: str, client: boto3.client, service: s
 
         if service:
             res = client.list_tasks(cluster=cluster, serviceName=service,
-                                        nextToken=next_token,
-                                        maxResults=100,
-                                        desiredStatus='RUNNING')
+                                    nextToken=next_token,
+                                    maxResults=100,
+                                    desiredStatus='RUNNING')
         else:
             res = client.list_tasks(cluster=cluster,
-                                        nextToken=next_token,
-                                        maxResults=100,
-                                        desiredStatus='RUNNING')
+                                    nextToken=next_token,
+                                    maxResults=100,
+                                    desiredStatus='RUNNING')
         tasks.extend(res["taskArns"])
     return tasks
