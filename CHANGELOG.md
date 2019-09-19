@@ -12,6 +12,7 @@
 - correcting annotation for timeout parameter in asg actions
 - fix tests to match new pytest's API for accessing exceptions' values [#52][52]
 - adding action stop_random_tasks to ecs actions
+- adding describe_service, describe_tasks, & describe_cluster to ecs probes
 
 [52]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/52
 
