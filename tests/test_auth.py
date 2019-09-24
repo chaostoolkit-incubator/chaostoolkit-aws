@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
+import os
 from unittest.mock import MagicMock, patch, ANY
 from urllib.parse import urlparse, parse_qs
 
+from chaoslib.exceptions import InterruptExecution
+import pytest
 import requests_mock
 
 from chaosaws import aws_client, get_credentials, signed_api_call
@@ -15,14 +19,17 @@ CONFIGURATION = {
 }
 
 CONFIG_WITH_PROFILE = {
+    "aws_region": "us-east-1",
     "aws_profile_name": "myprofile"
 }
 
 CONFIG_WITH_ARN = {
+    "aws_region": "us-east-1",
     "aws_assume_role_arn": "myarn"
 }
 
 CONFIG_WITH_ARN_AND_PROFILE = {
+    "aws_region": "us-east-1",
     "aws_profile_name": "myprofile",
     "aws_assume_role_arn": "myarn"
 }
@@ -190,3 +197,65 @@ def test_create_client_with_aws_role_arn_and_profile(boto3: object):
             aws_access_key_id=ANY,
             aws_secret_access_key=ANY,
             aws_session_token=ANY)
+
+
+@patch('chaosaws.boto3', autospec=True)
+@patch('chaosaws.logger', autospec=True)
+def test_region_must_be_set(logger: logging.Logger, boto3: object):
+    boto3.DEFAULT_SESSION = None
+    creds = get_credentials(dict())
+
+    with pytest.raises(InterruptExecution):
+        aws_client('ecs')
+        logger.debug.assert_any_call(
+            'The configuration key `aws_region` is not set, looking in the '
+            'environment instead for `AWS_REGION` or `AWS_DEFAULT_REGION`')
+
+
+@patch('chaosaws.boto3', autospec=True)
+@patch('chaosaws.logger', autospec=True)
+def test_region_can_be_set_as_AWS_REGION(logger: logging.Logger, boto3: object):
+    boto3.DEFAULT_SESSION = None
+    creds = get_credentials(dict())
+
+    try:
+        os.environ["AWS_REGION"] = "us-west-2"
+        aws_client('ecs')
+        logger.debug.assert_any_call(
+            'The configuration key `aws_region` is not set, looking in the '
+            'environment instead for `AWS_REGION` or `AWS_DEFAULT_REGION`')
+        logger.warning.assert_not_called()
+        logger.debug.assert_any_call("Using AWS region 'us-west2'")
+    except:
+        os.environ.pop("AWS_REGION", None)
+
+
+@patch('chaosaws.boto3', autospec=True)
+@patch('chaosaws.logger', autospec=True)
+def test_region_can_be_set_as_AWS_DEFAULT_REGION(
+        logger: logging.Logger, boto3: object):
+    boto3.DEFAULT_SESSION = None
+    creds = get_credentials(dict())
+
+    try:
+        os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
+        aws_client('ecs')
+        logger.debug.assert_any_call(
+            'The configuration key `aws_region` is not set, looking in the '
+            'environment instead for `AWS_REGION` or `AWS_DEFAULT_REGION`')
+        logger.warning.assert_not_called()
+        logger.debug.assert_any_call("Using AWS region 'us-west2'")
+    except:
+        os.environ.pop("AWS_DEFAULT_REGION", None)
+
+
+@patch('chaosaws.boto3', autospec=True)
+@patch('chaosaws.logger', autospec=True)
+def test_region_can_be_set_via_config(
+        logger: logging.Logger, boto3: object):
+    boto3.DEFAULT_SESSION = None
+    creds = get_credentials(dict())
+
+    aws_client('ecs', configuration={"aws_region": "us-west2"})
+    logger.debug.assert_any_call("Using AWS region 'us-west2'")
+    logger.warning.assert_not_called()
