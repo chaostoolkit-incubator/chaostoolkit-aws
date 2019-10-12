@@ -385,8 +385,8 @@ def __linux_from_default(instance_id: str = None,
                 else :
                     break
             except IndexError:
-                time.sleep(interval)
-                break
+                time.sleep(1)
+                continue
         for command_invocation in res_list['CommandInvocations']:
             for invocation in command_invocation['CommandPlugins']:
                 if invocation['Name'] == 'aws:runShellScript':
