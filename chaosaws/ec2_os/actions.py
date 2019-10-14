@@ -12,7 +12,7 @@ import os
 from .probes import describe_instance
 from .constants import OS_LINUX, OS_WINDOWS
 from .constants import BURN_CPU, FILL_DISK, NETWORK_UTIL, \
-    BURN_IO
+    BURN_IO, SSMDEFAULTNETWORKLAGACY
 
 __all__ = ["burn_cpu", "fill_disk", "network_latency", "burn_io",
            "network_loss", "network_corruption", "network_advanced",
@@ -373,7 +373,7 @@ def __linux_from_default(instance_id: str = None,
                     time.sleep(interval)
                     totalwait += interval
                     interval = interval / 2 if interval > 1 else 1
-                    if totalwait > default_timeout:
+                    if totalwait > default_timeout + SSMDEFAULTNETWORKLAGACY:
                         raise FailedActivity(
                             "Script exceeded default timeout {}"
                                 .format(default_timeout))
