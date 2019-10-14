@@ -366,9 +366,9 @@ def __linux_from_default(instance_id: str = None,
                 Details=True
             )
             logger.debug(res_list)
-            try :
-                cPlugins = res_list['CommandInvocations'][0]['CommandPlugins'][0]
-                status = cPlugins['Status']
+            try:
+                cp = res_list['CommandInvocations'][0]['CommandPlugins'][0]
+                status = cp['Status']
                 if status == "InProgress" :
                     time.sleep(interval)
                     totalwait += interval
@@ -376,7 +376,7 @@ def __linux_from_default(instance_id: str = None,
                     if totalwait > default_timeout + SSMDEFAULTNETWORKLAGACY:
                         raise FailedActivity(
                             "Script exceeded default timeout {}"
-                                .format(default_timeout))
+                            .format(default_timeout))
                     continue
                 elif status == "Failed" :
                     break
