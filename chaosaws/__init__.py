@@ -15,7 +15,7 @@ from chaoslib.types import (Configuration, DiscoveredActivities,
                             DiscoveredSystemInfo, Discovery, Secrets)
 from logzero import logger
 
-__version__ = '0.11.2'
+__version__ = '0.12.0'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
