@@ -4,6 +4,16 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.2...HEAD
 
+### Changed
+
+- Clarify the way the client receives the credentials for authentifying with
+  AWS services. This change MAY BE BREAKING since we do not assume
+  `"us-east-1"` as a default region anymore. You must be be explicit about the
+  target region!
+  [#57][57]
+
+[52]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/57
+
 ### Added
 
 - adding action stop_random_instances to asg actions

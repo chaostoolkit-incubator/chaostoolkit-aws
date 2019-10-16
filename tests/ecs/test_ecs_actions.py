@@ -6,20 +6,27 @@ from chaosaws.ecs.actions import (delete_cluster, delete_service,
                                   deregister_container_instance, stop_task,
                                   stop_random_tasks)
 
-def test_stop_random_tasks_no_cluster():
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_stop_random_tasks_no_cluster(aws_client):
     with pytest.raises(FailedActivity) as x:
         stop_random_tasks(service='ecs-service')
     assert 'A cluster name is required' in str(x.value)
 
-def test_stop_random_tasks_no_count_or_percent():
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_stop_random_tasks_no_count_or_percent(aws_client):
     with pytest.raises(FailedActivity) as x:
         stop_random_tasks(cluster='ecs-cluster')
     assert 'Must specify one of "task_count", "task_percent"' in str(x.value)
 
-def test_stop_random_tasks_both_count_and_percent():
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_stop_random_tasks_both_count_and_percent(aws_client):
     with pytest.raises(FailedActivity) as x:
         stop_random_tasks(cluster='ecs-cluster', task_count=1, task_percent=1)
     assert 'Must specify one of "task_count", "task_percent"' in str(x.value)
+
 
 @patch('chaosaws.ecs.actions.aws_client', autospec=True)
 def test_stop_random_tasks_count_too_high(aws_client):
