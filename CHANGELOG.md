@@ -12,7 +12,7 @@
   target region!
   [#57][57]
 
-[52]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/57
+[57]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/57
 
 ### Added
 
