@@ -356,7 +356,6 @@ def __linux_from_default(instance_id: str = None,
                 [__construct_script_content__(action, os_type, parameters)]
             },
         )
-        logger.debug(res_send_command)
         cmd_id = res_send_command["Command"]["CommandId"]
         totalwait = 0
         interval = default_timeout / 2
@@ -365,7 +364,6 @@ def __linux_from_default(instance_id: str = None,
                 CommandId=cmd_id,
                 Details=True
             )
-            logger.debug(res_list)
             try:
                 cp = res_list['CommandInvocations'][0]['CommandPlugins'][0]
                 status = cp['Status']
@@ -446,7 +444,7 @@ def __linux_from_internet(instance_ids: List[str] = None,
                     return
     except Exception as x:
         raise FailedActivity(
-            "failed issuing a execute of shell script")
+            "failed issuing a execute of shell script：\n{}".format(x))
 
 
 def __construct_script_content__(action, os_type, parameters):
