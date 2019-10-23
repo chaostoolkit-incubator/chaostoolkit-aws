@@ -11,7 +11,7 @@ from logzero import logger
 from .actions import __get_os_type
 from .constants import OS_LINUX,OS_WINDOWS
 
-__all__ = ["describe_instance"]
+__all__ = ["describe_instance", "ensure_tc_installed", "ensure_tc_uninstalled"]
 
 
 def describe_instance(instance_id: str,
