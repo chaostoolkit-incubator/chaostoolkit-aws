@@ -4,6 +4,11 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.12.0...HEAD
 
+### Added
+
+- adding set of actions ec2_os supporting os level experiments like burn_cpu and network_latency, enabled by AWS SSM
+
+
 ## [0.12.0][]
 
 [0.12.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.2...0.12.0

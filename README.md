@@ -82,6 +82,152 @@ Or select one at random from an AZ:
 }
 ```
 
+### EC2 Operation System Level Experiments Configure
+
+Below is a full set of setups:
+*Please be noticed that burn_disk is not my UAT scope as I do not have proper resource for it*
+*Please be noticed that all Windows platform is not my UAT scope as I do not have proper resource for it*
+```json
+{
+    "title": "ec_os_full",
+    "description": "This monkey runs all suite of ec2_os",
+    "configuration": {
+        "aws_region": "cn-north-1"
+    },
+    "method": [
+    	{
+            "type": "probe",
+            "name": "ensure_tc_installed",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.probes",
+                "func": "ensure_tc_installed",
+                "arguments": {
+                    "instance_ids": ["i-04cf7749ff48ca517"]
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "1_network_latency",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.actions",
+                "func": "network_latency",
+                "secrects":"aws",
+                "arguments": {
+                    "execution_duration": "90",
+                    "instance_ids": [ "i-04cf7749ff48ca517" ],
+                    "delay":"1000ms",
+                    "variance":"100ms",
+                    "ratio":"5%"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "2_os_advanced_internet_scripts",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.actions",
+                "func": "os_advanced_internet_scripts",
+                "secrects":"aws",
+                "arguments": {
+                    "instance_ids": [ "i-04cf7749ff48ca517" ],
+                    "source_info": "https://s3.amazonaws.com/somewhere/experiment/experiment_steady_state.sh",
+                    "command_line": [ "experiment_steady_state.sh -h i-04cf7749ff48ca517 -t 60" ]
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "3_network_loss",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.actions",
+                "func": "network_loss",
+                "secrects":"aws",
+                "arguments": {
+                    "execution_duration": "90",
+                    "instance_ids": [ "i-04cf7749ff48ca517" ],
+                    "loss_ratio":"10%"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "4_network_corruption",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.actions",
+                "func": "network_corruption",
+                "secrects":"aws",
+                "arguments": {
+                    "execution_duration": "90",
+                    "instance_ids": [ "i-04cf7749ff48ca517" ],
+                    "corruption_ratio":"10%"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "5_network_advanced",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.actions",
+                "func": "network_advanced",
+                "secrects":"aws",
+                "arguments": {
+                    "execution_duration": "90",
+                    "instance_ids": [ "i-04cf7749ff48ca517" ],
+                    "command":"loss 5%"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "6_burn_cpu",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.actions",
+                "func": "burn_cpu",
+                "secrects":"aws",
+                "arguments": {
+                    "execution_duration": "90",
+                    "instance_ids": [ "i-04cf7749ff48ca517" ]
+                }
+            }
+        },
+        {
+            "type": "probe",
+            "name": "ensure_tc_uninstalled",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.probes",
+                "func": "ensure_tc_uninstalled",
+                "arguments": {
+                    "instance_ids": ["i-04cf7749ff48ca517"]
+                }
+            }
+        }
+    ],
+    "rollbacks": [
+        {
+            "type": "probe",
+            "name": "ensure_tc_uninstalled",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ec2_os.probes",
+                "func": "ensure_tc_uninstalled",
+                "arguments": {
+                    "instance_ids": ["i-04cf7749ff48ca517"]
+                }
+            }
+        }
+    ]
+}
+```
+
 That's it!
 
 Please explore the code to see existing probes and actions.

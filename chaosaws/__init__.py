@@ -239,5 +239,7 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.rds.actions"))
     activities.extend(discover_probes("chaosaws.rds.probes"))
     activities.extend(discover_actions("chaosaws.elasticache.actions"))
+    activities.extend(discover_probes("chaosaws.ec2_os.probes"))
+    activities.extend(discover_actions("chaosaws.ec2_os.actions"))
 
     return activities
