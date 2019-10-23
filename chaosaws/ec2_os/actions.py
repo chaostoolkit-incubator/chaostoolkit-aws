@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+import time
+import os
+from typing import Any, Dict, List
+
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
+from logzero import logger
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
-
-from typing import Any, Dict, List
-from logzero import logger
-import time
-import os
 from .probes import describe_instance
 from .constants import OS_LINUX, OS_WINDOWS
 from .constants import BURN_CPU, FILL_DISK, NETWORK_UTIL, \
@@ -16,7 +16,7 @@ from .constants import BURN_CPU, FILL_DISK, NETWORK_UTIL, \
 
 __all__ = ["burn_cpu", "fill_disk", "network_latency", "burn_io",
            "network_loss", "network_corruption", "network_advanced",
-           "os_advanced"]
+           "os_advanced_internet_scripts"]
 
 
 def burn_cpu(instance_ids: List[str] = None,
@@ -305,14 +305,14 @@ def network_latency(instance_ids: List[str] = None,
             ))
 
 
-def os_advanced(instance_ids: List[str] = None,
+def os_advanced_internet_scripts(instance_ids: List[str] = None,
                 source_info: str = None,
                 command_line: List[str] = None,
                 execution_timeout: str = "60",
                 configuration: Configuration = None,
                 secrets: Secrets = None) -> AWSResponse:
     """
-    os_advanced send commands
+    os_advanced_internet_scripts send commands
     """
     logger.debug(
         "Start network_latency: configuration='{}', instance_ids='{}'".format(
@@ -369,7 +369,7 @@ def __linux_from_default(instance_id: str = None,
             try:
                 cp = res_list['CommandInvocations'][0]['CommandPlugins'][0]
                 status = cp['Status']
-                if status == "InProgress" :
+                if status == "InProgress":
                     time.sleep(interval)
                     totalwait += interval
                     interval = interval / 2 if interval > 1 else 1
@@ -378,11 +378,11 @@ def __linux_from_default(instance_id: str = None,
                             "Script exceeded default timeout {}"
                             .format(default_timeout))
                     continue
-                elif status == "Failed" :
+                elif status == "Failed":
                     break
-                elif status == "Success" :
+                elif status == "Success":
                     break
-                else :
+                else:
                     break
             except IndexError:
                 time.sleep(1)
