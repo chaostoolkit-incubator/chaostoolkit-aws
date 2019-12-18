@@ -18,19 +18,27 @@ __all__ = ["deregister_target", "set_security_groups", "set_subnets",
 def deregister_target(tg_name: str,
                       configuration: Configuration = None,
                       secrets: Secrets = None) -> AWSResponse:
-    """
-    Deregisters one random target from target group
-    """
+    """Deregisters one random target from target group"""
     client = aws_client('elbv2', configuration, secrets)
     tg_arn = get_target_group_arns(tg_names=[tg_name], client=client)
     tg_health = get_targets_health_description(tg_arns=tg_arn, client=client)
-    random_target = random.choice(tg_health[tg_name]
-                                  ['TargetHealthDescriptions'])['Target']['Id']
-    logger.debug("Deregistering target {} from target group {}".format(
-        random_target, tg_name))
+    random_target = random.choice(
+        tg_health[tg_name]['TargetHealthDescriptions'])
 
-    return client.deregister_targets(TargetGroupArn=tg_arn[tg_name],
-                                     Targets=[{'Id': random_target}])
+    logger.debug("Deregistering target {} from target group {}".format(
+        random_target['Target']['Id'], tg_name))
+
+    try:
+        return client.deregister_targets(
+            TargetGroupArn=tg_arn[tg_name],
+            Targets=[{
+                'Id': random_target['Target']['Id'],
+                'Port': random_target['Target']['Port']
+            }]
+        )
+    except ClientError as e:
+        raise FailedActivity('Exception detaching %s: %s' % (
+            tg_name, e.response['Error']['Message']))
 
 
 def set_security_groups(load_balancer_names: List[str],
@@ -242,7 +250,6 @@ def get_targets_health_description(tg_arns: Dict,
             'TargetHealthDescriptions']
     logger.debug("Health descriptions for target group(s) are: {}"
                  .format(str(tg_health_descr)))
-
     return tg_health_descr
 
 
