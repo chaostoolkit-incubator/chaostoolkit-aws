@@ -1,5 +1,3 @@
--r requirements.txt
-
 coverage
 moto==1.3.4
 pycodestyle
