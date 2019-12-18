@@ -5,7 +5,8 @@ import pytest
 from chaoslib.exceptions import FailedActivity
 
 from chaosaws.ecs.probes import (
-    service_is_deploying, are_all_desired_tasks_running)
+    service_is_deploying, describe_cluster, describe_service, describe_tasks,
+    are_all_desired_tasks_running)
 
 
 @patch('chaosaws.ecs.probes.aws_client', autospec=True)
@@ -122,3 +123,66 @@ def test_are_all_tasks_running_exception(aws_client):
     client.describe_services.assert_called_with(
         cluster=cluster, services=[service])
     assert 'Error retrieving service data from AWS' in str(e.value)
+
+
+@patch('chaosaws.ecs.probes.aws_client', autospec=True)
+def test_describe_clusters(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_clusters.return_value = {
+        'clusters': [{
+            'clusterArn': 'arn:aws:ecs:region:012345678910:cluster/MyCluster',
+            'clusterName': 'MyCluster',
+            'status': 'ACTIVE'
+        }]
+    }
+    response = describe_cluster(cluster='MyCluster')
+    client.describe_clusters.assert_called_with(clusters=['MyCluster'])
+    assert response['clusters'][0]['clusterName'] == 'MyCluster'
+
+
+@patch('chaosaws.ecs.probes.aws_client', autospec=True)
+def test_describe_service(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_services.return_value = {
+        'services': [{
+            'clusterArn': 'arn:aws:ecs:region:012345678910:cluster/MyCluster',
+            'serviceArn': 'arn:aws:ecs:region:012345678910:service/MyService',
+            'serviceName': 'MyService',
+            'status': 'ACTIVE'
+        }]
+    }
+    response = describe_service(cluster='MyCluster', service='MyService')
+    client.describe_services.assert_called_with(
+        cluster='MyCluster', services=['MyService'])
+    assert response['services'][0]['serviceName'] == 'MyService'
+
+
+@patch('chaosaws.ecs.probes.aws_client', autospec=True)
+def test_describe_tasks(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.get_paginator.return_value.paginate.return_value = [{
+        'taskArns': [
+            'arn:aws:ecs:region:012345678910:task/MyCluster/123456789'
+        ]
+    }]
+    client.describe_tasks.return_value = {
+        'tasks': [
+            {
+                'clusterArn': 'arn:aws:ecs:region:012345678910:cluster/'
+                              'MyCluster',
+                'taskArn': 'arn:aws:ecs:region:012345678910:task/MyCluster/'
+                           '123456789',
+                'version': 22
+            }
+        ]
+    }
+    response = describe_tasks(cluster='MyCluster')
+    client.get_paginator.return_value.paginate.assert_called_with(
+        cluster='MyCluster')
+    client.describe_tasks.assert_called_with(
+        cluster='MyCluster',
+        tasks=['arn:aws:ecs:region:012345678910:task/MyCluster/123456789'])
+    assert response['tasks'][0]['version'] == 22

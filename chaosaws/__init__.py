@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from typing import Any, Dict, List
 
 import boto3
@@ -9,12 +10,12 @@ from botocore import parsers
 from chaosaws.types import AWSResponse
 from chaoslib.discovery.discover import (discover_actions, discover_probes,
                                          initialize_discovery_result)
-from chaoslib.exceptions import DiscoveryFailed
+from chaoslib.exceptions import DiscoveryFailed, InterruptExecution
 from chaoslib.types import (Configuration, DiscoveredActivities,
                             DiscoveredSystemInfo, Discovery, Secrets)
 from logzero import logger
 
-__version__ = '0.11.2'
+__version__ = '0.12.0'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
@@ -56,43 +57,67 @@ def aws_client(resource_name: str, configuration: Configuration = None,
     as we do not read those settings from the `secrets` object.
     """  # noqa: E501
     configuration = configuration or {}
-    region = configuration.get("aws_region", "us-east-1")
-    creds = get_credentials(secrets)
+    aws_profile_name = configuration.get("aws_profile_name")
     aws_assume_role_arn = configuration.get("aws_assume_role_arn")
+    params = get_credentials(secrets)
+
+    region = configuration.get("aws_region")
+    if not region:
+        logger.debug(
+            "The configuration key `aws_region` is not set, looking in the "
+            "environment instead for `AWS_REGION` or `AWS_DEFAULT_REGION`")
+        region = os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION"))
+        if not region:
+            raise InterruptExecution("AWS requires a region to be set!")
+
+    if region:
+        logger.debug("Using AWS region '{}'".format(region))
+        params["region_name"] = region
 
     if boto3.DEFAULT_SESSION is None:
-        profile_name = configuration.get("aws_profile_name")
-
         # we must create our own session so that we can populate the profile
         # name when it is provided. Only create the default session once.
-        boto3.setup_default_session(
-            profile_name=profile_name, region_name=region, **creds)
+        boto3.setup_default_session(profile_name=aws_profile_name, **params)
 
-    # default config
     if not aws_assume_role_arn:
-        logger.debug("Using default AWS role")
-        return boto3.client(resource_name, region_name=region, **creds)
+        logger.debug(
+            "Client will be using profile '{}' from boto3 session".format(
+                aws_profile_name or "default"))
+        return boto3.client(resource_name, **params)
     else:
-        logger.info("Assuming role: " + aws_assume_role_arn)
-        # connect to sts client
-        client = boto3.client('sts', region_name=region, **creds)
+        logger.debug(
+            "Fetching credentials dynamically assuming role '{}'".format(
+                aws_assume_role_arn))
 
-        # get credentials for the role we want
-        response = client.assume_role(
-            RoleArn=aws_assume_role_arn,
-            RoleSessionName="tempDetourSession")['Credentials']
-        # create new dictionary for credentials
-        new_creds = dict(
-            aws_access_key_id=None,
-            aws_secret_access_key=None,
-            aws_session_token=None)
+        aws_assume_role_session_name = configuration.get(
+            "aws_assume_role_session_name")
+        if not aws_assume_role_session_name:
+            aws_assume_role_session_name = "ChaosToolkit"
+            logger.debug(
+                "You are missing the `aws_assume_role_session_name` "
+                "configuration key. A unique one was generated: '{}'".format(
+                    aws_assume_role_session_name))
 
-        new_creds["aws_access_key_id"] = response['AccessKeyId']
-        new_creds["aws_secret_access_key"] = response['SecretAccessKey']
-        new_creds["aws_session_token"] = response['SessionToken']
+        client = boto3.client('sts', **params)
+        params = {
+            "RoleArn": aws_assume_role_arn,
+            "RoleSessionName": aws_assume_role_session_name
+        }
+        response = client.assume_role(**params)
+        creds = response['Credentials']
+        logger.debug(
+            "Temporary credentials will expire on {}".format(
+                creds["Expiration"].isoformat()))
 
-        # return new client
-        return boto3.client(resource_name, region_name=region, **new_creds)
+        params = {
+            "aws_access_key_id": creds['AccessKeyId'],
+            "aws_secret_access_key": creds['SecretAccessKey'],
+            "aws_session_token": creds['SessionToken']
+        }
+        if region:
+            params["region_name"] = region
+
+        return boto3.client(resource_name, **params)
 
 
 def signed_api_call(service: str, path: str = "/", method: str = 'GET',

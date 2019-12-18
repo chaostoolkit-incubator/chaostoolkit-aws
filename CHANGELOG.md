@@ -2,7 +2,27 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.2...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.12.0...HEAD
+
+### Added
+
+- correcting IndexError in ecs are desired tasks running probe
+- adding unit tests for are desired tasks running probe
+- updating probes ALL list to include describe functions
+
+## [0.12.0][]
+
+[0.12.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.2...0.12.0
+
+### Changed
+
+- Clarify the way the client receives the credentials for authentifying with
+  AWS services. This change MAY BE BREAKING since we do not assume
+  `"us-east-1"` as a default region anymore. You must be be explicit about the
+  target region!
+  [#57][57]
+
+[57]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/57
 
 ### Added
 
@@ -12,9 +32,7 @@
 - correcting annotation for timeout parameter in asg actions
 - fix tests to match new pytest's API for accessing exceptions' values [#52][52]
 - adding action stop_random_tasks to ecs actions
-- correcting IndexError in ecs are desired tasks running probe
-- adding unit tests for are desired tasks running probe
-- updating probes ALL list to include describe functions
+- adding describe_service, describe_tasks, & describe_cluster to ecs probes
 
 [52]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues/52
 
