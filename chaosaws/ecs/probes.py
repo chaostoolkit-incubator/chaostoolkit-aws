@@ -13,31 +13,25 @@ def service_is_deploying(cluster: str,
                          service: str,
                          configuration: Configuration = None,
                          secrets: Secrets = None) -> bool:
-    """
-    Checks to make sure there is not an in progress deployment
-    """
+    """Checks to make sure there is not an in progress deployment"""
     client = aws_client("ecs", configuration, secrets)
-    response = client.describe_services(
-        cluster=cluster,
-        services=[service]
-    )
-    if not response['services'] or \
-            'deployments' not in response['services'][0]:
+    response = client.describe_services(cluster=cluster, services=[service])
+    services = response.get('services', [])
+    if not services:
         raise FailedActivity('Error retrieving service data from AWS')
-
-    return len(response['services'][0]['deployments']) > 1
+    return len(services[0].get('deployments')) > 1
 
 
 def are_all_desired_tasks_running(cluster: str, service: str,
                                   configuration: Configuration = None,
                                   secrets: Secrets = None) -> bool:
-    """
-    Checks to make sure desired and running tasks counts are equal
-    """
+    """Checks to make sure desired and running tasks counts are equal"""
     client = aws_client("ecs", configuration, secrets)
     response = client.describe_services(cluster=cluster, services=[service])
-    service = response['services'][0]
-    return service['desiredCount'] == service['runningCount']
+    services = response.get('services', [])
+    if not services:
+        raise FailedActivity('Error retrieving service data from AWS')
+    return services[0]['desiredCount'] == services[0]['runningCount']
 
 
 def describe_cluster(cluster: str,
@@ -65,7 +59,7 @@ def describe_cluster(cluster: str,
                         "cluster": "MyCluster"
                     }
                 }
-            }]
+            }
         }
 
     Full list of possible paths can be found:

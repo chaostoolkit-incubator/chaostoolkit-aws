@@ -4,6 +4,12 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.12.0...HEAD
 
+### Added
+
+- correcting IndexError in ecs are desired tasks running probe
+- adding unit tests for are desired tasks running probe
+- updating probes ALL list to include describe functions
+
 ## [0.12.0][]
 
 [0.12.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.11.2...0.12.0

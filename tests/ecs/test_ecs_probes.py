@@ -5,7 +5,8 @@ import pytest
 from chaoslib.exceptions import FailedActivity
 
 from chaosaws.ecs.probes import (
-    service_is_deploying, describe_cluster, describe_service, describe_tasks)
+    service_is_deploying, describe_cluster, describe_service, describe_tasks,
+    are_all_desired_tasks_running)
 
 
 @patch('chaosaws.ecs.probes.aws_client', autospec=True)
@@ -66,6 +67,62 @@ def test_error_checking_ecs_service_is_not_deploying(aws_client):
     client.describe_services.assert_called_with(
         cluster=cluster, services=[service])
     assert 'Error retrieving service data from AWS' in str(exceptionInfo.value)
+
+
+@patch('chaosaws.ecs.probes.aws_client', autospec=True)
+def test_are_all_tasks_running_true(aws_client):
+    client = MagicMock()
+    client.describe_services = MagicMock(
+        return_value={
+            'services': [{
+                'serviceName': 'MyGenericService',
+                'desiredCount': 3,
+                'runningCount': 3
+            }]
+        }
+    )
+    aws_client.return_value = client
+    cluster = 'ecs-cluster'
+    service = 'MyGenericService'
+    response = are_all_desired_tasks_running(cluster, service)
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service])
+    assert response
+
+
+@patch('chaosaws.ecs.probes.aws_client', autospec=True)
+def test_are_all_tasks_running_false(aws_client):
+    client = MagicMock()
+    client.describe_services = MagicMock(
+        return_value={
+            'services': [{
+                'serviceName': 'MyGenericService',
+                'desiredCount': 3,
+                'runningCount': 2
+            }]
+        }
+    )
+    aws_client.return_value = client
+    cluster = 'ecs-cluster'
+    service = 'MyGenericService'
+    response = are_all_desired_tasks_running(cluster, service)
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service])
+    assert not response
+
+
+@patch('chaosaws.ecs.probes.aws_client', autospec=True)
+def test_are_all_tasks_running_exception(aws_client):
+    client = MagicMock()
+    client.describe_services = MagicMock(return_value={'services': []})
+    aws_client.return_value = client
+    cluster = 'ecs-cluster'
+    service = 'MyGenericService'
+    with pytest.raises(FailedActivity) as e:
+        are_all_desired_tasks_running(cluster, service)
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service])
+    assert 'Error retrieving service data from AWS' in str(e.value)
 
 
 @patch('chaosaws.ecs.probes.aws_client', autospec=True)
