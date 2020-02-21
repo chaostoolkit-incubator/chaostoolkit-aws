@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import re
-from typing import List
+from typing import List, Dict, Any, Union
 
 import boto3
 from chaoslib.exceptions import FailedActivity
@@ -12,7 +12,8 @@ from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
 __all__ = ["stop_random_tasks", "stop_task", "delete_service",
-           "delete_cluster", "deregister_container_instance"]
+           "delete_cluster", "deregister_container_instance",
+           "update_desired_count"]
 
 
 def stop_random_tasks(cluster: str = None,
@@ -29,21 +30,20 @@ def stop_random_tasks(cluster: str = None,
     default cluster will be picked up.
 
     Parameters:
-                Required:
-                    - cluster: name of the cluster to stop tasks in
+    Required:
+        - cluster: name of the cluster to stop tasks in
 
-                Optional:
-                    - service: name of the service to stop tasks in
+    Optional:
+        - service: name of the service to stop tasks in
 
-                One Of:
-                    - task_count: the number of tasks to stop
-                    - task_percent: the percentage of tasks to stop
+    One Of:
+        - task_count: the number of tasks to stop
+        - task_percent: the percentage of tasks to stop
     """
     client = aws_client("ecs", configuration, secrets)
 
     if not cluster:
-        raise FailedActivity(
-            "A cluster name is required")
+        raise FailedActivity("A cluster name is required")
 
     if not any([task_count, task_percent]) or all([task_count, task_percent]):
         raise FailedActivity(
@@ -174,9 +174,64 @@ def deregister_container_instance(cluster: str,
                                                 force=force)
 
 
+def update_desired_count(cluster: str,
+                         service: str,
+                         desired_count: int,
+                         configuration: Configuration = None,
+                         secrets: Secrets = None) -> AWSResponse:
+    """Allows for changing the desired task count value for a given ecs service
+
+    Action Example:
+        "method": {
+            "type": "action",
+            "name": "update service",
+            "provider": {
+                "type": "python",
+                "module": "chaosaws.ecs.actions",
+                "func": "update_desired_count",
+                "arguments": {
+                    "cluster": "my_cluster_name",
+                    "service": "my_service_name",
+                    "desired_count": 6
+                }
+            }
+        }
+    """
+    client = aws_client("ecs", configuration, secrets)
+
+    if not validate_cluster(cluster, client):
+        raise FailedActivity('unable to locate cluster: %s' % cluster)
+    if not validate_service(cluster, service, client):
+        raise FailedActivity('unable to locate service: %s on %s' % (
+            service, cluster))
+
+    return client.update_service(
+        cluster=cluster,
+        service=service,
+        desiredCount=desired_count)
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
+def validate_cluster(cluster: str, client:boto3.client) -> Union[str, None]:
+    """Validates the provided cluster exists"""
+    cluster = client.describe_clusters(clusters=cluster)['clusters']
+    if not cluster:
+        return
+    return cluster[0]['clusterArn']
+
+
+def validate_service(
+        cluster: str, service: str, client: boto3.client) -> Union[str, None]:
+    """Validates the provided service exists in the cluster"""
+    service = client.describe_services(
+        cluster=cluster, services=[service])['services']
+    if not service:
+        return
+    return service[0]['serviceArn']
+
+
 def list_services_arns(cluster: str, client: boto3.client) -> List[str]:
     """
     Return of all services arns in the given cluster.

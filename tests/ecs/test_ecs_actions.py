@@ -4,7 +4,8 @@ from chaoslib.exceptions import FailedActivity
 import pytest
 from chaosaws.ecs.actions import (delete_cluster, delete_service,
                                   deregister_container_instance, stop_task,
-                                  stop_random_tasks)
+                                  stop_random_tasks,
+                                  update_desired_count)
 
 
 @patch('chaosaws.ecs.actions.aws_client', autospec=True)
@@ -267,3 +268,67 @@ def test_deregister_container_instance(aws_client):
     deregister_container_instance(cluster=cluster, instance_id=inst)
     client.deregister_container_instance.assert_called_with(
         cluster=cluster, containerInstance=inst, force=False)
+
+
+def test_no_arguments_error():
+    with pytest.raises(TypeError) as x:
+        update_desired_count()
+    assert 'missing 3 required positional arguments' in str(x.value)
+
+
+def test_missing_cluster_argument_error():
+    with pytest.raises(TypeError) as x:
+        update_desired_count(service='my_service', desired_count=1)
+    assert "required positional argument: 'cluster'" in str(x.value)
+
+
+def test_missing_count_argument_error():
+    with pytest.raises(TypeError) as x:
+        update_desired_count(
+            cluster='my_cluster', service='my_service')
+    assert "required positional argument: 'desired_count'" in str(x.value)
+
+
+def test_missing_service_argument_error():
+    with pytest.raises(TypeError) as x:
+        update_desired_count(
+            cluster='my_cluster', desired_count=0)
+    assert "required positional argument: 'service'" in str(x.value)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_update_desired_service_count(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    cluster = 'my_cluster'
+    service = 'my_service'
+
+    client.describe_clusters = MagicMock(
+        return_value={
+            'clusters': [{
+                'clusterArn': 'arn:aws:ecs:us-east-1::cluster/my_cluster',
+                'clusterName': 'my_cluster'
+            }]
+        }
+    )
+    client.describe_services = MagicMock(
+        return_value={
+            'services': [{
+                'serviceArn': 'arn:aws:ecs:us-east-1::service/my_service',
+                'serviceName': 'my_service'
+            }]
+        }
+    )
+    client.update_service = MagicMock(
+        return_value={
+            'service': {
+                'serviceArn': 'arn:aws:ecs:us-east-1::service/my_service',
+                'serviceName': 'my_service',
+                'desiredCount': 1
+            }
+        }
+    )
+    update_desired_count(
+        cluster=cluster, service=service, desired_count=1)
+    client.update_service.assert_called_with(
+        cluster=cluster, service=service, desiredCount=1)
