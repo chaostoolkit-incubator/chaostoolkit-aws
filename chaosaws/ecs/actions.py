@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import re
-from typing import List, Dict, Any, Union
+from typing import List, Union
 
 import boto3
 from chaoslib.exceptions import FailedActivity
@@ -214,7 +214,7 @@ def update_desired_count(cluster: str,
 ###############################################################################
 # Private functions
 ###############################################################################
-def validate_cluster(cluster: str, client:boto3.client) -> Union[str, None]:
+def validate_cluster(cluster: str, client: boto3.client) -> Union[str, None]:
     """Validates the provided cluster exists"""
     cluster = client.describe_clusters(clusters=cluster)['clusters']
     if not cluster:
