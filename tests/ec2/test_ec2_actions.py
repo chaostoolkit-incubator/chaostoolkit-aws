@@ -668,8 +668,7 @@ def test_detach_random_volume_ec2_invalid_filters(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         detach_random_volume(filters=filters)
-    assert "no instances found matching: {'Filters': %s}" % (
-        filters) in str(x.value)
+    assert str(filters) in str(x.value)
 
 
 @patch('chaosaws.ec2.actions.aws_client', autospec=True)

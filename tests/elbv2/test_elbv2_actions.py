@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import pytest
-
 from unittest.mock import MagicMock, patch, call
 
+import pytest
 from chaoslib.exceptions import FailedActivity
+
 from chaosaws.elbv2.actions import (deregister_target, delete_load_balancer,
                                     set_subnets, set_security_groups)
 
@@ -13,9 +13,8 @@ def test_deregister_target(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     tg_name = 'TestTargetGroup1'
-    tg_arn = """
-    arn:aws:elasticloadbalancing:eu-west-1:111111111111:targetgroup/TestTargetGroup1/1234567890abcdef
-    """
+    tg_arn = 'arn:aws:elasticloadbalancing:eu-west-1:111111111111:' \
+             'targetgroup/TestTargetGroup1/1234567890abcdef'
     target_id = 'i-0123456789abcdef0'
     client.describe_target_groups.return_value = {"TargetGroups": [
         {
@@ -25,12 +24,15 @@ def test_deregister_target(aws_client):
     ]}
     client.describe_target_health.return_value = {
         'TargetHealthDescriptions': [{
-            'Target': {'Id': target_id}
+            'Target': {
+                'Id': target_id,
+                'Port': 80
+            }
         }]
     }
     deregister_target(tg_name=tg_name)
     client.deregister_targets.assert_called_with(
-        TargetGroupArn=tg_arn, Targets=[{'Id': target_id}])
+        TargetGroupArn=tg_arn, Targets=[{'Id': target_id, 'Port': 80}])
 
 
 @patch('chaosaws.elbv2.actions.aws_client', autospec=True)

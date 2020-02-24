@@ -10,6 +10,7 @@
 - adding unit tests for are desired tasks running probe
 - updating probes ALL list to include describe functions
 - adding action to set the desired task count of an ecs service
+- updating elbv2 deregister action to include port [#60][60]
 
 ## [0.12.0][]
 
