@@ -50,6 +50,7 @@ packages = [
     'chaosaws.ecs',
     'chaosaws.ec2',
     'chaosaws.eks',
+    'chaosaws.elasticache',
     'chaosaws.iam',
     'chaosaws.elbv2',
     'chaosaws.asg',
