@@ -10,11 +10,12 @@ from chaosaws.types import AWSResponse
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
+from chaosaws.utils import breakup_iterable
 
 __all__ = ["desired_equals_healthy", "desired_equals_healthy_tags",
            "wait_desired_equals_healthy", "wait_desired_equals_healthy_tags",
            "is_scaling_in_progress", "process_is_suspended", "has_subnets",
-           "describe_auto_scaling_groups",
+           "describe_auto_scaling_groups", "instance_count_by_health",
            "wait_desired_not_equals_healthy_tags"]
 
 
@@ -317,9 +318,74 @@ def has_subnets(subnets: List[str],
     return True
 
 
+def instance_count_by_health(asg_names: List[str] = None,
+                             tags: List[Dict[str, str]] = None,
+                             count_healthy: bool = True,
+                             configuration: Configuration = None,
+                             secrets: Secrets = None) -> int:
+    """Reports the number of instances currently in the ASG by their health
+    status
+
+    Params:
+        OneOf:
+            - asg_names: a list of asg names to describe
+            - tags: a list of key/value pairs to collect ASG(s)
+
+        - count_healthy: boolean: true for healthy instance count,
+                                  false for unhealthy instance count
+
+    `tags` are expected as a list of dictionary objects:
+    [
+        {'Key': 'TagKey1', 'Value': 'TagValue1'},
+        {'Key': 'TagKey2', 'Value': 'TagValue2'},
+        ...
+    ]
+    """
+    client = aws_client('autoscaling', configuration, secrets)
+    asgs = discover_scaling_groups(client, asg_names, tags)
+
+    status = 'Healthy'
+    if not count_healthy:
+        status = 'Unhealthy'
+
+    result = 0
+    for a in asgs['AutoScalingGroups']:
+        instances = a['Instances']
+        for instance in instances:
+            if instance['HealthStatus'] == status:
+                result += 1
+    return result
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
+def discover_scaling_groups(client: boto3.client,
+                            asgs: List[str] = None,
+                            tags: List[Dict[str, Any]] = None) -> AWSResponse:
+    if not any([asgs, tags]):
+        raise FailedActivity(
+            'missing one of the required parameters: asg_names or tags')
+    if not asgs:
+        asgs = []
+
+    if tags:
+        tag_filter = []
+        for t in tags:
+            tag_filter.append({'Name': t['Key'], 'Values': [t['Value']]})
+        paginator = client.get_paginator('describe_tags')
+        for p in paginator.paginate(Filters=tag_filter):
+            asgs.extend([t['ResourceId'] for t in p['Tags'] if t[
+                'ResourceId'] not in asgs])
+
+    results = {'AutoScalingGroups': []}
+    for group in breakup_iterable(asgs, 50):
+        response = client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=group)
+        results['AutoScalingGroups'].extend(response['AutoScalingGroups'])
+    return results
+
+
 def get_asg_by_name(asg_names: List[str],
                     client: boto3.client) -> AWSResponse:
     results = {'AutoScalingGroups': []}

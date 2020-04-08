@@ -8,7 +8,7 @@ from chaosaws.asg.probes import (
     desired_equals_healthy, desired_equals_healthy_tags, has_subnets,
     is_scaling_in_progress, wait_desired_equals_healthy, process_is_suspended,
     wait_desired_equals_healthy_tags, wait_desired_not_equals_healthy_tags,
-    describe_auto_scaling_groups)
+    describe_auto_scaling_groups, instance_count_by_health)
 from chaoslib.exceptions import FailedActivity
 
 
@@ -137,24 +137,30 @@ def test_desired_equals_healthy_tags_true(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     tags = [{'Key': 'Application', 'Value': 'mychaosapp'}]
-    client.describe_auto_scaling_groups.return_value = \
-        {
-            "AutoScalingGroups": [
-                {
-                    'AutoScalingGroupName': 'AutoScalingGroup1',
-                    "DesiredCapacity": 1,
-                    "Instances": [{
-                        "HealthStatus": "Healthy",
-                        "LifecycleState": "InService"
-                    }],
-                    'Tags': [{
-                        'ResourceId': 'AutoScalingGroup1',
-                        'Key': 'Application',
-                        'Value': 'mychaosapp'
-                    }]
-                }
-            ]
-        }
+    client.get_paginator.return_value.paginate.return_value = [{
+        "Tags": [{
+            "ResourceId": "AutoScalingGroup1",
+            "ResourceType": "auto-scaling-group",
+            "Key": "Application",
+            "Value": "mychaosapp"}]}]
+
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [
+            {
+                'AutoScalingGroupName': 'AutoScalingGroup1',
+                "DesiredCapacity": 1,
+                "Instances": [{
+                    "HealthStatus": "Healthy",
+                    "LifecycleState": "InService"
+                }],
+                'Tags': [{
+                    'ResourceId': 'AutoScalingGroup1',
+                    'Key': 'Application',
+                    'Value': 'mychaosapp'
+                }]
+            }
+        ]
+    }
     client.get_paginator.return_value.paginate.return_value = [{
         "AutoScalingGroups": [
             {
@@ -896,3 +902,139 @@ def test_describe_auto_scaling_groups_tags(aws_client):
     describe_auto_scaling_groups(tags=tags)
     client.describe_auto_scaling_groups.assert_called_with(
         AutoScalingGroupNames=["AutoScalingGroup-A", "AutoScalingGroup-B"])
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_instance_healthy_count_names(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A']
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Instances": [
+                {
+                    "InstanceId": "i-012345678901",
+                    "HealthStatus": "Healthy"
+                },
+                {
+                    "InstanceId": "i-012345678902",
+                    "HealthStatus": "Healthy"
+                },
+                {
+                    "InstanceId": "i-012345678903",
+                    "HealthStatus": "Unhealthy"
+                }]}]}
+    response = instance_count_by_health(asg_names)
+    client.describe_auto_scaling_groups.assert_called_with(
+        AutoScalingGroupNames=asg_names)
+    assert response == 2
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_instance_healthy_count_tags(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    tags = [{'Key': 'TestKey', 'Value': 'TestValue'}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        "Tags": [{
+            "ResourceId": "AutoScalingGroup-A",
+            "ResourceType": "auto-scaling-group",
+            "Key": "TestKey",
+            "Value": "TestValue"}]}]
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Instances": [
+                {
+                    "InstanceId": "i-012345678901",
+                    "HealthStatus": "Healthy"
+                },
+                {
+                    "InstanceId": "i-012345678902",
+                    "HealthStatus": "Healthy"
+                },
+                {
+                    "InstanceId": "i-012345678903",
+                    "HealthStatus": "Unhealthy"
+                }],
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-A",
+                "Key": "TestKey",
+                "Value": "TestValue"}]
+        }]}
+    response = instance_count_by_health(tags=tags)
+    client.get_paginator.return_value.paginate.assert_called_with(
+        Filters=[{'Name': 'TestKey', 'Values': ['TestValue']}])
+    client.describe_auto_scaling_groups.assert_called_with(
+        AutoScalingGroupNames=["AutoScalingGroup-A"])
+    assert response == 2
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_instance_unhealthy_count_names(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    asg_names = ['AutoScalingGroup-A']
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Instances": [
+                {
+                    "InstanceId": "i-012345678901",
+                    "HealthStatus": "Healthy"
+                },
+                {
+                    "InstanceId": "i-012345678902",
+                    "HealthStatus": "Healthy"
+                },
+                {
+                    "InstanceId": "i-012345678903",
+                    "HealthStatus": "Unhealthy"
+                }
+            ]}]}
+    response = instance_count_by_health(asg_names, count_healthy=False)
+    client.describe_auto_scaling_groups.assert_called_with(
+        AutoScalingGroupNames=asg_names)
+    assert response == 1
+
+
+@patch('chaosaws.asg.probes.aws_client', autospec=True)
+def test_instance_unhealthy_count_tags(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    tags = [{'Key': 'TestKey', 'Value': 'TestValue'}]
+    client.get_paginator.return_value.paginate.return_value = [{
+        "Tags": [{
+            "ResourceId": "AutoScalingGroup-A",
+            "ResourceType": "auto-scaling-group",
+            "Key": "TestKey",
+            "Value": "TestValue"}]}]
+
+    client.describe_auto_scaling_groups.return_value = {
+        "AutoScalingGroups": [{
+            "AutoScalingGroupName": "AutoScalingGroup-A",
+            "Instances": [
+                {
+                    "InstanceId": "i-012345678901",
+                    "HealthStatus": "Healthy"
+                },
+                {
+                    "InstanceId": "i-012345678902",
+                    "HealthStatus": "Healthy"
+                },
+                {
+                    "InstanceId": "i-012345678903",
+                    "HealthStatus": "Unhealthy"
+                }],
+            "Tags": [{
+                "ResourceId": "AutoScalingGroup-A",
+                "Key": "TestKey",
+                "Value": "TestValue"}]
+        }]}
+    response = instance_count_by_health(tags=tags, count_healthy=False)
+    client.get_paginator.return_value.paginate.assert_called_with(
+        Filters=[{'Name': 'TestKey', 'Values': ['TestValue']}])
+    client.describe_auto_scaling_groups.assert_called_with(
+        AutoScalingGroupNames=["AutoScalingGroup-A"])
+    assert response == 1
