@@ -216,7 +216,7 @@ def update_desired_count(cluster: str,
 ###############################################################################
 def validate_cluster(cluster: str, client: boto3.client) -> Union[str, None]:
     """Validates the provided cluster exists"""
-    cluster = client.describe_clusters(clusters=cluster)['clusters']
+    cluster = client.describe_clusters(clusters=[cluster])['clusters']
     if not cluster:
         return
     return cluster[0]['clusterArn']

@@ -330,5 +330,6 @@ def test_update_desired_service_count(aws_client):
     )
     update_desired_count(
         cluster=cluster, service=service, desired_count=1)
+    client.describe_clusters.assert_called_with(clusters=[cluster])
     client.update_service.assert_called_with(
         cluster=cluster, service=service, desiredCount=1)
