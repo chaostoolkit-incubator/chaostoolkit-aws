@@ -8,7 +8,7 @@ import boto3
 from botocore.exceptions import ClientError
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
-from chaoslib.exceptions import FailedActivity
+from chaoslib.exceptions import FailedActivity, ActivityFailed
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
@@ -657,3 +657,110 @@ def attach_instance_volume(client: boto3.client,
             'Unable to attach volume %s to instance %s: %s' % (
                 volume_id, instance_id, e.response['Error']['Message']))
     return response
+
+
+def authorize_security_group_ingress(requested_security_group_id: str,
+                                     ip_protocol: str,
+                                     from_port: int,
+                                     to_port: int,
+                                     ingress_security_group_id: str = None,
+                                     cidr_ip: str = None,
+                                     configuration: Configuration = None,
+                                     secrets: Secrets = None) -> AWSResponse:
+    """
+    Add one ingress rule to a security group
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.authorize_security_group_ingress
+
+    - requested_security_group_id: the id for the security group to update
+    - ip_protocol: ip protocol name (tcp, udp, icmp, icmpv6) or -1 to specify all
+    - from_port: start of port range
+    - to_port: end of port range
+    - ingress_security_group_id: id of the securiy group to allow access to. You can either specify this or cidr_ip.
+    - cidr_ip: the IPv6 CIDR range.
+    You can either specify this or ingress_security_group_id
+    """  # noqa: E501
+    client = aws_client('ec2', configuration, secrets)
+    request_kwargs = create_ingress_kwargs(
+        requested_security_group_id,
+        ip_protocol,
+        from_port,
+        to_port,
+        ingress_security_group_id,
+        cidr_ip
+    )
+    try:
+        response = client.authorize_security_group_ingress(**request_kwargs)
+        return response
+    except ClientError as e:
+        raise ActivityFailed(
+            'Failed to add ingress rule: {}'.format(
+                e.response["Error"]["Message"]))
+
+
+def revoke_security_group_ingress(requested_security_group_id: str,
+                                  ip_protocol: str,
+                                  from_port: int,
+                                  to_port: int,
+                                  ingress_security_group_id: str = None,
+                                  cidr_ip: str = None,
+                                  configuration: Configuration = None,
+                                  secrets: Secrets = None) -> AWSResponse:
+    """
+    Remove one ingress rule from a security group
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.revoke_security_group_ingress
+
+    - requested_security_group_id: the id for the security group to update
+    - ip_protocol: ip protocol name (tcp, udp, icmp, icmpv6) or -1 to specify all
+    - from_port: start of port range
+    - to_port: end of port range
+    - ingress_security_group_id: id of the securiy group to allow access to. You can either specify this or cidr_ip.
+    - cidr_ip: the IPv6 CIDR range. You can either specify this or ingress_security_group_id
+    """  # noqa: E501
+    client = aws_client('ec2', configuration, secrets)
+    request_kwargs = create_ingress_kwargs(
+        requested_security_group_id,
+        ip_protocol,
+        from_port,
+        to_port,
+        ingress_security_group_id,
+        cidr_ip
+    )
+    try:
+        response = client.revoke_security_group_ingress(**request_kwargs)
+        return response
+    except ClientError as e:
+        raise ActivityFailed(
+            'Failed to remove ingress rule: {}'.format(
+                e.response["Error"]["Message"]))
+
+
+def create_ingress_kwargs(requested_security_group_id: str,
+                          ip_protocol: str,
+                          from_port: int,
+                          to_port: int,
+                          ingress_security_group_id: str = None,
+                          cidr_ip: str = None,) -> Dict[str, any]:
+    request_kwargs = {
+        'GroupId': requested_security_group_id,
+        'IpPermissions': [
+            {
+                'IpProtocol': ip_protocol,
+                'IpRanges': [{
+                    # conditionally assign the following
+                    # 'CidrIp': cidr_ip
+                }],
+                'FromPort': from_port,
+                'ToPort': to_port,
+                'UserIdGroupPairs': [{
+                    # conditionally assign the following
+                    # 'GroupId': ingress_security_group_id
+                }]
+            }
+        ]
+    }
+    req = request_kwargs['IpPermissions'][0]
+    if cidr_ip is not None:
+        req['IpRanges'][0]['CidrIp'] = cidr_ip
+    if ingress_security_group_id is not None:
+        req['UserIdGroupPairs'][0]['GroupId'] = ingress_security_group_id
+    return request_kwargs

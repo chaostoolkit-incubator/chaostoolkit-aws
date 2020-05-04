@@ -1,4 +1,4 @@
-# Chaos Toolkit Extension for AWS
+# [Chaos Toolkit Extension for AWS](https://docs.chaostoolkit.org/drivers/aws/)
 
 [![Build Status](https://travis-ci.org/chaostoolkit-incubator/chaostoolkit-aws.svg?branch=master)](https://travis-ci.org/chaostoolkit-incubator/chaostoolkit-aws)
 [![Python versions](https://img.shields.io/pypi/pyversions/chaostoolkit-aws.svg)](https://www.python.org/)
@@ -368,7 +368,7 @@ def test_reboot_instance(aws_client):
 ```
 
 By using the [built-in Python module to mock objects][pymock], we can mock the
-EC2 client and assert we edo indeed call the appropriate method with the right
+EC2 client and assert that we do indeed call the appropriate method with the right
 arguments. You are encouraged to write more than a single test for various
 conditions.
 

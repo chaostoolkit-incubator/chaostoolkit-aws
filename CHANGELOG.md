@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.13.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
+
+## [0.14.0][]
+
+[0.14.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.13.0...0.14.0
+
+### Added
+
+- add EC2 actions to allow/revoke security group ingress
 
 ## [0.13.0][]
 

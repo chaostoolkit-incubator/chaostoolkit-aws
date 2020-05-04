@@ -6,7 +6,8 @@ import pytest
 
 from chaosaws.ec2.actions import (
     stop_instance, stop_instances, terminate_instance, terminate_instances,
-    start_instances, restart_instances, detach_random_volume, attach_volume)
+    start_instances, restart_instances, detach_random_volume, attach_volume,
+    authorize_security_group_ingress, revoke_security_group_ingress)
 
 from chaoslib.exceptions import FailedActivity
 
@@ -763,3 +764,143 @@ def test_attach_volume_ec2_filter(aws_client):
         InstanceId=instance_ids[0],
         VolumeId='vol-00000001')
     assert results[0]['DeviceName'] == '/dev/sdb'
+
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_authorize_security_group_ingress_with_ingress_security_group(aws_client):
+    #arrange
+    client = MagicMock()
+    aws_client.return_value = client
+    requested_security_group_id='sg-123456789abc'
+    ingress_security_group_id='sg-123456789cba'
+    ip_protocol='tcp'
+    from_port=0
+    to_port=80
+    #act
+    authorize_security_group_ingress(
+        requested_security_group_id=requested_security_group_id,
+        ip_protocol=ip_protocol,
+        from_port=from_port,
+        to_port=to_port,
+        ingress_security_group_id=ingress_security_group_id
+    )
+    #assert
+    client.authorize_security_group_ingress.assert_called_with(
+        GroupId=requested_security_group_id,
+        IpPermissions=[
+            {
+                'IpProtocol': ip_protocol,
+                'FromPort': from_port,
+                'ToPort': to_port,
+                'IpRanges': [{}],
+                'UserIdGroupPairs': [
+                    {
+                        'GroupId': ingress_security_group_id
+                    }
+                ]
+            }
+        ]
+    )
+    
+    
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_authorize_security_group_ingress_with_cidr_ip(aws_client):
+    #arrange
+    client = MagicMock()
+    aws_client.return_value = client
+    requested_security_group_id='sg-123456789abc'
+    cidr_ip='0.0.0.0/0'
+    ip_protocol='tcp'
+    from_port=0
+    to_port=80
+    #act
+    authorize_security_group_ingress(
+        requested_security_group_id=requested_security_group_id,
+        ip_protocol=ip_protocol,
+        from_port=from_port,
+        to_port=to_port,
+        cidr_ip=cidr_ip
+    )
+    #assert
+    client.authorize_security_group_ingress.assert_called_with(
+        GroupId=requested_security_group_id,
+        IpPermissions=[
+            {
+                'IpProtocol': ip_protocol,
+                'FromPort': from_port,
+                'ToPort': to_port,
+                'IpRanges': [{'CidrIp': cidr_ip}],
+                'UserIdGroupPairs': [{}]
+            }
+        ]
+    )
+    
+    
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_revoke_security_group_ingress_with_ingress_security_group(aws_client):
+    #arrange
+    client = MagicMock()
+    aws_client.return_value = client
+    requested_security_group_id='sg-123456789abc'
+    ingress_security_group_id='sg-123456789cba'
+    ip_protocol='tcp'
+    from_port=0
+    to_port=80
+    #act
+    revoke_security_group_ingress(
+        requested_security_group_id=requested_security_group_id,
+        ip_protocol=ip_protocol,
+        from_port=from_port,
+        to_port=to_port,
+        ingress_security_group_id=ingress_security_group_id
+    )
+    #assert
+    client.revoke_security_group_ingress.assert_called_with(
+        GroupId=requested_security_group_id,
+        IpPermissions=[
+            {
+                'IpProtocol': ip_protocol,
+                'FromPort': from_port,
+                'ToPort': to_port,
+                'IpRanges': [{}],
+                'UserIdGroupPairs': [
+                    {
+                        'GroupId': ingress_security_group_id
+                    }
+                ]
+            }
+        ]
+    )
+    
+
+@patch('chaosaws.ec2.actions.aws_client', autospec=True)
+def test_revoke_security_group_ingress_with_cidr_ip(aws_client):
+    #arrange
+    client = MagicMock()
+    aws_client.return_value = client
+    requested_security_group_id='sg-123456789abc'
+    cidr_ip='0.0.0.0/0'
+    ip_protocol='tcp'
+    from_port=0
+    to_port=80
+    #act
+    revoke_security_group_ingress(
+        requested_security_group_id=requested_security_group_id,
+        ip_protocol=ip_protocol,
+        from_port=from_port,
+        to_port=to_port,
+        cidr_ip=cidr_ip
+    )
+    #assert
+    client.revoke_security_group_ingress.assert_called_with(
+        GroupId=requested_security_group_id,
+        IpPermissions=[
+            {
+                'IpProtocol': ip_protocol,
+                'FromPort': from_port,
+                'ToPort': to_port,
+                'IpRanges': [{'CidrIp': cidr_ip}],
+                'UserIdGroupPairs': [{}]
+            }
+        ]
+    )
