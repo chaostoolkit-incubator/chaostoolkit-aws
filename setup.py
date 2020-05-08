@@ -49,6 +49,7 @@ packages = [
     'chaosaws',
     'chaosaws.ecs',
     'chaosaws.ec2',
+    'chaosaws.ec2_os',
     'chaosaws.eks',
     'chaosaws.elasticache',
     'chaosaws.iam',
