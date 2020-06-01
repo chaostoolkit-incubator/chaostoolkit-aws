@@ -1,12 +1,34 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Dict, List
 
+from chaoslib.exceptions import FailedActivity
+from chaoslib.types import Configuration, Secrets
+from logzero import logger
+
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
-from chaoslib.types import Configuration, Secrets
-from chaoslib.exceptions import FailedActivity
+from chaosaws.utils import probe_monitor
 
-__all__ = ["describe_instances", "count_instances", "instance_state"]
+__all__ = ["describe_instances", "count_instances", "instance_state",
+           "monitor"]
+
+
+def monitor(probe_name: str,
+            probe_args: Dict[str, Any],
+            disrupted: Any,
+            recovered: Any,
+            json_path: str = None,
+            timeout: int = 300,
+            delay: int = 5,
+            configuration: Configuration = None,
+            secrets: Secrets = None) -> AWSResponse:
+    """Monitors an existing ASG probe for specific values
+    """
+    logger.info('Starting monitor of probe "%s"' % probe_name)
+    results = probe_monitor('ec2', probe_name, probe_args, disrupted,
+                            recovered, json_path, timeout, delay,
+                            configuration, secrets)
+    return results
 
 
 def describe_instances(filters: List[Dict[str, Any]],

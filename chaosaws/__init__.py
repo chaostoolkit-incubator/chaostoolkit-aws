@@ -19,7 +19,7 @@ __version__ = '0.13.0'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
-def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
+def get_credentials(secrets: Secrets = None) -> Dict[str, Any]:
     """
     Credentialss may be provided via the secrets object. When they aren't,
     they will be loaded from the process environment (for instance, read from
@@ -56,12 +56,14 @@ def aws_client(resource_name: str, configuration: Configuration = None,
     https://boto3.readthedocs.io/en/latest/guide/configuration.html#assume-role-provider
     as we do not read those settings from the `secrets` object.
     """  # noqa: E501
-    configuration = configuration or {}
-    aws_profile_name = configuration.get("aws_profile_name")
-    aws_assume_role_arn = configuration.get("aws_assume_role_arn")
+    if not isinstance(configuration, dict):
+        configuration = {}
+    aws_profile_name = configuration.get("aws_profile_name") or None
+    aws_assume_role_arn = configuration.get("aws_assume_role_arn") or None
+
     params = get_credentials(secrets)
 
-    region = configuration.get("aws_region")
+    region = configuration.get("aws_region") or None
     if not region:
         logger.debug(
             "The configuration key `aws_region` is not set, looking in the "
@@ -73,6 +75,10 @@ def aws_client(resource_name: str, configuration: Configuration = None,
     if region:
         logger.debug("Using AWS region '{}'".format(region))
         params["region_name"] = region
+
+    aws_session = configuration.get('aws_session')
+    if aws_session:
+        return aws_session.client(resource_name)
 
     if boto3.DEFAULT_SESSION is None:
         # we must create our own session so that we can populate the profile
@@ -239,5 +245,6 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.rds.actions"))
     activities.extend(discover_probes("chaosaws.rds.probes"))
     activities.extend(discover_actions("chaosaws.elasticache.actions"))
+    activities.extend(discover_probes('chaosaws.route53.probes'))
 
     return activities

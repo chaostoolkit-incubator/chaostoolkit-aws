@@ -1,0 +1,50 @@
+{
+    "status_code": 200,
+    "data": {
+        "TargetHealthDescriptions": [
+            {
+                "Target": {
+                    "Id": "i-00000000000000000",
+                    "Port": 8080
+                },
+                "HealthCheckPort": "8080",
+                "TargetHealth": {
+                    "State": "healthy"
+                }
+            },
+            {
+                "Target": {
+                    "Id": "i-00000000000000001",
+                    "Port": 8080
+                },
+                "HealthCheckPort": "8080",
+                "TargetHealth": {
+                    "State": "unused",
+                    "Reason": "Target.InvalidState",
+                    "Description": "Target is in the stopped state"
+                }
+            },
+            {
+                "Target": {
+                    "Id": "i-00000000000000002",
+                    "Port": 8080
+                },
+                "HealthCheckPort": "8080",
+                "TargetHealth": {
+                    "State": "healthy"
+                }
+            }
+        ],
+        "ResponseMetadata": {
+            "RequestId": "37a4a9dd-bc29-4405-b2b9-8b834ed2068d",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "37a4a9dd-bc29-4405-b2b9-8b834ed2068d",
+                "content-type": "text/xml",
+                "content-length": "1259",
+                "date": "Tue, 02 Jun 2020 16:30:16 GMT"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}

@@ -3,13 +3,15 @@ from sys import maxsize
 from unittest.mock import MagicMock, patch
 
 import pytest
+from chaoslib.exceptions import FailedActivity
 
+from chaosaws.asg.actions import terminate_random_instances
 from chaosaws.asg.probes import (
     desired_equals_healthy, desired_equals_healthy_tags, has_subnets,
     is_scaling_in_progress, wait_desired_equals_healthy, process_is_suspended,
     wait_desired_equals_healthy_tags, wait_desired_not_equals_healthy_tags,
-    describe_auto_scaling_groups, instance_count_by_health)
-from chaoslib.exceptions import FailedActivity
+    describe_auto_scaling_groups, instance_count_by_health, monitor)
+from tests.zpharmacy import Pharmacy
 
 
 def test_desired_equals_healthy_needs_asg_names():
@@ -1038,3 +1040,27 @@ def test_instance_unhealthy_count_tags(aws_client):
     client.describe_auto_scaling_groups.assert_called_with(
         AutoScalingGroupNames=["AutoScalingGroup-A"])
     assert response == 1
+
+
+class TestMonitorProbe(Pharmacy):
+    def test_asg_monitor_desired_equals_healthy_names(self):
+        session = self.replay('test_asg_monitor_desired_equals_healthy_names')
+        params = {
+            'probe_name': 'desired_equals_healthy',
+            'probe_args': {'asg_names': ['generic_asg']},
+            'timeout': 300,
+            'delay': 1,
+            'disrupted': False,
+            'recovered': True,
+            'configuration': {'aws_session': session, 'aws_region': 'us-east-1'}
+        }
+
+        targs = {
+            'asg_names': ['generic_asg'],
+            'instance_count': 1,
+            'configuration': {'aws_session': session, 'aws_region': 'us-east-1'}
+        }
+
+        terminate_random_instances(**targs)
+        results = monitor(**params)
+        self.assertEqual(results['ctk:monitor_results'], 'success')

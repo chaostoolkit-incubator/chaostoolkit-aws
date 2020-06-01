@@ -1,0 +1,38 @@
+{
+    "status_code": 200,
+    "data": {
+        "TargetHealthDescriptions": [
+            {
+                "Target": {
+                    "Id": "i-00000000000000001",
+                    "Port": 8080
+                },
+                "HealthCheckPort": "8080",
+                "TargetHealth": {
+                    "State": "healthy"
+                }
+            },
+            {
+                "Target": {
+                    "Id": "i-00000000000000002",
+                    "Port": 8080
+                },
+                "HealthCheckPort": "8080",
+                "TargetHealth": {
+                    "State": "healthy"
+                }
+            }
+        ],
+        "ResponseMetadata": {
+            "RequestId": "10f7d3b7-ec24-404f-acba-cd17c19b2f48",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "10f7d3b7-ec24-404f-acba-cd17c19b2f48",
+                "content-type": "text/xml",
+                "content-length": "884",
+                "date": "Tue, 02 Jun 2020 15:07:52 GMT"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}
