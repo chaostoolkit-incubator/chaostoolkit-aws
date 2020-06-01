@@ -1,0 +1,495 @@
+{
+    "status_code": 200,
+    "data": {
+        "tasks": [
+            {
+                "attachments": [],
+                "availabilityZone": "us-east-1a",
+                "clusterArn": "arn:aws:ecs:us-east-1:000000000000:cluster/generic_cluster",
+                "connectivity": "CONNECTED",
+                "connectivityAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 22,
+                    "microsecond": 896000
+                },
+                "containerInstanceArn": "arn:aws:ecs:us-east-1:000000000000:container-instance/generic_cluster/00000000000000000000000000000000a",
+                "containers": [
+                    {
+                        "containerArn": "arn:aws:ecs:us-east-1:000000000000:container/00000000-0000-0000-0000-000000000010",
+                        "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000003",
+                        "name": "service_2",
+                        "image": "generic_image",
+                        "lastStatus": "RUNNING",
+                        "networkBindings": [
+                            {
+                                "bindIP": "0.0.0.0",
+                                "containerPort": 80,
+                                "hostPort": 20001,
+                                "protocol": "tcp"
+                            }
+                        ],
+                        "networkInterfaces": [],
+                        "healthStatus": "UNKNOWN",
+                        "cpu": "128",
+                        "memory": "1024"
+                    }
+                ],
+                "cpu": "128",
+                "createdAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 22,
+                    "microsecond": 896000
+                },
+                "desiredStatus": "RUNNING",
+                "group": "service:generic_service_2",
+                "healthStatus": "UNKNOWN",
+                "lastStatus": "RUNNING",
+                "launchType": "EC2",
+                "memory": "1024",
+                "overrides": {
+                    "containerOverrides": [
+                        {
+                            "name": "service_2"
+                        }
+                    ],
+                    "inferenceAcceleratorOverrides": []
+                },
+                "pullStartedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 23,
+                    "microsecond": 455000
+                },
+                "pullStoppedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 58,
+                    "microsecond": 455000
+                },
+                "startedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 20,
+                    "second": 2,
+                    "microsecond": 455000
+                },
+                "startedBy": "ecs-svc/0000000000000000003",
+                "tags": [],
+                "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000003",
+                "taskDefinitionArn": "arn:aws:ecs:us-east-1:000000000000:task-definition/service_2:1",
+                "version": 2
+            },
+            {
+                "attachments": [],
+                "availabilityZone": "us-east-1b",
+                "clusterArn": "arn:aws:ecs:us-east-1:000000000000:cluster/generic_cluster",
+                "connectivity": "CONNECTED",
+                "connectivityAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 7,
+                    "minute": 25,
+                    "second": 34,
+                    "microsecond": 227000
+                },
+                "containerInstanceArn": "arn:aws:ecs:us-east-1:000000000000:container-instance/generic_cluster/00000000000000000000000000000000",
+                "containers": [
+                    {
+                        "containerArn": "arn:aws:ecs:us-east-1:000000000000:container/00000000-0000-0000-0000-000000000000",
+                        "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000000",
+                        "name": "service_name",
+                        "image": "image_name",
+                        "lastStatus": "RUNNING",
+                        "networkBindings": [],
+                        "networkInterfaces": [],
+                        "healthStatus": "UNKNOWN",
+                        "cpu": "128",
+                        "memory": "1024"
+                    }
+                ],
+                "cpu": "128",
+                "createdAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 7,
+                    "minute": 25,
+                    "second": 34,
+                    "microsecond": 227000
+                },
+                "desiredStatus": "RUNNING",
+                "group": "service:generic_service_1",
+                "healthStatus": "UNKNOWN",
+                "lastStatus": "RUNNING",
+                "launchType": "EC2",
+                "memory": "1024",
+                "overrides": {
+                    "containerOverrides": [
+                        {
+                            "name": "service_name"
+                        }
+                    ],
+                    "inferenceAcceleratorOverrides": []
+                },
+                "pullStartedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 7,
+                    "minute": 25,
+                    "second": 34,
+                    "microsecond": 139000
+                },
+                "pullStoppedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 7,
+                    "minute": 26,
+                    "second": 14,
+                    "microsecond": 139000
+                },
+                "startedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 7,
+                    "minute": 26,
+                    "second": 15,
+                    "microsecond": 139000
+                },
+                "startedBy": "ecs-svc/0000000000000000002",
+                "tags": [],
+                "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000000",
+                "taskDefinitionArn": "arn:aws:ecs:us-east-1:000000000000:task-definition/service_name:136",
+                "version": 2
+            },
+            {
+                "attachments": [],
+                "availabilityZone": "us-east-1c",
+                "clusterArn": "arn:aws:ecs:us-east-1:000000000000:cluster/generic_cluster",
+                "connectivity": "CONNECTED",
+                "connectivityAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 13,
+                    "minute": 23,
+                    "second": 11,
+                    "microsecond": 853000
+                },
+                "containerInstanceArn": "arn:aws:ecs:us-east-1:000000000000:container-instance/generic_cluster/00000000000000000000000000000000",
+                "containers": [
+                    {
+                        "containerArn": "arn:aws:ecs:us-east-1:000000000000:container/00000000-0000-0000-0000-000000000000",
+                        "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000001",
+                        "name": "service_name",
+                        "image": "image_name",
+                        "lastStatus": "RUNNING",
+                        "networkBindings": [],
+                        "networkInterfaces": [],
+                        "healthStatus": "UNKNOWN",
+                        "cpu": "128",
+                        "memory": "1024"
+                    }
+                ],
+                "cpu": "128",
+                "createdAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 13,
+                    "minute": 23,
+                    "second": 11,
+                    "microsecond": 853000
+                },
+                "desiredStatus": "RUNNING",
+                "group": "service:generic_service_1",
+                "healthStatus": "UNKNOWN",
+                "lastStatus": "RUNNING",
+                "launchType": "EC2",
+                "memory": "1024",
+                "overrides": {
+                    "containerOverrides": [
+                        {
+                            "name": "service_name"
+                        }
+                    ],
+                    "inferenceAcceleratorOverrides": []
+                },
+                "pullStartedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 13,
+                    "minute": 23,
+                    "second": 13,
+                    "microsecond": 517000
+                },
+                "pullStoppedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 13,
+                    "minute": 23,
+                    "second": 13,
+                    "microsecond": 517000
+                },
+                "startedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 6,
+                    "day": 1,
+                    "hour": 13,
+                    "minute": 23,
+                    "second": 13,
+                    "microsecond": 517000
+                },
+                "startedBy": "ecs-svc/0000000000000000002",
+                "tags": [],
+                "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000001",
+                "taskDefinitionArn": "arn:aws:ecs:us-east-1:000000000000:task-definition/service_name:136",
+                "version": 2
+            },
+            {
+                "attachments": [],
+                "availabilityZone": "us-east-1a",
+                "clusterArn": "arn:aws:ecs:us-east-1:000000000000:cluster/generic_cluster",
+                "connectivity": "CONNECTED",
+                "connectivityAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 11,
+                    "microsecond": 864000
+                },
+                "containerInstanceArn": "arn:aws:ecs:us-east-1:000000000000:container-instance/generic_cluster/00000000000000000000000000000000a",
+                "containers": [
+                    {
+                        "containerArn": "arn:aws:ecs:us-east-1:000000000000:container/00000000-1000-0000-0000-000000000000",
+                        "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000004",
+                        "name": "service_3",
+                        "image": "generic_image:latest",
+                        "lastStatus": "RUNNING",
+                        "networkBindings": [
+                            {
+                                "bindIP": "0.0.0.0",
+                                "containerPort": 8080,
+                                "hostPort": 20000,
+                                "protocol": "tcp"
+                            }
+                        ],
+                        "networkInterfaces": [],
+                        "healthStatus": "UNKNOWN",
+                        "cpu": "128",
+                        "memory": "1024"
+                    }
+                ],
+                "cpu": "128",
+                "createdAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 11,
+                    "microsecond": 864000
+                },
+                "desiredStatus": "RUNNING",
+                "group": "service:generic_service_3",
+                "healthStatus": "UNKNOWN",
+                "lastStatus": "RUNNING",
+                "launchType": "EC2",
+                "memory": "1024",
+                "overrides": {
+                    "containerOverrides": [
+                        {
+                            "name": "service_3"
+                        }
+                    ],
+                    "inferenceAcceleratorOverrides": []
+                },
+                "pullStartedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 13,
+                    "microsecond": 30000
+                },
+                "pullStoppedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 14,
+                    "microsecond": 30000
+                },
+                "startedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 14,
+                    "microsecond": 30000
+                },
+                "startedBy": "ecs-svc/0000000000000000001",
+                "tags": [],
+                "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000004",
+                "taskDefinitionArn": "arn:aws:ecs:us-east-1:000000000000:task-definition/service_3:106",
+                "version": 2
+            },
+            {
+                "attachments": [],
+                "availabilityZone": "us-east-1a",
+                "clusterArn": "arn:aws:ecs:us-east-1:000000000000:cluster/generic_cluster",
+                "connectivity": "CONNECTED",
+                "connectivityAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 28,
+                    "microsecond": 952000
+                },
+                "containerInstanceArn": "arn:aws:ecs:us-east-1:000000000000:container-instance/generic_cluster/00000000000000000000000000000000a",
+                "containers": [
+                    {
+                        "containerArn": "arn:aws:ecs:us-east-1:000000000000:container/00000000-0000-0000-0000-000000000020",
+                        "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000005",
+                        "name": "service_4",
+                        "image": "generic_image_3",
+                        "lastStatus": "RUNNING",
+                        "networkBindings": [
+                            {
+                                "bindIP": "0.0.0.0",
+                                "containerPort": 80,
+                                "hostPort": 20002,
+                                "protocol": "tcp"
+                            }
+                        ],
+                        "networkInterfaces": [],
+                        "healthStatus": "UNKNOWN",
+                        "cpu": "128",
+                        "memory": "1024"
+                    }
+                ],
+                "cpu": "128",
+                "createdAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 28,
+                    "microsecond": 952000
+                },
+                "desiredStatus": "RUNNING",
+                "group": "service:service_4",
+                "healthStatus": "UNKNOWN",
+                "lastStatus": "RUNNING",
+                "launchType": "EC2",
+                "memory": "1024",
+                "overrides": {
+                    "containerOverrides": [
+                        {
+                            "name": "service_4"
+                        }
+                    ],
+                    "inferenceAcceleratorOverrides": []
+                },
+                "pullStartedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 19,
+                    "second": 29,
+                    "microsecond": 565000
+                },
+                "pullStoppedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 20,
+                    "second": 0,
+                    "microsecond": 565000
+                },
+                "startedAt": {
+                    "__class__": "datetime",
+                    "year": 2020,
+                    "month": 5,
+                    "day": 29,
+                    "hour": 22,
+                    "minute": 20,
+                    "second": 2,
+                    "microsecond": 565000
+                },
+                "startedBy": "ecs-svc/0000000000000000000",
+                "tags": [],
+                "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000005",
+                "taskDefinitionArn": "arn:aws:ecs:us-east-1:000000000000:task-definition/service_4:555",
+                "version": 2
+            }
+        ],
+        "failures": [],
+        "ResponseMetadata": {
+            "RequestId": "d8ae3ba3-3520-47fc-a2d2-4d6ce7e53fea",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "d8ae3ba3-3520-47fc-a2d2-4d6ce7e53fea",
+                "content-type": "application/x-amz-json-1.1",
+                "content-length": "7290",
+                "date": "Mon, 01 Jun 2020 17:31:24 GMT"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}
