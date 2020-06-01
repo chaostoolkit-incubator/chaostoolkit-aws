@@ -1,0 +1,117 @@
+{
+    "status_code": 200,
+    "data": {
+        "task": {
+            "attachments": [],
+            "availabilityZone": "us-east-1a",
+            "clusterArn": "arn:aws:ecs:us-east-1:000000000000:cluster/generic_cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": {
+                "__class__": "datetime",
+                "year": 2020,
+                "month": 6,
+                "day": 1,
+                "hour": 13,
+                "minute": 26,
+                "second": 55,
+                "microsecond": 410000
+            },
+            "containerInstanceArn": "arn:aws:ecs:us-east-1:000000000000:container-instance/generic_cluster/00000000000000000000000000000000a",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:000000000000:container/000000000-0000-0000-0000-00000000000f",
+                    "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000002",
+                    "name": "service_name",
+                    "image": "image_name",
+                    "lastStatus": "RUNNING",
+                    "networkBindings": [],
+                    "networkInterfaces": [],
+                    "cpu": "128",
+                    "memory": "1024"
+                }
+            ],
+            "cpu": "128",
+            "createdAt": {
+                "__class__": "datetime",
+                "year": 2020,
+                "month": 6,
+                "day": 1,
+                "hour": 13,
+                "minute": 26,
+                "second": 55,
+                "microsecond": 410000
+            },
+            "desiredStatus": "STOPPED",
+            "group": "service:generic_service_1",
+            "lastStatus": "RUNNING",
+            "launchType": "EC2",
+            "memory": "1024",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "service_name"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "pullStartedAt": {
+                "__class__": "datetime",
+                "year": 2020,
+                "month": 6,
+                "day": 1,
+                "hour": 13,
+                "minute": 26,
+                "second": 56,
+                "microsecond": 809000
+            },
+            "pullStoppedAt": {
+                "__class__": "datetime",
+                "year": 2020,
+                "month": 6,
+                "day": 1,
+                "hour": 13,
+                "minute": 26,
+                "second": 56,
+                "microsecond": 809000
+            },
+            "startedAt": {
+                "__class__": "datetime",
+                "year": 2020,
+                "month": 6,
+                "day": 1,
+                "hour": 13,
+                "minute": 26,
+                "second": 56,
+                "microsecond": 809000
+            },
+            "startedBy": "ecs-svc/0000000000000000002",
+            "stopCode": "UserInitiated",
+            "stoppedReason": "Chaos Testing",
+            "stoppingAt": {
+                "__class__": "datetime",
+                "year": 2020,
+                "month": 6,
+                "day": 1,
+                "hour": 13,
+                "minute": 31,
+                "second": 24,
+                "microsecond": 48000
+            },
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000002",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:000000000000:task-definition/service_name:136",
+            "version": 3
+        },
+        "ResponseMetadata": {
+            "RequestId": "d81b081b-47bc-4469-b5d4-eff9af4c619f",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "d81b081b-47bc-4469-b5d4-eff9af4c619f",
+                "content-type": "application/x-amz-json-1.1",
+                "content-length": "1456",
+                "date": "Mon, 01 Jun 2020 17:31:23 GMT"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}

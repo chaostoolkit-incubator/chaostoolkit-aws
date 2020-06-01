@@ -4,9 +4,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from chaoslib.exceptions import FailedActivity
 
+from chaosaws.ecs.actions import stop_random_tasks
 from chaosaws.ecs.probes import (
     service_is_deploying, describe_cluster, describe_service, describe_tasks,
-    are_all_desired_tasks_running)
+    are_all_desired_tasks_running, monitor)
+from tests.zpharmacy import Pharmacy
 
 
 @patch('chaosaws.ecs.probes.aws_client', autospec=True)
@@ -186,3 +188,33 @@ def test_describe_tasks(aws_client):
         cluster='MyCluster',
         tasks=['arn:aws:ecs:region:012345678910:task/MyCluster/123456789'])
     assert response['tasks'][0]['version'] == 22
+
+
+class TestMonitorECS(Pharmacy):
+    def test_ecs_task_monitor_describe_tasks(self):
+        session = self.replay('test_ecs_monitor_describe_tasks')
+        params = {
+            'probe_name': 'describe_tasks',
+            'probe_args': {'cluster': 'generic_cluster'},
+            'json_path': 'tasks[]',
+            'disrupted': 5,
+            'recovered': 6,
+            'delay': 1,
+            'configuration': {
+                'aws_session': session,
+                'aws_region': 'us-east-1'
+            }
+        }
+
+        targs = {
+            'cluster': 'generic_cluster',
+            'service': 'generic_service_2',
+            'task_count': 1,
+            'configuration': {
+                'aws_session': session,
+                'aws_region': 'us-east-1'
+            }
+        }
+        stop_random_tasks(**targs)
+        results = monitor(**params)
+        self.assertEqual(results['ctk:monitor_results'], 'success')

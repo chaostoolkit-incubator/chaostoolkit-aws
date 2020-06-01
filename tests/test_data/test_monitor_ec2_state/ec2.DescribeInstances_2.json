@@ -1,0 +1,92 @@
+{
+    "status_code": 200,
+    "data": {
+        "Reservations": [
+            {
+                "Groups": [],
+                "Instances": [
+                    {
+                        "AmiLaunchIndex": 0,
+                        "ImageId": "ami-00000000000000000",
+                        "InstanceId": "i-00000000000000000",
+                        "InstanceType": "t3.micro",
+                        "LaunchTime": {
+                            "__class__": "datetime",
+                            "year": 2020,
+                            "month": 6,
+                            "day": 10,
+                            "hour": 14,
+                            "minute": 42,
+                            "second": 26,
+                            "microsecond": 0
+                        },
+                        "Monitoring": {
+                            "State": "enabled"
+                        },
+                        "Placement": {
+                            "AvailabilityZone": "us-east-1a",
+                            "GroupName": "",
+                            "Tenancy": "default"
+                        },
+                        "PrivateDnsName": "",
+                        "ProductCodes": [],
+                        "PublicDnsName": "",
+                        "State": {
+                            "Code": 48,
+                            "Name": "terminated"
+                        },
+                        "StateTransitionReason": "User initiated (2020-06-10 14:53:45 GMT)",
+                        "Architecture": "x86_64",
+                        "BlockDeviceMappings": [],
+                        "ClientToken": "00000000-0000-0000-0000-000000000000",
+                        "EbsOptimized": false,
+                        "EnaSupport": true,
+                        "Hypervisor": "xen",
+                        "NetworkInterfaces": [],
+                        "RootDeviceName": "/dev/sda1",
+                        "RootDeviceType": "ebs",
+                        "SecurityGroups": [],
+                        "StateReason": {
+                            "Code": "Client.UserInitiatedShutdown",
+                            "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                        },
+                        "Tags": [],
+                        "VirtualizationType": "hvm",
+                        "CpuOptions": {
+                            "CoreCount": 1,
+                            "ThreadsPerCore": 2
+                        },
+                        "CapacityReservationSpecification": {
+                            "CapacityReservationPreference": "open"
+                        },
+                        "HibernationOptions": {
+                            "Configured": false
+                        },
+                        "MetadataOptions": {
+                            "State": "pending",
+                            "HttpTokens": "optional",
+                            "HttpPutResponseHopLimit": 1,
+                            "HttpEndpoint": "enabled"
+                        }
+                    }
+                ],
+                "OwnerId": "000000000000",
+                "RequesterId": "000000000000",
+                "ReservationId": "r-00000000000000000"
+            }
+        ],
+        "ResponseMetadata": {
+            "RequestId": "0ffee018-978b-4cf0-9e88-afcc684c558f",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "0ffee018-978b-4cf0-9e88-afcc684c558f",
+                "content-type": "text/xml;charset=UTF-8",
+                "content-length": "4105",
+                "vary": "accept-encoding",
+                "date": "Wed, 10 Jun 2020 14:54:16 GMT",
+                "server": "AmazonEC2"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}

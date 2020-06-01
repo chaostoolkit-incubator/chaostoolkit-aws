@@ -1,0 +1,31 @@
+{
+    "status_code": 200,
+    "data": {
+        "TerminatingInstances": [
+            {
+                "CurrentState": {
+                    "Code": 32,
+                    "Name": "shutting-down"
+                },
+                "InstanceId": "i-00000000000000000",
+                "PreviousState": {
+                    "Code": 16,
+                    "Name": "running"
+                }
+            }
+        ],
+        "ResponseMetadata": {
+            "RequestId": "ee87d483-f178-4add-98bc-35d9c319a25a",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "ee87d483-f178-4add-98bc-35d9c319a25a",
+                "content-type": "text/xml;charset=UTF-8",
+                "transfer-encoding": "chunked",
+                "vary": "accept-encoding",
+                "date": "Wed, 10 Jun 2020 15:13:17 GMT",
+                "server": "AmazonEC2"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}

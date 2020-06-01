@@ -1,0 +1,164 @@
+{
+    "status_code": 200,
+    "data": {
+        "Reservations": [
+            {
+                "Groups": [],
+                "Instances": [
+                    {
+                        "AmiLaunchIndex": 0,
+                        "ImageId": "ami-00000000000000000",
+                        "InstanceId": "i-00000000000000000",
+                        "InstanceType": "t3.micro",
+                        "LaunchTime": {
+                            "__class__": "datetime",
+                            "year": 2020,
+                            "month": 6,
+                            "day": 10,
+                            "hour": 14,
+                            "minute": 42,
+                            "second": 26,
+                            "microsecond": 0
+                        },
+                        "Monitoring": {
+                            "State": "enabled"
+                        },
+                        "Placement": {
+                            "AvailabilityZone": "us-east-1a",
+                            "GroupName": "",
+                            "Tenancy": "default"
+                        },
+                        "PrivateDnsName": "ip-0-0-0-0.ec2.internal",
+                        "PrivateIpAddress": "0.0.0.0",
+                        "ProductCodes": [],
+                        "PublicDnsName": "",
+                        "State": {
+                            "Code": 16,
+                            "Name": "running"
+                        },
+                        "StateTransitionReason": "",
+                        "SubnetId": "subnet-00000000",
+                        "VpcId": "vpc-00000000",
+                        "Architecture": "x86_64",
+                        "BlockDeviceMappings": [
+                            {
+                                "DeviceName": "/dev/sda1",
+                                "Ebs": {
+                                    "AttachTime": {
+                                        "__class__": "datetime",
+                                        "year": 2020,
+                                        "month": 6,
+                                        "day": 10,
+                                        "hour": 14,
+                                        "minute": 42,
+                                        "second": 27,
+                                        "microsecond": 0
+                                    },
+                                    "DeleteOnTermination": true,
+                                    "Status": "attached",
+                                    "VolumeId": "vol-00000000000000000"
+                                }
+                            }
+                        ],
+                        "ClientToken": "00000000-0000-0000-0000-000000000000",
+                        "EbsOptimized": false,
+                        "EnaSupport": true,
+                        "Hypervisor": "xen",
+                        "IamInstanceProfile": {
+                            "Arn": "arn:aws:iam::000000000000:instance-profile/TestRole",
+                            "Id": "AAAAAAAAAAAAAAAAAAAAA"
+                        },
+                        "NetworkInterfaces": [
+                            {
+                                "Attachment": {
+                                    "AttachTime": {
+                                        "__class__": "datetime",
+                                        "year": 2020,
+                                        "month": 6,
+                                        "day": 10,
+                                        "hour": 14,
+                                        "minute": 42,
+                                        "second": 26,
+                                        "microsecond": 0
+                                    },
+                                    "AttachmentId": "eni-attach-00000000000000000",
+                                    "DeleteOnTermination": true,
+                                    "DeviceIndex": 0,
+                                    "Status": "attached"
+                                },
+                                "Description": "",
+                                "Groups": [
+                                    {
+                                        "GroupName": "TestSG",
+                                        "GroupId": "sg-00000000000000000"
+                                    }
+                                ],
+                                "Ipv6Addresses": [],
+                                "MacAddress": "00:00:00:00:00:00",
+                                "NetworkInterfaceId": "eni-00000000000000000",
+                                "OwnerId": "000000000000",
+                                "PrivateDnsName": "ip-0-0-0-0.ec2.internal",
+                                "PrivateIpAddress": "0.0.0.0",
+                                "PrivateIpAddresses": [
+                                    {
+                                        "Primary": true,
+                                        "PrivateDnsName": "ip-0-0-0-0.ec2.internal",
+                                        "PrivateIpAddress": "0.0.0.0"
+                                    }
+                                ],
+                                "SourceDestCheck": true,
+                                "Status": "in-use",
+                                "SubnetId": "subnet-00000000",
+                                "VpcId": "vpc-00000000",
+                                "InterfaceType": "interface"
+                            }
+                        ],
+                        "RootDeviceName": "/dev/sda1",
+                        "RootDeviceType": "ebs",
+                        "SecurityGroups": [
+                            {
+                                "GroupName": "TestSG",
+                                "GroupId": "sg-00000000000000000"
+                            }
+                        ],
+                        "SourceDestCheck": true,
+                        "Tags": [],
+                        "VirtualizationType": "hvm",
+                        "CpuOptions": {
+                            "CoreCount": 1,
+                            "ThreadsPerCore": 2
+                        },
+                        "CapacityReservationSpecification": {
+                            "CapacityReservationPreference": "open"
+                        },
+                        "HibernationOptions": {
+                            "Configured": false
+                        },
+                        "MetadataOptions": {
+                            "State": "applied",
+                            "HttpTokens": "optional",
+                            "HttpPutResponseHopLimit": 1,
+                            "HttpEndpoint": "enabled"
+                        }
+                    }
+                ],
+                "OwnerId": "000000000000",
+                "RequesterId": "000000000000",
+                "ReservationId": "r-00000000000000000"
+            }
+        ],
+        "ResponseMetadata": {
+            "RequestId": "fbbb0883-7f89-4efd-bac1-ea1204d60fb7",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "fbbb0883-7f89-4efd-bac1-ea1204d60fb7",
+                "content-type": "text/xml;charset=UTF-8",
+                "content-length": "8139",
+                "vary": "accept-encoding",
+                "date": "Wed, 10 Jun 2020 14:53:44 GMT",
+                "server": "AmazonEC2"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}

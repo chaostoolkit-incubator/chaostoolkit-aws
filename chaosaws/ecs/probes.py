@@ -1,12 +1,35 @@
 # -*- coding: utf-8 -*-
+from typing import Any, Dict
+
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
+from logzero import logger
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
+from chaosaws.utils import probe_monitor
 
 __all__ = ["service_is_deploying", "are_all_desired_tasks_running",
-           "describe_cluster", "describe_service", "describe_tasks"]
+           "monitor", "describe_cluster", "describe_service",
+           "describe_tasks"]
+
+
+def monitor(probe_name: str,
+            probe_args: Dict[str, Any],
+            disrupted: Any,
+            recovered: Any,
+            json_path: str = None,
+            timeout: int = 300,
+            delay: int = 5,
+            configuration: Configuration = None,
+            secrets: Secrets = None) -> AWSResponse:
+    """Monitors for changes to the tasks in an ECS service.
+    """
+    logger.info('Starting monitor of probe "%s"' % probe_name)
+    results = probe_monitor('ecs', probe_name, probe_args, disrupted,
+                            recovered, json_path, timeout, delay,
+                            configuration, secrets)
+    return results
 
 
 def service_is_deploying(cluster: str,

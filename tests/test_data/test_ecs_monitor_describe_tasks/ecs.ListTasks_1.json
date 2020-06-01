@@ -1,0 +1,21 @@
+{
+    "status_code": 200,
+    "data": {
+        "taskArns": [
+            "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000000",
+            "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000001",
+            "arn:aws:ecs:us-east-1:000000000000:task/generic_cluster/000000000000000000000000000000002"
+        ],
+        "ResponseMetadata": {
+            "RequestId": "aaf6875b-a276-438d-bc22-d508e8778369",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "aaf6875b-a276-438d-bc22-d508e8778369",
+                "content-type": "application/x-amz-json-1.1",
+                "content-length": "290",
+                "date": "Mon, 01 Jun 2020 17:31:23 GMT"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}

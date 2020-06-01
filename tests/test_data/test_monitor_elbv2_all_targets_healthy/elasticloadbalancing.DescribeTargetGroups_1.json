@@ -1,0 +1,40 @@
+{
+    "status_code": 200,
+    "data": {
+        "TargetGroups": [
+            {
+                "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:targetgroup/generic_target_group/0000000000000000",
+                "TargetGroupName": "generic_target_group",
+                "Protocol": "HTTP",
+                "Port": 443,
+                "VpcId": "vpc-00000000",
+                "HealthCheckProtocol": "HTTP",
+                "HealthCheckPort": "traffic-port",
+                "HealthCheckEnabled": true,
+                "HealthCheckIntervalSeconds": 30,
+                "HealthCheckTimeoutSeconds": 5,
+                "HealthyThresholdCount": 2,
+                "UnhealthyThresholdCount": 4,
+                "HealthCheckPath": "/health",
+                "Matcher": {
+                    "HttpCode": "200-299"
+                },
+                "LoadBalancerArns": [
+                    "arn:aws:elasticloadbalancing:us-east-1:000000000000:loadbalancer/app/generic_alb/0000000000000000"
+                ],
+                "TargetType": "instance"
+            }
+        ],
+        "ResponseMetadata": {
+            "RequestId": "f2310609-7564-499e-80a7-da5ff0da6f5f",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "f2310609-7564-499e-80a7-da5ff0da6f5f",
+                "content-type": "text/xml",
+                "content-length": "1441",
+                "date": "Tue, 02 Jun 2020 16:30:16 GMT"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}
