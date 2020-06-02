@@ -182,6 +182,14 @@ call against the [AWS STS][sts] service to fetch credentials dynamically.
 [assumerole]: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sts.html#STS.Client.assume_role
 [sts]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html
 
+#### Role template
+
+You can refer to `cf_role_template.json` file in the project repository for a template 
+of a role with necessary permissions to run the tests.
+
+The template comes with a 
+configuration parameter to enable a selected account to assume the role.
+
 #### Pass credentials explicitely
 
 You can pass the credentials as a secret to the experiment definition as
@@ -454,3 +462,8 @@ sub-package, with actions and probes:
     activities.extend(discover_probes("chaosaws.eks.probes"))
 ```
 
+#### Adding permissions for new API calls
+
+To keep the policy with lowest number of needed permissions up to date, when 
+adding code that calls new AWS actions, `cf_role_template.json` file must be updated to
+enable the role to invoke the actions.
