@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
-from tests.zpharmacy import Pharmacy
+
 import pytest
 from chaoslib.exceptions import FailedActivity
 
+from chaosaws.ecs.actions import stop_random_tasks
 from chaosaws.ecs.probes import (
     service_is_deploying, describe_cluster, describe_service, describe_tasks,
     are_all_desired_tasks_running, monitor)
-from chaosaws.ecs.actions import stop_random_tasks
+from tests.zpharmacy import Pharmacy
 
 
 @patch('chaosaws.ecs.probes.aws_client', autospec=True)

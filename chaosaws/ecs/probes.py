@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
+from typing import Any, Dict
+
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
-import time
-import sys
-from typing import Any, Dict
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
-from chaosaws.utils import jmes_search
+from chaosaws.utils import probe_monitor
 
-here = sys.modules[__name__]
 __all__ = ["service_is_deploying", "are_all_desired_tasks_running",
            "monitor", "describe_cluster", "describe_service",
            "describe_tasks"]
@@ -26,47 +24,9 @@ def monitor(probe_name: str,
             secrets: Secrets = None) -> AWSResponse:
     """Monitors for changes to the tasks in an ECS service.
     """
-    def _check_status(_data, _value, _jpath=None):
-        if json_path:
-            return jmes_search(_jpath, _data, _value)
-        return _data == _value
-
-    if probe_name not in __all__:
-        raise FailedActivity('no probe named %s found for ecs' % probe_name)
-
-    fx = getattr(here, probe_name)
-    probe_args.update({'configuration': configuration, 'secrets': secrets})
-    is_disrupted = False
-    results = {}
-    start_time = time.time()
-
-    while not is_disrupted:
-        if int(time.time() - start_time) > timeout:
-            raise FailedActivity('Timeout reached (%s) seconds' % timeout)
-
-        response = fx(**probe_args)
-        if _check_status(response, disrupted, json_path):
-            is_disrupted = True
-            results['ctk:disruption_time'] = time.time()
-            continue
-        time.sleep(delay)
-
-    is_recovered = False
-    while not is_recovered:
-        if int(time.time() - start_time) > timeout:
-            raise FailedActivity('Timeout reached (%s) seconds' % timeout)
-
-        response = fx(**probe_args)
-        if _check_status(response, recovered, json_path):
-            is_recovered = True
-            results['ctk:recovery_time'] = time.time()
-            continue
-        time.sleep(delay)
-
-    results['ctk:monitor_results'] = 'success'
-    results['ctk:time_to_recovery'] = int(
-        results['ctk:recovery_time'] - results['ctk:disruption_time'])
-    results['ctk:monitor_elapsed'] = int(time.time() - start_time)
+    results = probe_monitor('ecs', probe_name, probe_args, disrupted,
+                            recovered, json_path, timeout, delay,
+                            configuration, secrets)
     return results
 
 
