@@ -5,18 +5,36 @@ from sys import maxsize
 from typing import Any, Dict, List, Union
 
 import boto3
-from chaosaws import aws_client
-from chaosaws.types import AWSResponse
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
-from chaosaws.utils import breakup_iterable
+
+from chaosaws import aws_client
+from chaosaws.types import AWSResponse
+from chaosaws.utils import breakup_iterable, probe_monitor
 
 __all__ = ["desired_equals_healthy", "desired_equals_healthy_tags",
            "wait_desired_equals_healthy", "wait_desired_equals_healthy_tags",
            "is_scaling_in_progress", "process_is_suspended", "has_subnets",
            "describe_auto_scaling_groups", "instance_count_by_health",
-           "wait_desired_not_equals_healthy_tags"]
+           "wait_desired_not_equals_healthy_tags", "monitor"]
+
+
+def monitor(probe_name: str,
+            probe_args: Dict[str, Any],
+            disrupted: Any,
+            recovered: Any,
+            json_path: str = None,
+            timeout: int = 300,
+            delay: int = 5,
+            configuration: Configuration = None,
+            secrets: Secrets = None) -> AWSResponse:
+    """Monitors an existing ASG probe for specific values
+    """
+    results = probe_monitor('asg', probe_name, probe_args, disrupted,
+                            recovered, json_path, timeout, delay,
+                            configuration, secrets)
+    return results
 
 
 def describe_auto_scaling_groups(asg_names: List[str] = None,
