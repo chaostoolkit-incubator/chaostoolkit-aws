@@ -3,12 +3,14 @@ from typing import Any, Dict, List
 
 import boto3
 from chaoslib.types import Configuration, Secrets
+from chaoslib.exceptions import FailedActivity
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 from logzero import logger
+from botocore.exceptions import ClientError
 
-__all__ = ["delete_rule", "disable_rule", "enable_rule",
+__all__ = ["delete_rule", "disable_rule", "enable_rule", "set_alarm_state",
            "put_rule", "put_rule_targets", "remove_rule_targets"]
 
 
@@ -98,6 +100,37 @@ def remove_rule_targets(rule_name: str, target_ids: List[str] = None,
     if target_ids is None:
         target_ids = _get_rule_target_ids(rule_name, client)
     return _remove_rule_targets(rule_name, target_ids, client)
+
+
+def set_alarm_state(alarm_name: str, alarm_state: str,
+                    state_reason: str = None, state_data: str = None,
+                    configuration: Configuration = None,
+                    secrets: Secrets = None) -> None:
+    """Temporarily sets the state of an alarm
+
+    Parameters:
+        alarm_name: the name of the alarm
+        alarm_state: the new alarm state (OK, ALARM, INSUFFICIENT DATA)
+        state_reason: the reason the alarm is in the new state
+        state_data: the reason the alarm is in the new state (json format)
+        configuration: chaostoolkit account configuration
+        secrets: chaostoolkit secrets configuration
+    """
+    valid_states = ['OK', 'ALARM', 'INSUFFICIENT DATA']
+    if not state_reason:
+        state_reason = 'Chaos Toolkit Experiment'
+
+    if alarm_state not in valid_states:
+        raise FailedActivity('%s is not a valid alarm state (%s)' % (
+            alarm_state, ', '.join(valid_states)))
+
+    params = dict(AlarmName=alarm_name, StateValue=alarm_state,
+                  StateReason=state_reason)
+    if state_data:
+        params['StateReasonData'] = state_data
+
+    client = aws_client('cloudwatch', configuration, secrets)
+    client.set_alarm_state(**params)
 
 
 ###############################################################################

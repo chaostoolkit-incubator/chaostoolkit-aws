@@ -4,6 +4,9 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
 
+- adding placebo handler for unit testing (tests/zpharmacy.py)
+- adding new cloudwatch action set_alarm_state
+
 ## [0.14.0][]
 
 [0.14.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.13.0...0.14.0

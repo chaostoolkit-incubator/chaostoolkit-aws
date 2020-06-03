@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
-
-from chaosaws.cloudwatch.actions import (put_rule,
-                                         put_rule_targets,
-                                         disable_rule,
-                                         enable_rule,
-                                         delete_rule,
-                                         remove_rule_targets)
+from tests.zpharmacy import Pharmacy
+from chaosaws.cloudwatch.actions import (
+    put_rule, put_rule_targets, disable_rule, enable_rule, delete_rule,
+    remove_rule_targets, set_alarm_state)
+from chaosaws.cloudwatch.probes import get_alarm_state_value
 
 
 @patch('chaosaws.cloudwatch.actions.aws_client', autospec=True)
@@ -113,3 +111,20 @@ def test_cloudwatch_remove_rule_targets_all(aws_client):
     client.remove_targets.assert_called_with(Rule=rule_name, Ids=target_ids)
     client.list_targets_by_rule.assert_called_with(Rule=rule_name)
     client.remove_targets.assert_called_with(Rule=rule_name, Ids=target_ids)
+
+
+class TestCloudWatchActions(Pharmacy):
+    def test_set_cloudwatch_alarm(self):
+        session = self.replay_data('test_set_cloudwatch_alarm')
+        params = {
+            'alarm_name': 'MyTempTest',
+            'alarm_state': 'ALARM',
+            'configuration': {
+                'aws_session': session, 'aws_region': 'us-east-1'}}
+
+        set_alarm_state(**params)
+
+        params.pop('alarm_state')
+
+        results = get_alarm_state_value(**params)
+        self.assertEqual(results, 'ALARM')

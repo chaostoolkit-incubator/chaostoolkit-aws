@@ -74,6 +74,10 @@ def aws_client(resource_name: str, configuration: Configuration = None,
         logger.debug("Using AWS region '{}'".format(region))
         params["region_name"] = region
 
+    aws_session = configuration.get('aws_session')
+    if aws_session:
+        return aws_session.client(resource_name, region_name=region)
+
     if boto3.DEFAULT_SESSION is None:
         # we must create our own session so that we can populate the profile
         # name when it is provided. Only create the default session once.
