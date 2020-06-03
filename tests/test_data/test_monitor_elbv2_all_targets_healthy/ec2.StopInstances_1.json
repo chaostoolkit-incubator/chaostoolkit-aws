@@ -1,0 +1,30 @@
+{
+    "status_code": 200,
+    "data": {
+        "StoppingInstances": [
+            {
+                "CurrentState": {
+                    "Code": 64,
+                    "Name": "stopping"
+                },
+                "InstanceId": "i-00000000000000001",
+                "PreviousState": {
+                    "Code": 16,
+                    "Name": "running"
+                }
+            }
+        ],
+        "ResponseMetadata": {
+            "RequestId": "7b13dfff-cca1-4425-beb5-e68b25a96a5f",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "7b13dfff-cca1-4425-beb5-e68b25a96a5f",
+                "content-type": "text/xml;charset=UTF-8",
+                "content-length": "579",
+                "date": "Tue, 02 Jun 2020 16:30:15 GMT",
+                "server": "AmazonEC2"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}

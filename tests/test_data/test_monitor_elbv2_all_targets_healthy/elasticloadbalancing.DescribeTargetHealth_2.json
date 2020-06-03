@@ -1,0 +1,50 @@
+{
+    "status_code": 200,
+    "data": {
+        "TargetHealthDescriptions": [
+            {
+                "Target": {
+                    "Id": "i-00000000000000000",
+                    "Port": 8080
+                },
+                "HealthCheckPort": "8080",
+                "TargetHealth": {
+                    "State": "healthy"
+                }
+            },
+            {
+                "Target": {
+                    "Id": "i-00000000000000001",
+                    "Port": 8080
+                },
+                "HealthCheckPort": "8080",
+                "TargetHealth": {
+                    "State": "draining",
+                    "Reason": "Target.DeregistrationInProgress",
+                    "Description": "Target deregistration is in progress"
+                }
+            },
+            {
+                "Target": {
+                    "Id": "i-00000000000000002",
+                    "Port": 8080
+                },
+                "HealthCheckPort": "8080",
+                "TargetHealth": {
+                    "State": "healthy"
+                }
+            }
+        ],
+        "ResponseMetadata": {
+            "RequestId": "02aef754-477f-4eff-ae20-b561cc8bd3e3",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+                "x-amzn-requestid": "02aef754-477f-4eff-ae20-b561cc8bd3e3",
+                "content-type": "text/xml",
+                "content-length": "1279",
+                "date": "Tue, 02 Jun 2020 16:30:37 GMT"
+            },
+            "RetryAttempts": 0
+        }
+    }
+}

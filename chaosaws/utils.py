@@ -2,7 +2,7 @@
 import importlib
 import time
 from typing import Union, Dict, Any
-
+from logzero import logger
 import jmespath
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
@@ -16,10 +16,9 @@ def breakup_iterable(values: list, limit: int = 50) -> list:
 def jmes_search(json_path: str,
                 data: dict,
                 value: Union[list, int, bool, str]) -> bool:
-    if isinstance(value, int):
+    results = jmespath.search(json_path, data)
+    if isinstance(value, int) and not isinstance(results, int):
         results = jmespath.search('%s | length(@)' % json_path, data)
-    else:
-        results = jmespath.search(json_path, data)
     return results == value
 
 
@@ -51,6 +50,7 @@ def probe_monitor(resource_type: str,
     start_time = time.time()
 
     while not is_disrupted:
+        logger.debug('waiting for disruption to occur')
         if int(time.time() - start_time) > timeout:
             raise FailedActivity('Timeout reached (%s) seconds' % timeout)
 
@@ -63,6 +63,7 @@ def probe_monitor(resource_type: str,
 
     is_recovered = False
     while not is_recovered:
+        logger.debug('waiting for recovery to occur')
         if int(time.time() - start_time) > timeout:
             raise FailedActivity('Timeout reached (%s) seconds' % timeout)
 
