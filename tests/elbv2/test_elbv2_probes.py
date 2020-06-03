@@ -157,7 +157,7 @@ class TestMonitorELB(Pharmacy):
 
     def test_monitor_all_targets_healthy(self):
         session = self.replay('test_monitor_elbv2_all_targets_healthy')
-        tg_name = 'dev-east-dkron-r1-tg'
+        tg_name = 'generic_target_group'
         params = {
             'probe_name': 'all_targets_healthy',
             'probe_args': {'tg_names': [tg_name]},
@@ -171,7 +171,7 @@ class TestMonitorELB(Pharmacy):
         }
 
         targs = {
-            'instance_id': 'i-0e31f4282191e614d',
+            'instance_id': 'i-00000000000000001',
             'configuration': {
                 'aws_session': session,
                 'aws_region': 'us-east-1'
