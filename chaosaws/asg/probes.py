@@ -31,6 +31,7 @@ def monitor(probe_name: str,
             secrets: Secrets = None) -> AWSResponse:
     """Monitors an existing ASG probe for specific values
     """
+    logger.info('Starting monitor of probe "%s"' % probe_name)
     results = probe_monitor('asg', probe_name, probe_args, disrupted,
                             recovered, json_path, timeout, delay,
                             configuration, secrets)

@@ -24,6 +24,7 @@ def monitor(probe_name: str,
             secrets: Secrets = None) -> AWSResponse:
     """Monitors for changes to the tasks in an ECS service.
     """
+    logger.info('Starting monitor of probe "%s"' % probe_name)
     results = probe_monitor('ecs', probe_name, probe_args, disrupted,
                             recovered, json_path, timeout, delay,
                             configuration, secrets)
