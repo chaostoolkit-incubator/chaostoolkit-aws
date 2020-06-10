@@ -78,6 +78,7 @@ def probe_monitor(resource_type: str,
             continue
         time.sleep(delay)
 
+    results['ctk:monitor_start'] = time.ctime(results['ctk:monitor_start'])
     results['ctk:monitor_results'] = 'success'
     results['ctk:time_to_recovery'] = int(
         results['ctk:recovery_time'] - results['ctk:disruption_time'])

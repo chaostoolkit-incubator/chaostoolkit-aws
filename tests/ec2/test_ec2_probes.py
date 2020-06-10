@@ -2,9 +2,11 @@
 import pytest
 
 from unittest.mock import MagicMock, patch
+from tests.zpharmacy import Pharmacy
 
 from chaosaws.ec2.probes import (
-    describe_instances, count_instances, instance_state)
+    describe_instances, count_instances, instance_state, monitor)
+from chaosaws.ec2.actions import terminate_instance
 from chaoslib.exceptions import FailedActivity
 
 
@@ -75,3 +77,56 @@ def test_instance_state_filters(aws_client):
         filters=filters)
     client.describe_instances.assert_called_with(Filters=filters)
     assert results
+
+
+class TestProbesEC2(Pharmacy):
+    def test_monitor_ec2_describe(self):
+        session = self.replay('test_monitor_ec2_describe')
+
+        configuration = {'aws_session': session, 'aws_region': 'us-east-1'}
+
+        params = {
+            'probe_name': 'describe_instances',
+            'probe_args': {
+                'filters': [
+                    {
+                        'Name': 'instance-id',
+                        'Values': ['i-00000000000000000']
+                    }
+                ]
+            },
+            'timeout': 300,
+            'delay': 1,
+            'json_path': 'Reservations[0].Instances[0].State.Name',
+            'disrupted': 'shutting-down',
+            'recovered': 'terminated',
+            'configuration': configuration
+        }
+
+        tparams = {'instance_id': 'i-00000000000000000',
+                   'configuration': configuration}
+        terminate_instance(**tparams)
+        results = monitor(**params)
+        self.assertEqual(results['ctk:monitor_results'], 'success')
+
+    def test_monitor_ec2_state(self):
+        session = self.replay('test_monitor_ec2_state')
+        configuration = {'aws_session': session, 'aws_region': 'us-east-1'}
+        params = {
+            'probe_name': 'instance_state',
+            'probe_args': {
+                'instance_ids': ['i-00000000000000000'],
+                'state': 'terminated'
+            },
+            'timeout': 300,
+            'delay': 1,
+            'disrupted': False,
+            'recovered': True,
+            'configuration': configuration
+        }
+
+        tparams = {'instance_id': 'i-00000000000000000',
+                   'configuration': configuration}
+        terminate_instance(**tparams)
+        results = monitor(**params)
+        self.assertEqual(results['ctk:monitor_results'], 'success')
