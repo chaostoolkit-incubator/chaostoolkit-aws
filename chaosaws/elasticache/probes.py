@@ -23,7 +23,7 @@ def describe_cache_cluster(cluster_id: str,
 
     :example:
     {
-        "type": "action",
+        "type": "probe",
         "name": "validate cache cluster engine",
         "tolerance": {
             "type": "jsonpath",
@@ -69,7 +69,7 @@ def get_cache_node_count(cluster_id: str,
 
     :example:
     {
-        "type": "action",
+        "type": "probe",
         "name": "validate cache node count",
         "tolerance": 3,
         "provider": {
@@ -97,7 +97,7 @@ def get_cache_node_status(cluster_id: str,
 
     :example:
     {
-        "type": "action",
+        "type": "probe",
         "name": "validate cache node status",
         "tolerance": "available",
         "provider": {
