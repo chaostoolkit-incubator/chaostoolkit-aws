@@ -1,0 +1,123 @@
+{
+  "instances": {
+    "single": [{
+      "DBInstances": [
+        {
+          "DBInstanceIdentifier": "MyTestInstanceRDS",
+          "DBInstanceStatus": "available",
+          "DBInstanceClass": "db.m5.24xlarge",
+          "Engine": "mysql",
+          "StorageEncrypted": true,
+          "KmsKeyId": "arn:aws:kms:us-east-1:000000000000:key/00000000-0000-0000-0000-0000000000000000"
+        }
+      ]
+    }],
+    "multiple": [{
+      "DBInstances": [
+        {
+          "DBInstanceIdentifier": "MyTestInstanceRDS_A",
+          "DBInstanceStatus": "available",
+          "DBInstanceClass": "db.m5.24xlarge",
+          "Engine": "mysql",
+          "StorageEncrypted": true,
+          "KmsKeyId": "arn:aws:kms:us-east-1:000000000000:key/00000000-0000-0000-0000-0000000000000000"
+        },
+        {
+          "DBInstanceIdentifier": "MyTestInstanceRDS_B",
+          "DBInstanceStatus": "available",
+          "DBInstanceClass": "db.m5.24xlarge",
+          "Engine": "mysql",
+          "StorageEncrypted": true,
+          "KmsKeyId": "arn:aws:kms:us-east-1:000000000000:key/00000000-0000-0000-0000-0000000000000000"
+        },
+        {
+          "DBInstanceIdentifier": "MyTestInstanceRDS_C",
+          "DBInstanceStatus": "available",
+          "DBInstanceClass": "db.m5.24xlarge",
+          "Engine": "mysql",
+          "StorageEncrypted": true,
+          "KmsKeyId": "arn:aws:kms:us-east-1:000000000000:key/00000000-0000-0000-0000-0000000000000000"
+        }
+      ]
+    }]
+  },
+  "clusters": {
+    "single": [{
+      "DBClusters": [
+        {
+          "DBClusterIdentifier": "MyTestClusterRDS",
+          "Status": "available",
+          "DatabaseName": "MyTestDB",
+          "Engine": "mysql",
+          "StorageEncrypted": true,
+          "KmsKeyId": "arn:aws:kms:us-east-1:000000000000:key/00000000-0000-0000-0000-0000000000000000",
+          "EngineMode": "provisioned",
+          "DBClusterMembers": [
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_A",
+              "IsClusterWriter": true
+            },
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_B",
+              "IsClusterWriter": false
+            },
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_C",
+              "IsClusterWriter": false
+            }
+          ]
+        }
+      ]
+    }],
+    "multiple": [{
+      "DBClusters": [
+        {
+          "DBClusterIdentifier": "MyTestClusterRDS_A",
+          "Status": "available",
+          "DatabaseName": "MyTestDB",
+          "Engine": "mysql",
+          "StorageEncrypted": true,
+          "KmsKeyId": "arn:aws:kms:us-east-1:000000000000:key/00000000-0000-0000-0000-0000000000000000",
+          "EngineMode": "provisioned",
+          "DBClusterMembers": [
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_A",
+              "IsClusterWriter": true
+            },
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_B",
+              "IsClusterWriter": false
+            },
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_C",
+              "IsClusterWriter": false
+            }
+          ]
+        },
+        {
+          "DBClusterIdentifier": "MyTestClusterRDS_B",
+          "Status": "available",
+          "DatabaseName": "MyTestDB",
+          "Engine": "mysql",
+          "StorageEncrypted": true,
+          "KmsKeyId": "arn:aws:kms:us-east-1:000000000000:key/00000000-0000-0000-0000-0000000000000000",
+          "EngineMode": "provisioned",
+          "DBClusterMembers": [
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_D",
+              "IsClusterWriter": true
+            },
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_E",
+              "IsClusterWriter": false
+            },
+            {
+              "DBInstanceIdentifier": "MyTestInstanceRDS_F",
+              "IsClusterWriter": false
+            }
+          ]
+        }
+      ]
+    }]
+  }
+}
