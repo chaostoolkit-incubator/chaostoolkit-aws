@@ -92,7 +92,7 @@ def stop_task(cluster: str = None, task_id: str = None, service: str = None,
         tasks = list_tasks(cluster=cluster, client=client, service=service)
         if not tasks:
             raise FailedActivity(
-                    "No ECS tasks found for service: {}".format(service))
+                "No ECS tasks found for service: {}".format(service))
         task_id = random.choice(tasks)
         task_id = task_id.rsplit("/", 1)[1]
 

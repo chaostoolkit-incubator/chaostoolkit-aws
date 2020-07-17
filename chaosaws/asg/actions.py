@@ -338,9 +338,9 @@ def detach_random_instances(asg_names: List[str] = None,
                 len(instances) * float(instance_percent)) / 100)
 
         if instance_count > len(instances):
-            raise FailedActivity('You are attempting to detach more instances '
-                                 'than exist on asg %s' % (
-                                    a['AutoScalingGroupName']))
+            raise FailedActivity(
+                'You are attempting to detach more instances '
+                'than exist on asg %s' % (a['AutoScalingGroupName']))
 
         instances = random.sample(instances, instance_count)
 
