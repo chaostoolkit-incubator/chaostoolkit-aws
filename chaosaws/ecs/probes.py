@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
+from logzero import logger
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
