@@ -4,6 +4,8 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
 
+- adding probe monitors for asg, ec2, ecs, elbv2
+
 ## [0.14.0][]
 
 [0.14.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.13.0...0.14.0
