@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
 
-from chaosaws.cloudwatch.actions import (put_rule,
-                                         put_rule_targets,
-                                         disable_rule,
-                                         enable_rule,
-                                         delete_rule,
-                                         remove_rule_targets)
+from chaosaws.cloudwatch.actions import (
+    put_rule, put_rule_targets, disable_rule, enable_rule, delete_rule,
+    remove_rule_targets)
 
 
 @patch('chaosaws.cloudwatch.actions.aws_client', autospec=True)

@@ -5,6 +5,7 @@
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
 
 - adding probes to rds resource (instance_status, cluster_status, cluster_membership_count)
+- add Cloudwatch get_metric_data probe
 
 ## [0.14.0][]
 

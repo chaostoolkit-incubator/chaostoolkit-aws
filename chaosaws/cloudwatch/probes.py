@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
+from statistics import mean
 
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
@@ -7,7 +8,7 @@ from logzero import logger
 
 from chaosaws import aws_client
 
-__all__ = ["get_alarm_state_value", "get_metric_statistics"]
+__all__ = ["get_alarm_state_value", "get_metric_statistics", "get_metric_data"]
 
 
 def get_alarm_state_value(alarm_name: str,
@@ -80,12 +81,8 @@ def get_metric_statistics(namespace: str, metric_name: str,
     response = client.get_metric_statistics(**request_kwargs)
 
     datapoints = response['Datapoints']
-    if len(datapoints) == 0:
-        raise FailedActivity(
-            "No datapoints found for metric {}.{}.{}.{}".format(
-                namespace, metric_name, dimension_name, dimension_value
-            )
-        )
+    if not datapoints:
+        return 0
 
     datapoint = datapoints[0]
     logger.debug('Response: {}'.format(response))
@@ -98,3 +95,73 @@ def get_metric_statistics(namespace: str, metric_name: str,
         raise FailedActivity(
             "Unable to parse response '{}': '{}'".format(response, str(x))
         )
+
+
+def get_metric_data(namespace: str, metric_name: str, dimension_name: str,
+                    dimension_value: str, statistic: str = None,
+                    duration: int = 300, period: int = 60, offset: int = 0,
+                    unit: str = None, configuration: Configuration = None,
+                    secrets: Secrets = None) -> float:
+    """Gets metric data for a given metric in a given time period. This method
+    allows for more data to be retrieved than get_metric_statistics
+
+    :params
+        namespace: The AWS metric namespace
+        metric_name: The name of the metric to pull data for
+        dimension_name: The name of the dimension to search for
+        dimension_value: The value to be used for searching the dimension
+        unit: The type of unit desired to be collected
+        statistic: The type of data to return.
+            One of: Average, Sum, Minimum, Maximum, SampleCount
+        period: The window in which to pull datapoints for
+        offset: The time (seconds) to offset the endtime (from now)
+        duration: The time (seconds) to set the start time (from now)
+    """
+    start_time = datetime.utcnow() - timedelta(seconds=duration)
+    end_time = datetime.utcnow() - timedelta(seconds=offset)
+    args = {
+        'MetricDataQueries': [{
+            'Id': 'm1',
+            'MetricStat': {
+                'Metric': {
+                    'Namespace': namespace,
+                    'MetricName': metric_name,
+                    'Dimensions': [{
+                        'Name': dimension_name,
+                        'Value': dimension_value
+                    }]
+                },
+                'Period': period,
+                'Stat': statistic
+            },
+            'Label': metric_name,
+        }],
+        'StartTime': start_time,
+        'EndTime': end_time
+    }
+
+    if unit:
+        args['MetricDataQueries'][0]['MetricStat']['Unit'] = unit
+
+    client = aws_client('cloudwatch', configuration, secrets)
+    response = client.get_metric_data(**args)['MetricDataResults']
+
+    results = {}
+    for r in response:
+        results.setdefault(r['Label'], []).extend(r['Values'])
+
+    result = 0
+    for k, v in results.items():
+        if not v:
+            continue
+
+        if statistic == 'Sum':
+            result = sum(v)
+        elif statistic == 'Minimum':
+            result = min(v)
+        elif statistic == 'Maximum':
+            result = max(v)
+        else:
+            result = mean(v)
+
+    return round(result, 2)

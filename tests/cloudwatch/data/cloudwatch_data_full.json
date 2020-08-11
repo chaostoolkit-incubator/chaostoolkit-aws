@@ -1,0 +1,20 @@
+{
+  "MetricDataResults": [
+    {
+      "Id": "m1",
+      "Label": "ActiveConnectionCount",
+      "Timestamps": [
+        "Wed, 1 Jan 2020 16:59",
+        "Wed, 1 Jan 2020 16:58",
+        "Wed, 1 Jan 2020 16:57",
+        "Wed, 1 Jan 2020 16:56",
+        "Wed, 1 Jan 2020 16:55"
+      ],
+      "Values": [
+        10.3333333333333335, 5.0, 6.3333333333333335, 7.0, 9.0
+      ],
+      "StatusCode": "Complete"
+    }
+  ]
+}
+
