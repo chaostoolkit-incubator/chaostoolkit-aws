@@ -10,7 +10,8 @@ from chaosaws.awslambda.actions import (delete_function_concurrency,
                                         invoke_function,
                                         put_function_concurrency,
                                         put_function_memory_size,
-                                        put_function_timeout)
+                                        put_function_timeout,
+                                        put_function_env)
 
 
 @patch('chaosaws.awslambda.actions.aws_client', autospec=True)
@@ -166,3 +167,15 @@ def test_aws_lambda_put_function_memory_size(aws_client):
     client.update_function_configuration.assert_called_with(
         FunctionName=lambda_function_name,
         MemorySize=memory_size)
+
+
+@patch('chaosaws.awslambda.actions.aws_client', autospec=True)
+def test_aws_lambda_put_function_env(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    lambda_function_name = 'my-lambda-function'
+    env = {'Testing': 'true'}
+    put_function_env(lambda_function_name, env)
+    client.update_function_configuration.assert_called_with(
+        FunctionName=lambda_function_name,
+        Environment={'Variables': env})
