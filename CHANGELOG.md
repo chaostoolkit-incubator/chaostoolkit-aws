@@ -2,8 +2,6 @@
 
 ## [Unreleased][]
 
-- adding elasticache probes `describe_cache_cluster`, `get_cache_node_count`, & `get_cache_node_status`
-
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
 
 - adding probes to rds resource (instance_status, cluster_status, cluster_membership_count)
@@ -14,6 +12,7 @@
 
 ### Added
 
+- adding elasticache probes `describe_cache_cluster`, `get_cache_node_count`, & `get_cache_node_status`
 - add EC2 actions to allow/revoke security group ingress
 
 ## [0.13.0][]
