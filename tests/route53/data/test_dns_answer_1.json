@@ -1,0 +1,12 @@
+{
+  "Nameserver": "ns-0000.awsdns-00.co.uk",
+  "RecordName": "aws.testrecord.com",
+  "RecordType": "A",
+  "RecordData": [
+    "0.0.0.0",
+    "0.0.0.1",
+    "0.0.0.2"
+  ],
+  "ResponseCode": "NOERROR",
+  "Protocol": "UDP"
+}

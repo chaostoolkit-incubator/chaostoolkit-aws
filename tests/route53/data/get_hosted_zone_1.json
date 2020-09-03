@@ -1,0 +1,20 @@
+{
+  "HostedZone": {
+    "Id": "/hostedzone/AAAAAAAAAAAAA",
+    "Name": "aws.testrecord.com.",
+    "CallerReference": "PublicInt-myExtern-AAAAAAAAAAAAA",
+    "Config": {
+      "Comment": "External sub-domain",
+      "PrivateZone": false
+    },
+    "ResourceRecordSetCount": 1
+  },
+  "DelegationSet": {
+    "NameServers": [
+      "ns-0000.awsdns-00.co.uk",
+      "ns-000.awsdns-00.net",
+      "ns-000.awsdns-00.com",
+      "ns-0000.awsdns-00.org"
+    ]
+  }
+}
