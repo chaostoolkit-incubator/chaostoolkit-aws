@@ -15,7 +15,7 @@ from chaosaws.types import AWSResponse
 __all__ = ["create_document","send_command","delete_document"]
 
 
-def create_document(content: str = None, 
+def create_document(path_content: str = None, 
                     name: str = None,
                     version_name: str = None, 
                     document_type: str = None,
@@ -31,23 +31,24 @@ def create_document(content: str = None,
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.create_document
     """
 
-    if not any([content, name]):
+    if not any([path_content, name]):
         raise FailedActivity('To create a document, you must specify the  content and name')
 
     try:
-        client = aws_client('ssm', configuration, secrets)
-        return client.create_document(Content=content,Name=name,VersionName=version_name,DocumentType=document_type,DocumentFormat=document_format)
+        with open(path_content) as openFile:
+            document_content = openFile.read()
+            client = aws_client('ssm', configuration, secrets)
+            return client.create_document(Content=document_content,Name=name,VersionName=version_name,DocumentType=document_type,DocumentFormat=document_format)
     except ClientError as e:
         raise FailedActivity('Failed to create document %s: %s' % (name, e.response['Error']['Message']))
 
 def send_command (targets:List[Dict[str, Any]]=None,
                   document_name: str = None,
                   document_version: str = None,
-                  parameters:List[Dict[str, Any]]=None,
+                  parameters:Dict[str, Any]=None,
                   timeout_seconds: int = None,
                   max_concurrency: str = None,
                   max_errors: str = None,
-                  output_s3_bucket_name : str = None,
                   region: str=None,
                   configuration: Configuration = None,
                   secrets: Secrets = None) -> AWSResponse:
@@ -65,14 +66,13 @@ def send_command (targets:List[Dict[str, Any]]=None,
 
     try:
         client = aws_client('ssm', configuration, secrets)
-        return client.send_command(DocumentName=document_name,DocumentVersion=document_version,Targets=targets,TimeoutSeconds=timeout_seconds,
-                               MaxConcurrency=max_concurrency,MaxErrors=max_errors,OutputS3BucketName=output_s3_bucket_name)
+        return client.send_command(DocumentName=document_name,DocumentVersion=document_version,Targets=targets,TimeoutSeconds=timeout_seconds,Parameters=parameters,
+                               MaxConcurrency=max_concurrency,MaxErrors=max_errors)
     except ClientError as e:
         raise FailedActivity('Failed to send command for document  %s: %s' % (document_name, e.response['Error']['Message']))
 
 def delete_document(name: str = None,
                     version_name: str = None, 
-                    document_version: str = None,
                     force: bool=True,
                     configuration: Configuration = None,
                     secrets: Secrets = None) -> AWSResponse:
@@ -90,6 +90,6 @@ def delete_document(name: str = None,
 
     try:
         client = aws_client('ssm', configuration, secrets)
-        return client.delete_document(Name =name,VersionName=version_name,DocumentVersion=document_version,Force=force)
+        return client.delete_document(Name =name,VersionName=version_name,Force=force)
     except ClientError as e:
         raise FailedActivity('Failed to delete  document  %s: %s' % (name, e.response['Error']['Message']))
