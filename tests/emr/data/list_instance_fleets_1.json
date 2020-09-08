@@ -1,0 +1,90 @@
+{
+  "InstanceFleets": [
+    {
+      "Id": "i-987654321ZYWXW",
+      "Name": "PrimaryFleetNodes",
+      "InstanceFleetType": "MASTER",
+      "TargetOnDemandCapacity": 2,
+      "ProvisionedOnDemandCapacity": 2,
+      "InstanceTypeSpecifications": [
+        {
+          "InstanceType": "m1.xlarge",
+          "EbsBlockDevices": [
+            {
+              "VolumeSpecification": {
+                "VolumeType": "gp2",
+                "Iops": 100,
+                "SizeInGB": 50
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Id": "i-ABCDEFGHI4567",
+      "Name": "CoreFleetNodes",
+      "InstanceFleetType": "CORE",
+      "TargetOnDemandCapacity": 8,
+      "ProvisionedOnDemandCapacity": 8,
+      "InstanceTypeSpecifications": [
+        {
+          "InstanceType": "m1.xlarge",
+          "EbsBlockDevices": [
+            {
+              "VolumeSpecification": {
+                "VolumeType": "gp2",
+                "Iops": 100,
+                "SizeInGB": 50
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Id": "i-IJKLMNOPQ8912",
+      "Name": "TaskFleetNodes",
+      "InstanceFleetType": "Task",
+      "TargetOnDemandCapacity": 8,
+      "ProvisionedOnDemandCapacity": 8,
+      "InstanceTypeSpecifications": [
+        {
+          "InstanceType": "m1.xlarge",
+          "EbsBlockDevices": [
+            {
+              "VolumeSpecification": {
+                "VolumeType": "gp2",
+                "Iops": 100,
+                "SizeInGB": 50
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Id": "i-QRSTUVWXYZ99",
+      "Name": "TaskFleetNodes2",
+      "InstanceFleetType": "Task",
+      "TargetOnDemandCapacity": 3,
+      "ProvisionedOnDemandCapacity": 4,
+      "TargetSpotCapacity": 2,
+      "ProvisionedSpotCapacity": 4,
+      "InstanceTypeSpecifications": [
+        {
+          "InstanceType": "m1.xlarge",
+          "EbsBlockDevices": [
+            {
+              "VolumeSpecification": {
+                "VolumeType": "gp2",
+                "Iops": 100,
+                "SizeInGB": 50
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

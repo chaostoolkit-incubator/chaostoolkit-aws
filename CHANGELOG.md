@@ -6,8 +6,12 @@
 
 - adding probes to rds resource (instance_status, cluster_status, cluster_membership_count)
 - add Cloudwatch get_metric_data probe
+- adding new probes & actions for EMR
 
 ## [0.14.0][]
+
+- added EMR probes 'describe_cluster', 'describe_instance_fleet', 'describe_instance_group', 'list_cluster_fleet_instances', 'list_cluster_group_instances'
+- added EMR actions 'modify_cluster', 'modify_instance_fleet', 'modify_instance_groups_instance_count', 'modify_instance_groups_shrink_policy'
 
 [0.14.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.13.0...0.14.0
 

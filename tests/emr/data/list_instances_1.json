@@ -1,0 +1,18 @@
+{
+  "Instances": [
+    {
+      "Id": "RandomId0",
+      "Ec2InstanceId": "i-000000000000",
+      "InstanceFleetId": "i-987654321ZYWXW",
+      "Market": "ON_DEMAND",
+      "InstanceType": "m1.xlarge"
+    },
+    {
+      "Id": "RandomId1",
+      "Ec2InstanceId": "i-000000000001",
+      "InstanceFleetId": "i-987654321ZYWXW",
+      "Market": "ON_DEMAND",
+      "InstanceType": "m1.xlarge"
+    }
+  ]
+}

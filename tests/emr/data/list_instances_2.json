@@ -1,0 +1,32 @@
+{
+  "Instances": [
+    {
+      "Id": "RandomId0",
+      "Ec2InstanceId": "i-000000000000",
+      "InstanceGroupId": "i-123456789ABCD",
+      "Market": "ON_DEMAND",
+      "InstanceType": "m1.xlarge"
+    },
+    {
+      "Id": "RandomId1",
+      "Ec2InstanceId": "i-000000000001",
+      "InstanceGroupId": "i-123456789ABCD",
+      "Market": "ON_DEMAND",
+      "InstanceType": "m1.xlarge"
+    },
+    {
+      "Id": "RandomId2",
+      "Ec2InstanceId": "i-000000000002",
+      "InstanceGroupId": "i-123456789ABCD",
+      "Market": "ON_DEMAND",
+      "InstanceType": "m1.xlarge"
+    },
+    {
+      "Id": "RandomId3",
+      "Ec2InstanceId": "i-000000000003",
+      "InstanceGroupId": "i-123456789ABCD",
+      "Market": "ON_DEMAND",
+      "InstanceType": "m1.xlarge"
+    }
+  ]
+}

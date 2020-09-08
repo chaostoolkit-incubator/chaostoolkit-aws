@@ -1,0 +1,40 @@
+{
+  "InstanceGroups": [
+    {
+      "Id": "i-123456789ABCD",
+      "Name": "MasterGroupNodes",
+      "ShrinkPolicy": {
+        "DecommissionTimeout": 180,
+        "InstanceResizePolicy": {
+          "InstancesToTerminate": [],
+          "InstancesToProtect": ["i-000000000000"],
+          "InstanceTerminationTimeout": 300
+        }
+      }
+    },
+    {
+      "Id": "i-123456789EFGH",
+      "Name": "CoreGroupNodes",
+      "ShrinkPolicy": {
+        "DecommissionTimeout": 360,
+        "InstanceResizePolicy": {
+          "InstancesToTerminate": ["i-123456789123"],
+          "InstancesToProtect": ["i-111111111111"],
+          "InstanceTerminationTimeout": 500
+        }
+      }
+    },
+    {
+      "Id": "i-123456789DCBA",
+      "Name": "TaskGroupNodes",
+      "ShrinkPolicy": {
+        "DecommissionTimeout": 360,
+        "InstanceResizePolicy": {
+          "InstancesToTerminate": [],
+          "InstancesToProtect": [],
+          "InstanceTerminationTimeout": 500
+        }
+      }
+    }
+  ]
+}
