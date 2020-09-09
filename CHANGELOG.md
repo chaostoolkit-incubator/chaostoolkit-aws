@@ -4,6 +4,8 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
 
+- adding probes to rds resource (instance_status, cluster_status, cluster_membership_count)
+
 ## [0.14.0][]
 
 [0.14.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.13.0...0.14.0
