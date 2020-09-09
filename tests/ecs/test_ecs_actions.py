@@ -1,18 +1,36 @@
 # -*- coding: utf-8 -*-
+import os
+from json import loads
 from unittest.mock import ANY, MagicMock, patch
-from chaoslib.exceptions import FailedActivity
+
 import pytest
-from chaosaws.ecs.actions import (delete_cluster, delete_service,
-                                  deregister_container_instance, stop_task,
-                                  stop_random_tasks,
-                                  update_desired_count)
+from botocore.exceptions import ClientError
+from chaoslib.exceptions import FailedActivity
+
+from chaosaws.ecs.actions import (
+    delete_cluster, delete_service, deregister_container_instance, stop_task,
+    stop_random_tasks, set_service_placement_strategy, update_desired_count,
+    set_service_deployment_configuration, tag_resource, untag_resource,
+    update_container_instances_state
+)
+
+data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 
-@patch('chaosaws.ecs.actions.aws_client', autospec=True)
-def test_stop_random_tasks_no_cluster(aws_client):
-    with pytest.raises(FailedActivity) as x:
-        stop_random_tasks(service='ecs-service')
-    assert 'A cluster name is required' in str(x.value)
+def read_configs(filename):
+    config = os.path.join(data_path, filename)
+    with open(config, 'r') as fh:
+        return loads(fh.read())
+
+
+def mock_client_error(*args, **kwargs):
+    return ClientError(
+        operation_name=kwargs['op'],
+        error_response={'Error': {
+            'Code': kwargs['Code'],
+            'Message': kwargs['Message']
+        }}
+    )
 
 
 @patch('chaosaws.ecs.actions.aws_client', autospec=True)
@@ -333,3 +351,269 @@ def test_update_desired_service_count(aws_client):
     client.describe_clusters.assert_called_with(clusters=[cluster])
     client.update_service.assert_called_with(
         cluster=cluster, service=service, desiredCount=1)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_set_service_placement_strategy(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_clusters.return_value = read_configs(
+        'describe_clusters_1.json')
+    client.describe_services.return_value = read_configs(
+        'describe_services_1.json')
+    client.update_service.return_value = read_configs('update_service_1.json')
+
+    params = {
+        'cluster': 'MyTestEcsCluster',
+        'service': 'MyTestEcsService',
+        'placement_type': 'random'
+    }
+    set_service_placement_strategy(**params)
+    client.update_service.assert_called_with(
+        cluster='MyTestEcsCluster',
+        service='MyTestEcsService',
+        placementStrategy=[{'type': 'random'}])
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_set_service_placement_strategy_invalid_cluster(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_clusters.return_value = {'clusters': []}
+
+    params = {
+        'cluster': 'MyInvalidCluster',
+        'service': 'MyTestEcsService',
+        'placement_type': 'random'
+    }
+    with pytest.raises(FailedActivity) as e:
+        set_service_placement_strategy(**params)
+    assert 'unable to locate cluster: MyInvalidCluster' in str(e)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_set_service_placement_strategy_invalid_service(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_clusters.return_value = read_configs(
+        'describe_clusters_1.json')
+    client.describe_services.return_value = {'services': []}
+
+    params = {
+        'cluster': 'MyTestEcsCluster',
+        'service': 'MyInvalidService',
+        'placement_type': 'random'
+    }
+    with pytest.raises(FailedActivity) as e:
+        set_service_placement_strategy(**params)
+    assert 'unable to locate service: MyInvalidService' in str(e)
+
+
+def test_set_service_placement_strategy_invalid_param_1():
+    params = {
+        'cluster': 'MyTestEcsCluster',
+        'service': 'MyTestEcsService',
+        'placement_type': 'spread'
+    }
+    with pytest.raises(FailedActivity) as e:
+        set_service_placement_strategy(**params)
+    assert '"placement_field" is required when using' in str(e)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_set_service_placement_strategy_invalid_param_2(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_clusters.return_value = read_configs(
+        'describe_clusters_1.json')
+    client.describe_services.return_value = read_configs(
+        'describe_services_1.json')
+
+    params = {
+        'op': 'UpdateService',
+        'Code': 'InvalidParameterException',
+        'Message': 'An error occurred (InvalidParameterException)'
+    }
+    client.update_service.side_effect = mock_client_error(**params)
+
+    params = {
+        'cluster': 'MyTestEcsCluster',
+        'service': 'MyTestEcsService',
+        'placement_type': 'xrandom'
+    }
+    with pytest.raises(FailedActivity) as e:
+        set_service_placement_strategy(**params)
+    assert 'An error occurred (InvalidParameterException)' in str(e)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_set_service_deployment_configuration(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_clusters.return_value = read_configs(
+        'describe_clusters_1.json')
+    client.describe_services.return_value = read_configs(
+        'describe_services_1.json')
+    client.update_service.return_value = read_configs('update_service_2.json')
+
+    params = {
+        'cluster': 'MyTestEcsCluster',
+        'service': 'MyTestEcsService',
+        'maximum_percent': 300,
+        'minimum_healthy_percent': 50
+    }
+    set_service_deployment_configuration(**params)
+    client.update_service.assert_called_with(
+        cluster='MyTestEcsCluster',
+        service='MyTestEcsService',
+        deploymentConfiguration={
+            'maximumPercent': 300,
+            'minimumHealthyPercent': 50
+        })
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_set_service_deployment_configuration_invalid_cluster(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_clusters.return_value = {'clusters': []}
+
+    params = {
+        'cluster': 'MyInvalidCluster',
+        'service': 'MyTestEcsService',
+        'maximum_percent': 100
+    }
+    with pytest.raises(FailedActivity) as e:
+        set_service_deployment_configuration(**params)
+    assert 'unable to locate cluster: MyInvalidCluster' in str(e)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_set_service_deployment_configuration_invalid_service(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_clusters.return_value = read_configs(
+        'describe_clusters_1.json')
+    client.describe_services.return_value = {'services': []}
+
+    params = {
+        'cluster': 'MyTestEcsCluster',
+        'service': 'MyInvalidService',
+        'maximum_percent': 100
+    }
+    with pytest.raises(FailedActivity) as e:
+        set_service_deployment_configuration(**params)
+    assert 'unable to locate service: MyInvalidService' in str(e)
+
+
+def test_set_service_deployment_configuration_invalid_minimum():
+    params = {
+        'cluster': 'MyTestEcsCluster',
+        'service': 'MyTestEcsService',
+        'maximum_percent': 50,
+        'minimum_healthy_percent': 100
+    }
+    with pytest.raises(FailedActivity) as e:
+        set_service_deployment_configuration(**params)
+    assert 'minimum_healthy_percent cannot be larger' in str(e)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_tag_resource(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.tag_resource.return_value = {}
+
+    arn = 'arn:aws:ecs:us-east-1:012345678910:cluster/MyTestEcsCluster'
+    tags = [{'key': 'Name', 'value': 'MyTestEcsCluster'}]
+    tag_resource(tags, arn)
+    client.tag_resource.assert_called_with(resourceArn=arn, tags=tags)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_tag_resource_not_found(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.tag_resource.side_effect = mock_client_error(
+        op='TagResource',
+        Code='ClusterNotFoundException',
+        Message='An error occurred (ClusterNotFoundException) when calling the '
+                'TagResource operation: Cluster not found.'
+    )
+
+    arn = 'arn:aws:ecs:us-east-1:012345678910:service/MyTestEcsCluster1/'
+    tags = [{'key': 'Name', 'value': 'MyTestEcsCluster'}]
+    with pytest.raises(FailedActivity) as e:
+        tag_resource(tags, arn)
+    assert 'Cluster not found' in str(e)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_untag_resource(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.untag_resource.return_value = {}
+
+    arn = 'arn:aws:ecs:us-east-1:012345678910:service/MyTestEcsCluster/' \
+          'MyTestEcsService'
+    tag_keys = ['Purpose']
+    untag_resource(tag_keys, arn)
+    client.untag_resource.assert_called_with(resourceArn=arn, tagKeys=tag_keys)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_untag_resource_not_found(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.untag_resource.side_effect = mock_client_error(
+        op='UntagResource',
+        Code='ClusterNotFoundException',
+        Message='An error occurred (ClusterNotFoundException) when calling the '
+                'UntagResource operation: Cluster not found.'
+    )
+
+    arn = 'arn:aws:ecs:us-east-1:012345678910:service/MyTestEcsCluster1/' \
+          'MyTestEcsService'
+    tag_keys = ['Purpose']
+    with pytest.raises(FailedActivity) as e:
+        untag_resource(tag_keys, arn)
+    assert 'Cluster not found' in str(e)
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_update_container_instance_state(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.update_container_instance_state.return_value = read_configs(
+        'update_container_instance_state_1.json')
+
+    arns = ['arn:aws:ecs:us-east-1:123456789012:container-instance/'
+            'a1b2c3d4-5678-90ab-cdef-11111']
+
+    update_container_instances_state(
+        cluster='MyTestEcsCluster',
+        container_instances=arns,
+        status='DRAINING')
+
+    client.update_container_instance_state.assert_called_with(
+        cluster='MyTestEcsCluster',
+        containerInstances=arns,
+        status='DRAINING')
+
+
+@patch('chaosaws.ecs.actions.aws_client', autospec=True)
+def test_update_container_instance_state_invalid_status(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.update_container_instance_state.side_effect = mock_client_error(
+        op='UpdateContainerInstanceState',
+        Code='InvalidParameterException',
+        Message='Container instances status should be one of [ACTIVE,DRAINING]'
+    )
+    with pytest.raises(FailedActivity) as e:
+        update_container_instances_state(
+            cluster='MyTestEcsCluster',
+            container_instances=[
+                'arn:aws:ecs:us-east-1:x:container-instance/z'],
+            status='INVALID')
+    assert 'ACTIVE,DRAINING' in str(e)

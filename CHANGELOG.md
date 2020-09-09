@@ -27,6 +27,7 @@
 ### Changed
 
 - fixing `describe_cache_cluster` argument calls ordering
+- adding actions to ecs resource ('tag_resource', 'untag_resource', 'set_service_placement_strategy', 'set_service_deployment_configuration', & 'update_container_instances_state')
 
 ## [0.14.0][]
 
