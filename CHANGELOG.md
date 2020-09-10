@@ -4,6 +4,7 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
 
+- updating `load_exported_activities` to dynamically load probes & actions
 - adding probes to rds resource (instance_status, cluster_status, cluster_membership_count)
 
 ## [0.14.0][]

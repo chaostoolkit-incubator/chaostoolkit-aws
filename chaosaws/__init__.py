@@ -6,17 +6,16 @@ import boto3
 import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
-from botocore import parsers
-from chaosaws.types import AWSResponse
 from chaoslib.discovery.discover import (discover_actions, discover_probes,
                                          initialize_discovery_result)
-from chaoslib.exceptions import DiscoveryFailed, InterruptExecution
+from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import (Configuration, DiscoveredActivities,
-                            DiscoveredSystemInfo, Discovery, Secrets)
+                            Discovery, Secrets)
 from logzero import logger
 
 __version__ = '0.14.0'
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
+__module_path__ = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 
 def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
@@ -220,25 +219,13 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     Extract metadata from actions and probes exposed by this extension.
     """
     activities = []
-    activities.extend(discover_actions("chaosaws.ec2.actions"))
-    activities.extend(discover_probes("chaosaws.ec2.probes"))
-    activities.extend(discover_actions("chaosaws.ecs.actions"))
-    activities.extend(discover_probes("chaosaws.ecs.probes"))
-    activities.extend(discover_actions("chaosaws.iam.actions"))
-    activities.extend(discover_probes("chaosaws.iam.probes"))
-    activities.extend(discover_actions("chaosaws.eks.actions"))
-    activities.extend(discover_probes("chaosaws.eks.probes"))
-    activities.extend(discover_actions("chaosaws.elbv2.actions"))
-    activities.extend(discover_probes("chaosaws.elbv2.probes"))
-    activities.extend(discover_actions("chaosaws.asg.actions"))
-    activities.extend(discover_probes("chaosaws.asg.probes"))
-    activities.extend(discover_actions("chaosaws.awslambda.actions"))
-    activities.extend(discover_probes("chaosaws.awslambda.probes"))
-    activities.extend(discover_actions("chaosaws.cloudwatch.actions"))
-    activities.extend(discover_probes("chaosaws.cloudwatch.probes"))
-    activities.extend(discover_actions("chaosaws.rds.actions"))
-    activities.extend(discover_probes("chaosaws.rds.probes"))
-    activities.extend(discover_actions("chaosaws.elasticache.actions"))
-    activities.extend(discover_probes('chaosaws.elasticache.probes'))
 
+    for d in os.listdir(__module_path__):
+        if not os.path.isdir(d) or d.startswith('__'):
+            continue
+
+        if os.path.isfile(os.path.join(__module_path__, d, 'actions.py')):
+            activities.extend(discover_actions('chaosaws.%s.actions' % d))
+        if os.path.isfile(os.path.join(__module_path__, d, 'probes.py')):
+            activities.extend(discover_probes('chaosaws.%s.probes' % d))
     return activities
