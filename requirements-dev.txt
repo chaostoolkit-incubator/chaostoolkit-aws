@@ -1,7 +1,8 @@
 coverage
-moto==1.3.4
+moto
 pycodestyle
 pytest>=2.8
 pytest-cov
 pytest-sugar
 requests_mock
+cryptography
