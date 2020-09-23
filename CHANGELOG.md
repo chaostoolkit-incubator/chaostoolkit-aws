@@ -8,6 +8,7 @@
 
 - use setuptools auto discovery of all packages under `chaosaws` to not forget
   them anylonger
+- turn `chaosaws.emr` into a proper Python package
 
 ## [0.15.0][]
 [0.15.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...0.15.0
