@@ -46,19 +46,7 @@ author = 'chaostoolkit Team'
 author_email = 'contact@chaostoolkit.org'
 url = 'http://chaostoolkit.org'
 license = 'Apache License Version 2.0'
-packages = [
-    'chaosaws',
-    'chaosaws.ecs',
-    'chaosaws.ec2',
-    'chaosaws.eks',
-    'chaosaws.elasticache',
-    'chaosaws.iam',
-    'chaosaws.elbv2',
-    'chaosaws.asg',
-    'chaosaws.awslambda',
-    'chaosaws.cloudwatch',
-    'chaosaws.rds'
-]
+packages = setuptools.find_packages(include=['chaosaws', 'chaosaws.*'])
 
 needs_pytest = set(['pytest', 'test']).intersection(sys.argv)
 

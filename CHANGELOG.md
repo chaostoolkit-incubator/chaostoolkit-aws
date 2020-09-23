@@ -4,6 +4,11 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.15.0...HEAD
 
+### Changed
+
+- use setuptools auto discovery of all packages under `chaosaws` to not forget
+  them anylonger
+
 ## [0.15.0][]
 [0.15.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...0.15.0
 
