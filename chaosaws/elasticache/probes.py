@@ -82,7 +82,8 @@ def get_cache_node_count(cluster_id: str,
         }
     }
     """
-    response = describe_cache_cluster(cluster_id, configuration, secrets)
+    response = describe_cache_cluster(
+        cluster_id, configuration=configuration, secrets=secrets)
     return response['CacheClusters'][0].get('NumCacheNodes', 0)
 
 
@@ -111,5 +112,6 @@ def get_cache_node_status(cluster_id: str,
     }
 
     """
-    response = describe_cache_cluster(cluster_id, configuration, secrets)
+    response = describe_cache_cluster(
+        cluster_id, configuration=configuration, secrets=secrets)
     return response['CacheClusters'][0].get('CacheClusterStatus', '')

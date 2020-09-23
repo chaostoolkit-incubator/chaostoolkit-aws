@@ -4,9 +4,16 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
 
+
+### Added
+
 - adding probes to rds resource (instance_status, cluster_status, cluster_membership_count)
 - add Cloudwatch get_metric_data probe
 - adding new probes & actions for EMR
+
+### Changed
+
+- fixing `describe_cache_cluster` argument calls ordering
 
 ## [0.14.0][]
 
