@@ -128,7 +128,7 @@ class TestEmrProbesMocked:
 
         with pytest.raises(FailedActivity) as e:
             list_cluster_group_instances(self.cluster_id, group_id)
-        assert "Instance group id '%s' is not valid" % group_id in str(e)
+        assert "Instance group id '%s' is not valid" % group_id in str(e.value)
 
     @patch('chaosaws.emr.probes.aws_client', autospec=True)
     def test_describe_instance_group_invalid_cluster(self, aws_client):
@@ -144,7 +144,7 @@ class TestEmrProbesMocked:
 
         with pytest.raises(FailedActivity) as e:
             describe_instance_group(cluster_id, 'i-IJKLMNOPQ8912')
-        assert "Cluster id '%s' is not valid" % cluster_id in str(e)
+        assert "Cluster id '%s' is not valid" % cluster_id in str(e.value)
 
     @patch('chaosaws.emr.probes.aws_client', autospec=True)
     def test_describe_instance_fleet(self, aws_client):
@@ -174,7 +174,7 @@ class TestEmrProbesMocked:
 
         with pytest.raises(FailedActivity) as e:
             describe_cluster(cluster_id=cluster_id)
-        assert "Cluster id '%s' is not valid" % cluster_id in str(e)
+        assert "Cluster id '%s' is not valid" % cluster_id in str(e.value)
 
     @patch('chaosaws.emr.probes.aws_client', autospec=True)
     def test_describe_instance_fleet_invalid_cluster(self, aws_client):
@@ -190,4 +190,4 @@ class TestEmrProbesMocked:
 
         with pytest.raises(FailedActivity) as e:
             describe_instance_fleet(cluster_id, 'i-IJKLMNOPQ8912')
-        assert "Cluster id '%s' is not valid" % cluster_id in str(e)
+        assert "Cluster id '%s' is not valid" % cluster_id in str(e.value)

@@ -104,7 +104,7 @@ class TestEmrActionsMock:
         }
         with pytest.raises(FailedActivity) as e:
             modify_instance_groups_instance_count(**params)
-        assert "Cluster id '%s' is not valid" % cluster_id in str(e)
+        assert "Cluster id '%s' is not valid" % cluster_id in str(e.value)
 
     @patch('chaosaws.emr.actions.aws_client', autospec=True)
     def test_modify_cluster(self, aws_client):
@@ -132,7 +132,7 @@ class TestEmrActionsMock:
 
         with pytest.raises(FailedActivity) as e:
             modify_cluster(cluster_id=self.cluster_id, concurrency=10)
-        assert "Cluster id '%s' is not valid" % cluster_id in str(e)
+        assert "Cluster id '%s' is not valid" % cluster_id in str(e.value)
 
     @patch('chaosaws.emr.actions.aws_client', autospec=True)
     def test_modify_instance_groups_shrink_policy(self, aws_client):
@@ -192,7 +192,7 @@ class TestEmrActionsMock:
         with pytest.raises(FailedActivity) as e:
             modify_instance_groups_shrink_policy(**params)
 
-        assert "Group id '%s' is not valid" % group_id in str(e)
+        assert "Group id '%s' is not valid" % group_id in str(e.value)
 
     def test_modify_instance_groups_shrink_policy_bad_args_1(self):
         params = {
@@ -255,4 +255,4 @@ class TestEmrActionsMock:
             modify_instance_fleet(
                 cluster_id=self.cluster_id, fleet_id=fleet_id,
                 on_demand_capacity=3, spot_capacity=2)
-        assert "Fleet id '%s' is not valid" % fleet_id in str(e)
+        assert "Fleet id '%s' is not valid" % fleet_id in str(e.value)
