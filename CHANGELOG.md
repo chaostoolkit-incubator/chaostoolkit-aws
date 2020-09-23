@@ -10,6 +10,7 @@
 - adding probes to rds resource (instance_status, cluster_status, cluster_membership_count)
 - add Cloudwatch get_metric_data probe
 - adding new probes & actions for EMR
+- building for Python 3.8
 
 ### Changed
 
