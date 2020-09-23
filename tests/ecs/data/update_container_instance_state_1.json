@@ -1,0 +1,14 @@
+{
+  "containerInstances": [
+    {
+      "containerInstanceArn": "arn:aws:ecs:us-east-1:123456789012:container-instance/a1b2c3d4-5678-90ab-cdef-11111",
+      "ec2InstanceId": "i-000000000001",
+      "status": "DRAINING"
+    },
+    {
+      "containerInstanceArn": "arn:aws:ecs:us-east-1:123456789012:container-instance/a1b2c3d4-5678-90ab-cdef-11111",
+      "ec2InstanceId": "i-000000000002",
+      "status": "DRAINING"
+    }
+  ]
+}

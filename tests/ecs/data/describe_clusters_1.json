@@ -1,0 +1,21 @@
+{
+  "clusters": [
+    {
+      "clusterArn": "arn:aws:ecs:us-east-1:012345678910:cluster/MyTestEcsCluster",
+      "clusterName": "MyTestEcsCluster",
+      "status": "ACTIVE",
+      "registeredContainerInstancesCount": 0,
+      "runningTasksCount": 0,
+      "pendingTasksCount": 0,
+      "activeServicesCount": 0
+    }
+  ],
+  "failures": [],
+  "ResponseMetadata": {
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "server": "amazon.com"
+    },
+    "RetryAttempts": 0
+  }
+}
