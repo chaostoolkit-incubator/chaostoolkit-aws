@@ -6,6 +6,7 @@
 
 ### Added
 - adding route53 probes & actions
+- adding ssm actions
 
 ### Changed
 
