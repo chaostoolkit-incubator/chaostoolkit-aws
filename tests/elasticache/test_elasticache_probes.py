@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
 from chaosaws.elasticache.probes import (
-    describe_cache_cluster, get_cache_node_status, get_cache_node_count)
+    describe_cache_cluster, get_cache_node_status, get_cache_node_count, count_cache_clusters_from_replication_group)
 
 import pytest
 
@@ -42,6 +42,14 @@ def test_get_node_count_invalid():
         get_cache_node_count()
     assert "get_cache_node_count() missing 1 required positional " \
            "argument: 'cluster_id'" in str(x.value)
+
+
+def test_count_cache_clusters_from_replication_group():
+    with pytest.raises(TypeError) as x:
+        count_cache_clusters_from_replication_group()
+    assert "count_cache_clusters_from_replication_group() missing 1 " \
+           "required positional argument: 'replication_group_id'" \
+           in str(x.value)
 
 
 @patch('chaosaws.elasticache.probes.aws_client', autospec=True)
