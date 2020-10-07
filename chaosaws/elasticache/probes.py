@@ -7,7 +7,8 @@ from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
 __all__ = ['describe_cache_cluster', 'get_cache_node_count',
-           'get_cache_node_status']
+           'get_cache_node_status',
+           'count_cache_clusters_from_replication_group']
 
 
 def describe_cache_cluster(cluster_id: str,
@@ -115,3 +116,51 @@ def get_cache_node_status(cluster_id: str,
     response = describe_cache_cluster(
         cluster_id, configuration=configuration, secrets=secrets)
     return response['CacheClusters'][0].get('CacheClusterStatus', '')
+
+
+def count_cache_clusters_from_replication_group(
+        replication_group_id: str,
+        configuration: Configuration = None,
+        secrets: Secrets = None
+) -> int:
+    """
+    Returns the number of cache clusters that are part of the given
+    ReplicationGroupId
+    :param replication_group_id: The identifier for the replication group
+    to be described
+    :param configuration: Configuration
+    :param secrets: Secrets
+    Probe example:
+        "steady-state-hypothesis": {
+            "title": "MyCluster has 3 nodes",
+            "probes": [{
+                "type": "probe",
+                "name": "Cluster running node count",
+                "tolerance": 3,
+                "provider": {
+                    "type": "python",
+                    "module": "modules.elasticache",
+                    "func": "count_cache_clusters_from_replication_group",
+                    "arguments": {
+                        "replication_group_id": "MyCluster"
+                    }
+                }
+            }
+        }
+    """
+    client = aws_client(
+        "elasticache", configuration=configuration, secrets=secrets
+    )
+
+    response = client.describe_replication_groups(
+        ReplicationGroupId=replication_group_id
+    )
+
+    rep_groups = response.get("ReplicationGroups", [])
+    if not rep_groups:
+        raise FailedActivity(
+            "Error retrieving ReplicationGroups for "
+            "{}".format(replication_group_id)
+        )
+
+    return len(rep_groups[0].get("MemberClusters", []))
