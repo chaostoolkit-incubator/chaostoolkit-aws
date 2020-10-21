@@ -388,19 +388,18 @@ def discover_scaling_groups(client: boto3.client,
 
 def get_asg_by_name(asg_names: List[str],
                     client: boto3.client) -> AWSResponse:
-    results = {'AutoScalingGroups': []}
-    paginator = client.get_paginator('describe_auto_scaling_groups')
-    for p in paginator.paginate(AutoScalingGroupNames=asg_names):
-        results['AutoScalingGroups'].extend(p['AutoScalingGroups'])
+    asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
 
-    valid_asgs = [
-        a['AutoScalingGroupName'] for a in results['AutoScalingGroups']]
-    invalid_asgs = [a for a in asg_names if a not in valid_asgs]
+    if not asgs.get('AutoScalingGroups', []):
+        raise FailedActivity(
+            'Unable to locate ASG(s): {}'.format(asg_names))
 
+    found_asgs = [a['AutoScalingGroupName'] for a in asgs['AutoScalingGroups']]
+    invalid_asgs = [a for a in asg_names if a not in found_asgs]
     if invalid_asgs:
-        raise FailedActivity('No ASG(s) found matching: {}'.format(
+        raise FailedActivity('No ASG(s) found with name(s): {}'.format(
             invalid_asgs))
-    return results
+    return asgs
 
 
 def get_asg_by_tags(tags: Union[dict, List[Dict[str, str]]],

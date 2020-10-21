@@ -643,12 +643,12 @@ def test_is_process_suspended_names_true(aws_client):
     aws_client.return_value = client
     asg_names = ['AutoScalingGroup-A']
     process_names = ['Launch']
-    client.get_paginator.return_value.paginate.return_value = [{
+    client.describe_auto_scaling_groups.return_value = {
         "AutoScalingGroups": [{
             "AutoScalingGroupName": "AutoScalingGroup-A",
             "SuspendedProcesses": [{
                 "ProcessName": "Launch"
-            }]}]}]
+            }]}]}
     assert process_is_suspended(
         asg_names=asg_names, process_names=process_names) is True
     assert client.suspend
@@ -660,10 +660,10 @@ def test_is_process_suspended_names_false(aws_client):
     aws_client.return_value = client
     asg_names = ['AutoScalingGroup-A']
     process_names = ['Launch']
-    client.get_paginator.return_value.paginate.return_value = [{
+    client.describe_auto_scaling_groups.return_value = {
         "AutoScalingGroups": [{
             "AutoScalingGroupName": "AutoScalingGroup-A",
-            "SuspendedProcesses": [{"ProcessName": "AZRebalance"}]}]}]
+            "SuspendedProcesses": [{"ProcessName": "AZRebalance"}]}]}
     assert process_is_suspended(
         asg_names=asg_names, process_names=process_names) is False
     assert client.suspend
@@ -698,7 +698,7 @@ def test_has_subnets_names_valid(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     asg_names = ['AutoScalingGroup-A', 'AutoScalingGroup-B']
-    client.get_paginator.return_value.paginate.return_value = [{
+    client.describe_auto_scaling_groups.return_value = {
         "AutoScalingGroups": [{
             "AutoScalingGroupName": "AutoScalingGroup-A",
             "Tags": [{
@@ -709,15 +709,15 @@ def test_has_subnets_names_valid(aws_client):
             "Tags": [{
                 "ResourceId": "AutoScalingGroup-B",
                 "Key": "TestKey",
-                "Value": "TestValue"}]}]}]
-    client.get_paginator.return_value.paginate.return_value = [{
+                "Value": "TestValue"}]}]}
+    client.describe_auto_scaling_groups.return_value = {
         "AutoScalingGroups": [
             {
                 "AutoScalingGroupName": "AutoScalingGroup-A",
                 "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"},
             {
                 "AutoScalingGroupName": "AutoScalingGroup-B",
-                "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"}]}]
+                "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"}]}
     response = has_subnets(
         subnets=['subnet-012345678', 'subnet-123456789'],
         asg_names=asg_names)
@@ -783,14 +783,14 @@ def test_has_subnets_names_invalid(aws_client):
                 "ResourceId": "AutoScalingGroup-B",
                 "Key": "TestKey",
                 "Value": "TestValue"}]}]}]
-    client.get_paginator.return_value.paginate.return_value = [{
+    client.describe_auto_scaling_groups.return_value = {
         "AutoScalingGroups": [
             {
                 "AutoScalingGroupName": "AutoScalingGroup-A",
                 "VPCZoneIdentifier": "subnet-012345678,subnet-123456789"},
             {
                 "AutoScalingGroupName": "AutoScalingGroup-B",
-                "VPCZoneIdentifier": "subnet-012345678,subnet-23456789a"}]}]
+                "VPCZoneIdentifier": "subnet-012345678,subnet-23456789a"}]}
     response = has_subnets(
         subnets=['subnet-012345678', 'subnet-123456789'],
         asg_names=asg_names)
@@ -851,15 +851,15 @@ def test_describe_auto_scaling_groups_names(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     asg_names = ['AutoScalingGroup-A']
-    client.get_paginator.return_value.paginate.return_value = [{
+    client.describe_auto_scaling_groups.return_value = {
         "AutoScalingGroups": [{
             "AutoScalingGroupName": "AutoScalingGroup-A",
             "Tags": [{
                 "ResourceId": "AutoScalingGroup-A",
                 "Key": "TestKey",
-                "Value": "TestValue"}]}]}]
+                "Value": "TestValue"}]}]}
     describe_auto_scaling_groups(asg_names=asg_names)
-    client.get_paginator.return_value.paginate.assert_called_with(
+    client.describe_auto_scaling_groups.assert_called_with(
         AutoScalingGroupNames=asg_names)
 
 
