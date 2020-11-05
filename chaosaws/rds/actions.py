@@ -66,7 +66,7 @@ def stop_db_instance(db_instance_identifier: str,
                      configuration: Configuration = None,
                      secrets: Secrets = None) -> AWSResponse:
     """
-    Stops a RDS DB instance
+    Stops a RDS DB instance, then wait until the RDS DB instance is completely stopped
 
     - db_instance_identifier: the instance identifier of the RDS instance
     - db_snapshot_identifier: the name of the DB snapshot made before stop
@@ -79,7 +79,11 @@ def stop_db_instance(db_instance_identifier: str,
         params['DBSnapshotIdentifier'] = db_snapshot_identifier
 
     try:
-        return client.stop_db_instance(**params)
+        call = client.stop_db_instance(**params)
+
+        while True:
+            if client.describe_db_instances(DBInstanceIdentifier=db_instance_identifier)['DBInstances'][0]['DBInstanceStatus'] == 'stopped':
+                return call
     except ClientError as e:
         raise FailedActivity('Failed to stop RDS DB instance %s: %s' % (
             db_instance_identifier, e.response['Error']['Message']))
