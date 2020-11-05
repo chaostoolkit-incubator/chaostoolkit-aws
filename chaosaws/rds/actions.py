@@ -82,9 +82,9 @@ def stop_db_instance(db_instance_identifier: str,
         call = client.stop_db_instance(**params)
 
         while True:
-            instance_status = client.describe_db_instances( \
-                DBInstanceIdentifier=db_instance_identifier) \
-                ['DBInstances'][0]['DBInstanceStatus']
+            instance_status = (client.describe_db_instances(
+                DBInstanceIdentifier=db_instance_identifier)['DBInstances']
+                [0]['DBInstanceStatus'])
 
             if instance_status == 'stopped':
                 return call
