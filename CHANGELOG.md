@@ -4,6 +4,12 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...HEAD
 
+## [0.16.1][]
+[0.16.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...0.16.1
+
+### Added
+- new RDS action that starts a DB instance
+
 ## [0.16.0][]
 [0.16.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.15.1...0.16.0
 
