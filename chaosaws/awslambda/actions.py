@@ -124,13 +124,26 @@ def put_function_memory_size(function_name: str, memory_size: int,
                                           memory_size=memory_size)
 
 
+def put_function_env(function_name: str, env: Dict[str, str],
+                     configuration: Configuration = None,
+                     secrets: Secrets = None) -> AWSResponse:
+    """
+    Sets environment variables for the function.
+    """
+    client = aws_client("lambda", configuration, secrets)
+    return _update_function_configuration(function_name=function_name,
+                                          client=client,
+                                          env=env)
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
 def _update_function_configuration(function_name: str,
                                    client: boto3.client,
                                    timeout: int = None,
-                                   memory_size: int = None) -> AWSResponse:
+                                   memory_size: int = None,
+                                   env: Dict[str, str] = None) -> AWSResponse:
     request_kwargs = {
         'FunctionName': function_name
     }
@@ -138,4 +151,6 @@ def _update_function_configuration(function_name: str,
         request_kwargs['Timeout'] = timeout
     if memory_size is not None:
         request_kwargs['MemorySize'] = memory_size
+    if env is not None:
+        request_kwargs['Environment'] = {'Variables': env}
     return client.update_function_configuration(**request_kwargs)
