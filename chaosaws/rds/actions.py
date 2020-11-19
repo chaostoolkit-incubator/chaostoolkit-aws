@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import boto3
+import time
 
 from typing import Any, Dict, List
 from botocore.exceptions import ClientError
@@ -61,10 +62,12 @@ def reboot_db_instance(db_instance_identifier: str,
                 db_instance_identifier, str(x)))
 
 
-def stop_db_instance(db_instance_identifier: str,
-                     db_snapshot_identifier: str = None,
-                     configuration: Configuration = None,
-                     secrets: Secrets = None) -> AWSResponse:
+def stop_db_instance(
+        db_instance_identifier: str,
+        db_snapshot_identifier: str = None,
+        configuration: Configuration = None,
+        secrets: Secrets = None
+    ) -> AWSResponse:
     """
     Stops a RDS DB instance
 
@@ -73,21 +76,21 @@ def stop_db_instance(db_instance_identifier: str,
     """
     client = aws_client("rds", configuration, secrets)
 
-    params = dict(
-        DBInstanceIdentifier=db_instance_identifier)
+    params = dict(DBInstanceIdentifier=db_instance_identifier)
     if db_snapshot_identifier:
         params['DBSnapshotIdentifier'] = db_snapshot_identifier
 
     try:
         call = client.stop_db_instance(**params)
 
-        while True:
-            instance_status = (client.describe_db_instances(
-                DBInstanceIdentifier=db_instance_identifier)['DBInstances']
-                [0]['DBInstanceStatus'])
+        while (
+            client.describe_db_instances(
+                DBInstanceIdentifier=db_instance_identifier
+            )['DBInstances'][0]['DBInstanceStatus'] != 'stopped'
+        ):
+            time.sleep(5)
 
-            if instance_status == 'stopped':
-                return call
+        return call
     except ClientError as e:
         raise FailedActivity('Failed to stop RDS DB instance %s: %s' % (
             db_instance_identifier, e.response['Error']['Message']))
