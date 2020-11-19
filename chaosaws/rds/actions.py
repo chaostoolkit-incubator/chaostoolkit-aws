@@ -84,10 +84,9 @@ def stop_db_instance(
         call = client.stop_db_instance(**params)
 
         while (
-            client.describe_db_instances(DBInstanceIdentifier=db_instance_identifier)[
-                "DBInstances"
-            ][0]["DBInstanceStatus"]
-            != "stopped"
+            client.describe_db_instances(
+                DBInstanceIdentifier=db_instance_identifier
+            )["DBInstances"][0]["DBInstanceStatus"] != "stopped"
         ):
             time.sleep(5)
 
