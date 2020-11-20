@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import boto3
+import time
 
 from typing import Any, Dict, List
 from botocore.exceptions import ClientError
@@ -12,7 +13,7 @@ from chaosaws.types import AWSResponse
 
 __all__ = ["failover_db_cluster", "reboot_db_instance", "stop_db_instance",
            "stop_db_cluster", "delete_db_instance", "delete_db_cluster",
-           "delete_db_cluster_endpoint"]
+           "delete_db_cluster_endpoint", "start_db_instance"]
 
 
 def failover_db_cluster(db_cluster_identifier: str,
@@ -189,6 +190,46 @@ def delete_db_cluster_endpoint(db_cluster_identifier: str,
     except ClientError as e:
         raise FailedActivity('unable to delete endpoint for cluster %s: %s' % (
             db_cluster_identifier, e.response['Error']['Message']))
+
+
+def start_db_instance(
+    db_instance_identifier: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None
+) -> AWSResponse:
+    """
+    Start a RDS DB instance
+
+    - db_instance_identifier: the identifier of the RDS instance to start
+    """
+    client = aws_client("rds", configuration, secrets)
+
+    params = dict(
+        DBInstanceIdentifier=db_instance_identifier)
+
+    try:
+        call = client.start_db_instance(**params)
+        timeout = 5
+        timeout_max = 600
+
+        while (
+            client.describe_db_instances(
+                DBInstanceIdentifier=db_instance_identifier
+            )['DBInstances'][0]['DBInstanceStatus'] != 'available'
+        ):
+            if timeout <= timeout_max:
+                timeout += 5
+                time.sleep(5)
+            else:
+                raise FailedActivity(
+                    'Failed to start RDS DB instance %s after a timeout of %d'
+                    % (db_instance_identifier, timeout_max)
+                )
+
+            return call
+    except ClientError as e:
+        raise FailedActivity('Failed to start RDS DB instance %s: %s' % (
+            db_instance_identifier, e.response['Error']['Message']))
 
 
 ###############################################################################

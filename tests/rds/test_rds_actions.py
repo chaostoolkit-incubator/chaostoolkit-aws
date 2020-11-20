@@ -4,10 +4,16 @@ from unittest.mock import MagicMock, patch
 import pytest
 from chaoslib.exceptions import FailedActivity
 
-from chaosaws.rds.actions import (failover_db_cluster, reboot_db_instance,
-                                  stop_db_instance, stop_db_cluster,
-                                  delete_db_instance, delete_db_cluster,
-                                  delete_db_cluster_endpoint)
+from chaosaws.rds.actions import (
+    failover_db_cluster,
+    reboot_db_instance,
+    stop_db_instance,
+    stop_db_cluster,
+    delete_db_instance,
+    delete_db_cluster,
+    delete_db_cluster_endpoint,
+    start_db_instance
+)
 
 
 @patch('chaosaws.rds.actions.aws_client', autospec=True)
@@ -237,3 +243,12 @@ def test_delete_db_cluster_endpoint(aws_client):
     delete_db_cluster_endpoint(db_cluster_identifier=cluster_id)
     client.delete_db_cluster_endpoint.assert_called_with(
         DBClusterEndpointIdentifier='%s.domain.endpoint' % cluster_id)
+
+
+@patch('chaosaws.rds.actions.aws_client', autospec=True)
+def test_start_db_instance(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    db_id = 'some-rds-instance-identifier'
+    start_db_instance(db_instance_identifier=db_id)
+    client.start_db_instance.assert_called_with(DBInstanceIdentifier=db_id)
