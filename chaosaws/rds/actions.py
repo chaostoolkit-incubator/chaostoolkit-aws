@@ -74,7 +74,7 @@ def stop_db_instance(
 
     - db_instance_identifier: the instance identifier of the RDS instance
     - db_snapshot_identifier: the name of the DB snapshot made before stop
-    - timeout: the timeout (in seconds) for the action to be completed 
+    - timeout: the timeout (in seconds) for the action to be completed
     """
     client = aws_client("rds", configuration, secrets)
 
