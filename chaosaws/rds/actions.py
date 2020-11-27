@@ -65,6 +65,7 @@ def reboot_db_instance(db_instance_identifier: str,
 def stop_db_instance(
     db_instance_identifier: str,
     db_snapshot_identifier: str = None,
+    timeout: int = 600,
     configuration: Configuration = None,
     secrets: Secrets = None,
 ) -> AWSResponse:
@@ -73,6 +74,7 @@ def stop_db_instance(
 
     - db_instance_identifier: the instance identifier of the RDS instance
     - db_snapshot_identifier: the name of the DB snapshot made before stop
+    - timeout: the timeout (in seconds) for the action to be completed 
     """
     client = aws_client("rds", configuration, secrets)
 
@@ -82,6 +84,7 @@ def stop_db_instance(
 
     try:
         call = client.stop_db_instance(**params)
+        until = time.time() + timeout
 
         while (
             client.describe_db_instances(
@@ -89,6 +92,12 @@ def stop_db_instance(
             )["DBInstances"][0]["DBInstanceStatus"] != "stopped"
         ):
             time.sleep(5)
+
+            if time.time() >= until:
+                raise FailedActivity(
+                    'Failed to stop RDS DB instance %s after a timeout of %d'
+                    % (db_instance_identifier, timeout)
+                )
 
         return call
     except ClientError as e:
