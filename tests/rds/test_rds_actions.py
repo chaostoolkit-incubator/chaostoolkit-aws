@@ -91,7 +91,10 @@ def test_stop_db_instance(aws_client):
     db_id = 'some-rds-instance-identifier'
     timeout = 30
 
-    client.stop_db_instance.assert_called_with(DBInstanceIdentifier=db_id)
+    client.stop_db_instance.assert_called_with(
+        DBInstanceIdentifier=db_id,
+        timeout=timeout
+    )
     
     with pytest.raises(FailedActivity):
         stop_db_instance(db_instance_identifier=db_id, timeout=timeout)
