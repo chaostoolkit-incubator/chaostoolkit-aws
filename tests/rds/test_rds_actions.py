@@ -89,8 +89,13 @@ def test_stop_db_instance(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     db_id = 'some-rds-instance-identifier'
-    stop_db_instance(db_instance_identifier=db_id)
+    timeout = 30
+
     client.stop_db_instance.assert_called_with(DBInstanceIdentifier=db_id)
+    
+    with pytest.raises(FailedActivity):
+        stop_db_instance(db_instance_identifier=db_id, timeout=timeout)
+    assert 'Failed to stop RDS DB instance after a timeout'
 
 
 @patch('chaosaws.rds.actions.aws_client', autospec=True)
@@ -99,8 +104,10 @@ def test_stop_db_instance_snapshot(aws_client):
     aws_client.return_value = client
     db_id = 'some-rds-instance-identifier'
     ss_id = 'some-rds-snapshot-identifier'
+    timeout = 30
     stop_db_instance(db_instance_identifier=db_id,
-                     db_snapshot_identifier=ss_id)
+                     db_snapshot_identifier=ss_id,
+                     timeout=30)
     client.stop_db_instance.assert_called_with(
         DBInstanceIdentifier=db_id, DBSnapshotIdentifier=ss_id)
 
