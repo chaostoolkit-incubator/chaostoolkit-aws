@@ -107,9 +107,10 @@ def delete_document(name: str,
 
     try:
         client = aws_client('ssm', configuration, secrets)
-        return client.delete_document(Name=name,
-                                      VersionName=version_name,
-                                      Force=force)
+        kwargs = {'Name': name, 'Force': force}
+        if version_name:
+            kwargs['VersionName'] = version_name
+        return client.delete_document(**kwargs)
     except ClientError as e:
         raise ActivityFailed(
             "Failed to delete  document '{}': '{}'".format(
