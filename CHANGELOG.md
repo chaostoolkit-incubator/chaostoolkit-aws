@@ -4,6 +4,13 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...HEAD
 
+### Added
+- adding list_event_source_mapping to awslambda probes
+- adding delete_event_source_mapping to awslambda actions
+- adding toggle_event_source_mapping_state to awslambda actions
+
+### Changed
+
 ## [0.16.0][]
 [0.16.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.15.1...0.16.0
 
