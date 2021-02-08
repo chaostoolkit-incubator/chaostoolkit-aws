@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 import boto3
 from chaoslib.exceptions import FailedActivity
+from botocore.exceptions import ClientError
 from chaoslib.types import Configuration, Secrets
 
 from chaosaws import aws_client
@@ -13,7 +14,8 @@ from chaosaws.types import AWSResponse
 
 __all__ = ["invoke_function", "put_function_concurrency",
            "delete_function_concurrency", "put_function_timeout",
-           "put_function_memory_size"]
+           "put_function_memory_size", "delete_event_source_mapping",
+           "toggle_event_source_mapping_state"]
 
 
 def invoke_function(function_name: str,
@@ -122,6 +124,45 @@ def put_function_memory_size(function_name: str, memory_size: int,
     return _update_function_configuration(function_name=function_name,
                                           client=client,
                                           memory_size=memory_size)
+
+
+def delete_event_source_mapping(event_uuid: str,
+                                configuration: Configuration = None,
+                                secrets: Secrets = None) -> AWSResponse:
+    """
+    Delete an event source mapping
+
+    :param event_uuid: The identifier of the event source mapping
+    :param configuration: AWS configuration data
+    :param secrets: AWS secrets
+    :return: AWSResponse
+    """
+    client = aws_client("lambda", configuration, secrets)
+    try:
+        return client.delete_event_source_mapping(UUID=event_uuid)
+    except ClientError as e:
+        raise FailedActivity(e.response['Error']['Message'])
+
+
+def toggle_event_source_mapping_state(event_uuid: str,
+                                      enabled: bool,
+                                      configuration: Configuration = None,
+                                      secrets: Secrets = None) -> AWSResponse:
+    """
+    Toggle an event source mapping to be disabled or enabled
+
+    :param event_uuid: The identifier of the event source mapping
+    :param enabled: Boolean value: true to enable, false to disable
+    :param configuration: AWS configuration data
+    :param secrets: AWS secrets
+    :return: AWSResponse
+    """
+    client = aws_client("lambda", configuration, secrets)
+    try:
+        return client.update_event_source_mapping(
+            UUID=event_uuid, Enabled=enabled)
+    except ClientError as e:
+        raise FailedActivity(e.response['Error']['Message'])
 
 
 ###############################################################################

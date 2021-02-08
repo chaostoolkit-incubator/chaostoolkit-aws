@@ -2,15 +2,30 @@
 import json
 from base64 import b64encode
 from unittest.mock import MagicMock, patch
+import os
 
 import pytest
 from chaoslib.exceptions import FailedActivity
+from botocore.exceptions import ClientError
 
-from chaosaws.awslambda.actions import (delete_function_concurrency,
-                                        invoke_function,
-                                        put_function_concurrency,
-                                        put_function_memory_size,
-                                        put_function_timeout)
+from chaosaws.awslambda.actions import (
+    delete_function_concurrency, invoke_function, put_function_concurrency,
+    put_function_memory_size, put_function_timeout, delete_event_source_mapping,
+    toggle_event_source_mapping_state
+)
+
+
+def mock_client_error(operation_name: str):
+    return ClientError(operation_name=operation_name, error_response={
+        'Error': {'Message': 'Test Error'}})
+
+
+def read_in_test_data(filename):
+    module_path = os.path.dirname(os.path.abspath(__file__))
+    test_path = os.path.join(module_path, 'test_data', filename)
+    with open(test_path, 'r') as fh:
+        test_data = json.loads(fh.read())
+    return test_data
 
 
 @patch('chaosaws.awslambda.actions.aws_client', autospec=True)
@@ -166,3 +181,67 @@ def test_aws_lambda_put_function_memory_size(aws_client):
     client.update_function_configuration.assert_called_with(
         FunctionName=lambda_function_name,
         MemorySize=memory_size)
+
+
+@patch('chaosaws.awslambda.actions.aws_client', autospec=True)
+def test_aws_lambda_delete_event_source_mapping(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.delete_event_source_mapping.return_value = read_in_test_data(
+        'delete_event_source_mapping.json')
+    uuid = '6b08c7db-a0f5-404d-ae73-b116d9125b0e'
+    response = delete_event_source_mapping(event_uuid=uuid)
+    assert response['State'] == 'Deleting'
+    client.delete_event_source_mapping.assert_called_with(UUID=uuid)
+
+
+@patch('chaosaws.awslambda.actions.aws_client', autospec=True)
+def test_aws_lambda_delete_event_source_mapping_exception(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.delete_event_source_mapping.side_effect = mock_client_error(
+        'delete_event_source_mapping')
+
+    with pytest.raises(FailedActivity) as x:
+        uuid = '6b08c7db-a0f5-404d-ae73-b116d9125b0e'
+        delete_event_source_mapping(event_uuid=uuid)
+    assert 'Test Error' in str(x)
+
+
+@patch('chaosaws.awslambda.actions.aws_client', autospec=True)
+def test_aws_lambda_toggle_event_source_mapping_enable(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.update_event_source_mapping.return_value = read_in_test_data(
+        'update_event_source_mapping_enable.json')
+    uuid = '6b08c7db-a0f5-404d-ae73-b116d9125b0e'
+    response = toggle_event_source_mapping_state(event_uuid=uuid, enabled=True)
+    assert response['State'] == 'Enabling'
+    client.update_event_source_mapping.assert_called_with(
+        UUID=uuid, Enabled=True)
+
+
+@patch('chaosaws.awslambda.actions.aws_client', autospec=True)
+def test_aws_lambda_toggle_event_source_mapping_disable(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.update_event_source_mapping.return_value = read_in_test_data(
+        'update_event_source_mapping_disable.json')
+    uuid = '6b08c7db-a0f5-404d-ae73-b116d9125b0e'
+    response = toggle_event_source_mapping_state(event_uuid=uuid, enabled=False)
+    assert response['State'] == 'Disabling'
+    client.update_event_source_mapping.assert_called_with(
+        UUID=uuid, Enabled=False)
+
+
+@patch('chaosaws.awslambda.actions.aws_client', autospec=True)
+def test_aws_lambda_toggle_event_source_mapping_exception(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.update_event_source_mapping.side_effect = mock_client_error(
+        'update_event_source_mapping')
+
+    with pytest.raises(FailedActivity) as x:
+        uuid = '6b08c7db-a0f5-404d-ae73-b116d9125b0e'
+        toggle_event_source_mapping_state(uuid, False)
+    assert 'Test Error' in str(x)
