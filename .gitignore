@@ -110,3 +110,6 @@ junit-test-results.xml
 
 # vim
 *.swp
+
+Pipfile
+Pipfile.lock
