@@ -2,9 +2,8 @@
 start-venv:
 	pipenv shell
 
-# needs to be ran before tests can be run
-setup:
-	python3 setup.py develop
+#setup:
+#	python3 setup.py develop
 
 pip-install:
 	pip3 install -r requirements.txt
@@ -19,6 +18,5 @@ pip-clean-install: pip-clean pip-install
 
 pip-install-all: pip-install pip-install-dev
 
-# be sure to run setup target first
 test:
-	pytest
+	python3 setup.py pytest

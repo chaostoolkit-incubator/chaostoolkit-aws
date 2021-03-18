@@ -27,3 +27,6 @@ def test_delete_cluster(aws_client):
     cluster = "eks-cluster"
     delete_cluster(name=cluster)
     client.delete_cluster.assert_called_with(name=cluster)
+
+
+# def test_terminate_random_nodes(aws_client):
