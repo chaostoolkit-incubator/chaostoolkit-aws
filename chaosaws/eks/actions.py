@@ -43,7 +43,7 @@ def delete_cluster(name: str = None, configuration: Configuration = None,
 def terminate_random_nodes(cluster_name: str,
                            aws_region: str,
                            node_count: int,
-                           termination_timeout: int,
+                           termination_timeout: int = 60,
                            secrets: Secrets = None):
     ec2_client = aws_client("ec2",
                             {"aws_region": aws_region},
@@ -63,6 +63,7 @@ def terminate_random_nodes(cluster_name: str,
         }
     ])
     cluster_instances = []
+    # raise ActivityFailed("alalal")
     for reservation in ec2_describe_response['Reservations']:
         for instance in reservation['Instances']:
             cluster_instances.append(instance['InstanceId'])
@@ -70,8 +71,8 @@ def terminate_random_nodes(cluster_name: str,
     instances_to_terminate = random.sample(cluster_instances, node_count)
     for instanceId in instances_to_terminate:
         logger.info("Terminating {} instance".format(instanceId))
-        # terminate_instance(instanceId)
-        timeout = datetime.datetime.now() + datetime.\
+        terminate_instance(instanceId)
+        timeout = datetime.datetime.now() + datetime. \
             timedelta(0, termination_timeout)
         _wait_for(
             timeout,
