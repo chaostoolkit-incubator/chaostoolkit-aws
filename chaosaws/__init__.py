@@ -83,7 +83,10 @@ def aws_client(resource_name: str, configuration: Configuration = None,
         logger.debug(
             "Client will be using profile '{}' from boto3 session".format(
                 aws_profile_name or "default"))
-        return boto3.client(resource_name, **params)
+        # NOTE: For this use case (az_failure) using a boto3 resource is easier than a client. The same can be achieved
+        #       with a client object and this would need to happen to 'productize' this example
+        return boto3.resource(resource_name, **params)
+        # return boto3.client(resource_name, **params)
     else:
         logger.debug(
             "Fetching credentials dynamically assuming role '{}'".format(
@@ -117,7 +120,8 @@ def aws_client(resource_name: str, configuration: Configuration = None,
         if region:
             params["region_name"] = region
 
-        return boto3.client(resource_name, **params)
+        # return boto3.client(resource_name, **params)
+        return boto3.resource(resource_name, **params)
 
 
 def signed_api_call(service: str, path: str = "/", method: str = 'GET',

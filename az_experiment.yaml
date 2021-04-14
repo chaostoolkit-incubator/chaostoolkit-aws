@@ -1,0 +1,44 @@
+version: 1.0.0
+title: AZ failure
+description: Simulate an AZ failure
+configuration:
+  aws_region: us-east-1
+  aws_profile_name: chaos-test
+
+steady-state-hypothesis:
+  title: Pods in running phase
+  probes:
+    - type: probe
+      name: SM pods running
+      tolerance: true
+      provider:
+        type: python
+        module: chaosk8s.pod.probes
+        func: all_pods_healthy
+        arguments:
+          ns: test-1
+
+method:
+- type: action
+  title: Simulate AZ failure
+  name: AZ failure
+  pauses:
+    after: 300
+  provider:
+    type: python
+    module: chaosaws.ec2.actions
+    func: az_failure
+    arguments:
+      instance_id: i-09b28affc80716d51
+      networking_profile_name: networking-internal
+
+rollbacks:
+- type: action
+  title: Rollback AZ failure
+  name: Rollback AZ failure
+  provider:
+    type: python
+    module: chaosaws.ec2.actions
+    func: rollback_az_failure
+    arguments:
+      networking_profile_name: networking-internal

@@ -5,6 +5,7 @@ from copy import deepcopy
 from typing import Any, Dict, List, Union
 
 import boto3
+import json
 from botocore.exceptions import ClientError
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
@@ -14,7 +15,120 @@ from logzero import logger
 
 __all__ = ["stop_instance", "stop_instances", "terminate_instances",
            "terminate_instance", "start_instances", "restart_instances",
-           "detach_random_volume", "attach_volume"]
+           "detach_random_volume", "attach_volume", "az_failure"]
+
+
+def az_failure(instance_id: str = None, networking_profile_name: str = None, configuration: Configuration = None):
+    if not networking_profile_name:
+        networking_profile_name = configuration.get("aws_profile_name")
+
+    # Setup
+    experiment_data = {"instance_id": instance_id}
+    ec2_client = aws_client('ec2', configuration=configuration, secrets=None)
+    instance = ec2_client.Instance(instance_id)
+
+    vpc_id = instance.vpc_id
+    subnet_id = instance.subnet_id
+    experiment_data["subnet_id"] = subnet_id
+    subnet = ec2_client.Subnet(subnet_id)
+    logger.info(f"Simulating AZ failure for {subnet.availability_zone}")
+
+
+    acl_response = create_network_acl(vpc_id, profile_name=networking_profile_name)
+    logger.info(f"Created new network ACL - {str(acl_response)}")
+
+    acl_id = acl_response['NetworkAcl']['NetworkAclId']
+
+    logger.info("Creating blackhole ACL")
+    create_network_acl_ingress_entry(acl_id, rule_num=1, protocol="-1", cidr_block="0.0.0.0/0", from_port=-30000,
+                                     to_port=30000, profile_name=networking_profile_name, allow=True)
+
+    network_association_id = None
+    prev_network_acl_id = None
+
+    network_acl_dict = get_network_acls(profile_name=networking_profile_name)
+
+    for acl in network_acl_dict["NetworkAcls"]:
+        for association in acl["Associations"]:
+            if association["SubnetId"] == subnet_id:
+                network_association_id = association["NetworkAclAssociationId"]
+                prev_network_acl_id = association["NetworkAclId"]
+                experiment_data["acl_id"] = prev_network_acl_id
+                experiment_data["blackhole_acl_id"] = acl_id
+                json.dump(experiment_data, open("experiment_data.json", 'w+'))
+
+    logger.info(f"Replacing original ACL - {prev_network_acl_id} with blackholde ACL {acl_id} to subnet {subnet_id}")
+    change_network_acl_association(acl_id, network_association_id, profile_name=networking_profile_name)
+
+
+def create_network_acl(vpc_id, profile_name: str = None):
+    client = get_session_client('ec2', profile_name=profile_name)
+    params = {"VpcId": vpc_id}
+    return client.create_network_acl(**params)
+
+
+def create_network_acl_ingress_entry(acl_id, rule_num, protocol, cidr_block, from_port, to_port, profile_name,
+                                     allow=True):
+    client = get_session_client('ec2', profile_name=profile_name)
+    params = {
+        "NetworkAclId": acl_id,
+        "RuleNumber": rule_num,
+        "Protocol": protocol,
+        "CidrBlock": cidr_block,
+        "Egress": False,
+        "RuleAction": "ALLOW" if allow else "DENY",
+        "PortRange": {"From": from_port, "To": to_port}
+    }
+    return client.create_network_acl_entry(**params)
+
+
+def get_network_acls(profile_name: str = None):
+    # NOTE: Passing profile name here because networking resources are managed be a separate account from the
+    #       ec2 instances themselves. Credentials to account hosting services (e.g. sites-load-test) are passed
+    #       via the configuration option in the experiment yaml.
+    client = get_session_client('ec2', profile_name=profile_name)
+    return client.describe_network_acls()
+
+
+def change_network_acl_association(acl_id, association, profile_name: str = None):
+    client = get_session_client('ec2', profile_name=profile_name)
+    params = {
+        "AssociationId": association,
+        "NetworkAclId": acl_id
+    }
+    return client.replace_network_acl_association(**params)
+
+
+def get_session_client(service, profile_name="chaos-test"):
+    session = boto3.Session(profile_name=profile_name)
+    return session.client(service)
+
+
+def rollback_az_failure(networking_profile_name: str = None, configuration: Configuration = None):
+    if not networking_profile_name:
+        networking_profile_name = configuration.get("aws_profile_name")
+
+    experiment_data = json.load(open("experiment_data.json", 'r'))
+    previous_network_acl_id = experiment_data["acl_id"]
+    blackhole_acl_id = experiment_data["blackhole_acl_id"]
+    subnet_id = experiment_data["subnet_id"]
+
+    logger.info(f"Rolling back ACL for subnet {subnet_id} from blackhole ACL {blackhole_acl_id} to original ACL {previous_network_acl_id}")
+    network_acl_dict = get_network_acls(profile_name="networking-internal")
+    for acl in network_acl_dict["NetworkAcls"]:
+        for association in acl["Associations"]:
+            if association["SubnetId"] == subnet_id:
+                network_association_id = association["NetworkAclAssociationId"]
+
+    change_network_acl_association(previous_network_acl_id, network_association_id, profile_name=networking_profile_name)
+    logger.info(f"Removing blackhole ACL {blackhole_acl_id}")
+    delete_network_acl(blackhole_acl_id, profile_name=networking_profile_name)
+
+
+def delete_network_acl(acl_id, profile_name: str = None):
+    client = get_session_client('ec2', profile_name)
+    params = {"NetworkAclId": acl_id}
+    return client.delete_network_acl(**params)
 
 
 def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
