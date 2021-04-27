@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import boto3
+from botocore.exceptions import ClientError
+from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
+from logzero import logger
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
-from logzero import logger
 
-__all__ = ["delete_rule", "disable_rule", "enable_rule",
+__all__ = ["delete_rule", "disable_rule", "enable_rule", "put_metric_data",
            "put_rule", "put_rule_targets", "remove_rule_targets"]
 
 
@@ -26,17 +28,13 @@ def put_rule(rule_name: str, schedule_expression: str = None,
     client = aws_client("events", configuration, secrets)
     kwargs = {
         'Name': rule_name,
+        **({'ScheduleExpression': schedule_expression}
+           if schedule_expression else {}),
+        **({'EventPattern': event_pattern} if event_pattern else {}),
+        **({'State': state} if state else {}),
+        **({'Description': description} if description else {}),
+        **({'RoleArn': role_arn} if role_arn else {})
     }
-    if schedule_expression is not None:
-        kwargs['ScheduleExpression'] = schedule_expression
-    if event_pattern is not None:
-        kwargs['EventPattern'] = event_pattern
-    if state is not None:
-        kwargs['State'] = state
-    if description is not None:
-        kwargs['Description'] = description
-    if role_arn is not None:
-        kwargs['RoleArn'] = role_arn
     return client.put_rule(**kwargs)
 
 
@@ -100,10 +98,63 @@ def remove_rule_targets(rule_name: str, target_ids: List[str] = None,
     return _remove_rule_targets(rule_name, target_ids, client)
 
 
+def put_metric_data(namespace: str,
+                    metric_data: List[Dict[str, Any]],
+                    configuration: Configuration = None,
+                    secrets: Secrets = None):
+    """
+    Publish metric data points to CloudWatch
+
+    :param namespace: The metric namespace
+    :param metric_data: A list of metric data to submit
+    :param configuration: AWS authentication configuration
+    :param secrets: Additional authentication secrets
+    :return: None
+
+    example:
+        namespace='MyCustomTestMetric',
+        metric_data=[
+            {
+                'MetricName': 'MyCustomInstanceMetric',
+                'Dimensions': [
+                    {'Name': 'InstanceId', 'Value': 'i-000000000000'},
+                    {'Name': 'Instance Name', 'Value': 'Test Instance'}
+                ],
+                'Timestamp': datetime(yyyy, mm, dd),
+                'Value': 55.55,
+                'StatisticValues': {
+                    'SampleCount': 0.0,
+                    'Sum': 0.0,
+                    'Minimum': 0.0,
+                    'Maximum': 0.0
+                },
+                'Values': [0.0, 1.0, 2.0],
+                'Counts': [1.0, 1.5, 2.6],
+                'Unit': 'Percent',
+                'StorageResolution': 60
+            }
+        ]
+
+    For additional information, consult: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data
+    """
+    params = {
+        'Namespace': namespace,
+        'MetricData': metric_data
+    }
+
+    client = aws_client('cloudwatch', configuration, secrets)
+
+    try:
+        client.put_metric_data(**params)
+    except ClientError as e:
+        raise FailedActivity(e.response['Error']['Message'])
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
-def _remove_rule_targets(rule_name: str, target_ids: str,
+def _remove_rule_targets(rule_name: str,
+                         target_ids: Union[str, List[str]],
                          client: boto3.client):
     """
     Removes provided CloudWatch rule targets.
@@ -121,10 +172,10 @@ def _get_rule_target_ids(rule_name: str, client: boto3.client,
     Return all targets for a provided CloudWatch rule name.
     """
     request_kwargs = {
-        'Rule': rule_name
+        'Rule': rule_name,
+        **({'Limit': limit} if limit else {}),
     }
-    if limit is not None:
-        request_kwargs['Limit'] = limit
+
     targets = []
     while True:
         response = client.list_targets_by_rule(**request_kwargs)
