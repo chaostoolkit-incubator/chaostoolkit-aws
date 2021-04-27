@@ -1,9 +1,25 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
+
+import pytest
+from botocore.exceptions import ClientError
+from chaoslib.exceptions import FailedActivity
 
 from chaosaws.cloudwatch.actions import (
     put_rule, put_rule_targets, disable_rule, enable_rule, delete_rule,
-    remove_rule_targets)
+    remove_rule_targets, put_metric_data
+)
+
+
+def mock_client_error(*args, **kwargs):
+    return ClientError(
+        operation_name=kwargs['op'],
+        error_response={'Error': {
+            'Code': kwargs['Code'],
+            'Message': kwargs['Message']
+        }}
+    )
 
 
 @patch('chaosaws.cloudwatch.actions.aws_client', autospec=True)
@@ -16,10 +32,10 @@ def test_cloudwatch_put_rule(aws_client):
     description = 'My 5 minute rule'
     role_arn = 'iam:role:for:my:rule'
     put_rule(rule_name,
-                        schedule_expression=schedule_expression,
-                        state=state,
-                        description=description,
-                        role_arn=role_arn)
+             schedule_expression=schedule_expression,
+             state=state,
+             description=description,
+             role_arn=role_arn)
     client.put_rule.assert_called_with(
         Name=rule_name,
         ScheduleExpression=schedule_expression,
@@ -37,7 +53,7 @@ def test_cloudwatch_put_rule_targets(aws_client):
         {
             'Id': '1234',
             'Arn': 'arn:aws:lambda:eu-central-1:'
-            '101010101010:function:MyFunction'
+                   '101010101010:function:MyFunction'
         }
     ]
     put_rule_targets(rule_name, targets)
@@ -110,3 +126,126 @@ def test_cloudwatch_remove_rule_targets_all(aws_client):
     client.remove_targets.assert_called_with(Rule=rule_name, Ids=target_ids)
     client.list_targets_by_rule.assert_called_with(Rule=rule_name)
     client.remove_targets.assert_called_with(Rule=rule_name, Ids=target_ids)
+
+
+@patch('chaosaws.cloudwatch.actions.aws_client', autospec=True)
+def test_put_metric_data_valid_single_datapoint(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.put_metric_data.return_value = None
+    time_stamp_1 = datetime.today() - timedelta(minutes=2)
+    time_stamp_2 = datetime.today()
+
+    put_metric_data(
+        namespace='TestMetricNamespace',
+        metric_data=[
+            {
+                'MetricName': 'MemoryUtilization',
+                'Dimensions': [
+                    {'Name': 'InstanceId', 'Value': 'i-000000000000'}],
+                'Timestamp': time_stamp_1,
+                'Value': 85.568945236,
+                'Unit': 'Percent',
+                'StorageResolution': 60
+            },
+            {
+                'MetricName': 'MemoryUtilization',
+                'Dimensions': [
+                    {'Name': 'InstanceId', 'Value': 'i-000000000000'}],
+                'Timestamp': time_stamp_2,
+                'Value': 89.6854,
+                'Unit': 'Percent',
+                'StorageResolution': 60
+            }
+        ]
+    )
+
+    client.put_metric_data.assert_called_with(
+        Namespace='TestMetricNamespace',
+        MetricData=[
+            {
+                'MetricName': 'MemoryUtilization',
+                'Dimensions': [
+                    {'Name': 'InstanceId', 'Value': 'i-000000000000'}],
+                'Timestamp': time_stamp_1,
+                'Value': 85.568945236,
+                'Unit': 'Percent',
+                'StorageResolution': 60
+            },
+            {
+                'MetricName': 'MemoryUtilization',
+                'Dimensions': [
+                    {'Name': 'InstanceId', 'Value': 'i-000000000000'}],
+                'Timestamp': time_stamp_2,
+                'Value': 89.6854,
+                'Unit': 'Percent',
+                'StorageResolution': 60
+            }
+        ]
+    )
+
+
+@patch('chaosaws.cloudwatch.actions.aws_client', autospec=True)
+def test_put_metric_data_valid_multi_datapoints(aws_client):
+    time_stamp = datetime.today()
+    client = MagicMock()
+    aws_client.return_value = client
+    client.put_metric_data.return_value = None
+
+    put_metric_data(
+        namespace='TestMetricNamespace',
+        metric_data=[{
+            'MetricName': 'MemoryUtilization',
+            'Dimensions': [{'Name': 'InstanceId', 'Value': 'i-000000000000'}],
+            'Timestamp': time_stamp,
+            'Values': [5.5, 10.2, 6.5],
+            'Counts': [1, 3, 2.6],
+            'Unit': 'Percent',
+            'StorageResolution': 60
+        }]
+    )
+
+    client.put_metric_data.assert_called_with(
+        Namespace='TestMetricNamespace',
+        MetricData=[
+            {
+                'MetricName': 'MemoryUtilization',
+                'Dimensions': [
+                    {'Name': 'InstanceId', 'Value': 'i-000000000000'}],
+                'Timestamp': time_stamp,
+                'Values': [5.5, 10.2, 6.5],
+                'Counts': [1, 3, 2.6],
+                'Unit': 'Percent',
+                'StorageResolution': 60
+            }
+        ]
+    )
+
+
+@patch('chaosaws.cloudwatch.actions.aws_client', autospec=True)
+def test_put_metric_data_invalid_parameter(aws_client):
+    time_stamp = datetime.today()
+    client = MagicMock()
+    aws_client.return_value = client
+    client.put_metric_data.side_effect = mock_client_error(
+        op='PutMetricData',
+        Code='InvalidParameterValueException',
+        Message='An error occurred when calling PutMetricData'
+    )
+
+    with pytest.raises(FailedActivity) as x:
+        put_metric_data(
+            namespace='TestMetricNamespace',
+            metric_data=[
+                {
+                    'MetricName': 'MemoryUtilization',
+                    'Dimensions': [
+                        {'Name': 'InstanceId', 'Value': 'i-000000000000'}],
+                    'Timestamp': time_stamp,
+                    'Value': 85.568945236,
+                    'Unit': 'InvalidUnit',
+                    'StorageResolution': 60
+                }
+            ]
+        )
+    assert 'An error occurred when calling PutMetricData' in str(x)

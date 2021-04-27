@@ -8,6 +8,7 @@
 - adding list_event_source_mapping to awslambda probes
 - adding delete_event_source_mapping to awslambda actions
 - adding toggle_event_source_mapping_state to awslambda actions
+- adding put_metric_data to cloudwatch actions
 
 ### Changed
 
