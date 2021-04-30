@@ -115,21 +115,13 @@ def put_metric_data(namespace: str,
         namespace='MyCustomTestMetric',
         metric_data=[
             {
-                'MetricName': 'MyCustomInstanceMetric',
+                'MetricName': 'MemoryUsagePercent',
                 'Dimensions': [
                     {'Name': 'InstanceId', 'Value': 'i-000000000000'},
                     {'Name': 'Instance Name', 'Value': 'Test Instance'}
                 ],
-                'Timestamp': datetime(yyyy, mm, dd),
+                'Timestamp': datetime(yyyy, mm, dd, HH, MM, SS),
                 'Value': 55.55,
-                'StatisticValues': {
-                    'SampleCount': 0.0,
-                    'Sum': 0.0,
-                    'Minimum': 0.0,
-                    'Maximum': 0.0
-                },
-                'Values': [0.0, 1.0, 2.0],
-                'Counts': [1.0, 1.5, 2.6],
                 'Unit': 'Percent',
                 'StorageResolution': 60
             }
