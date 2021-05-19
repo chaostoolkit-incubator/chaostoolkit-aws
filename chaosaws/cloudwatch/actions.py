@@ -128,7 +128,7 @@ def put_metric_data(namespace: str,
         ]
 
     For additional information, consult: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data
-    """
+    """  # noqa: E501
     params = {
         'Namespace': namespace,
         'MetricData': metric_data
