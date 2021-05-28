@@ -349,6 +349,10 @@ def detach_random_instances(asg_names: List[str] = None,
             InstanceIds=sorted(instances),
             ShouldDecrementDesiredCapacity=decrement_capacity)
         results.setdefault('Activities', []).extend(response['Activities'])
+        results.setdefault('DetachingInstances', []).append({
+            'AutoScalingGroupName': a['AutoScalingGroupName'],
+            'InstanceIds': instances
+        })
     return results
 
 
