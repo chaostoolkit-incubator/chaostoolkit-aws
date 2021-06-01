@@ -11,6 +11,7 @@
 - adding put_metric_data to cloudwatch actions
 
 ### Changed
+- update return value of asg action detach_random_instances to include instance IDs
 
 ## [0.16.0][]
 [0.16.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.15.1...0.16.0
