@@ -584,7 +584,7 @@ def test_detach_instances_count(aws_client):
             }
         ]
     }
-    detach_random_instances(asg_names, instance_count=2)
+    result = detach_random_instances(asg_names, instance_count=2)
 
     instance_calls = [
         ['i-00000000000000001', 'i-00000000000000002'],
@@ -592,15 +592,25 @@ def test_detach_instances_count(aws_client):
         ['i-00000000000000002', 'i-00000000000000003']]
 
     ex = None
+    call_found = False
     for i in instance_calls:
         try:
+            call_found = False
+            instance_ids = sorted(i)
             client.detach_instances.assert_called_with(
                 AutoScalingGroupName=asg_names[0],
-                InstanceIds=sorted(i),
+                InstanceIds=instance_ids,
                 ShouldDecrementDesiredCapacity=False)
+            call_found = True
+            assert result['DetachingInstances'] == [{
+                'AutoScalingGroupName': asg_names[0],
+                'InstanceIds': instance_ids
+            }]
             return True
         except AssertionError as e:
             ex = str(e.args)
+            if call_found:
+                break
     raise AssertionError(ex)
 
 
