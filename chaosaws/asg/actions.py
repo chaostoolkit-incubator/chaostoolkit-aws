@@ -343,10 +343,11 @@ def detach_random_instances(asg_names: List[str] = None,
                 'than exist on asg %s' % (a['AutoScalingGroupName']))
 
         instances = random.sample(instances, instance_count)
+        instances = sorted(instances)
 
         response = client.detach_instances(
             AutoScalingGroupName=a['AutoScalingGroupName'],
-            InstanceIds=sorted(instances),
+            InstanceIds=instances,
             ShouldDecrementDesiredCapacity=decrement_capacity)
         results.setdefault('Activities', []).extend(response['Activities'])
         results.setdefault('DetachingInstances', []).append({
