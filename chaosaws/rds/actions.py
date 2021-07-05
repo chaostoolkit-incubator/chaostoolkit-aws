@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import boto3
+import time
 
 from typing import Any, Dict, List
 from botocore.exceptions import ClientError
@@ -61,28 +62,49 @@ def reboot_db_instance(db_instance_identifier: str,
                 db_instance_identifier, str(x)))
 
 
-def stop_db_instance(db_instance_identifier: str,
-                     db_snapshot_identifier: str = None,
-                     configuration: Configuration = None,
-                     secrets: Secrets = None) -> AWSResponse:
+def stop_db_instance(
+    db_instance_identifier: str,
+    db_snapshot_identifier: str = None,
+    timeout: int = 600,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
     """
     Stops a RDS DB instance
 
     - db_instance_identifier: the instance identifier of the RDS instance
     - db_snapshot_identifier: the name of the DB snapshot made before stop
+    - timeout: the timeout (in seconds) for the action to be completed
     """
     client = aws_client("rds", configuration, secrets)
 
-    params = dict(
-        DBInstanceIdentifier=db_instance_identifier)
+    params = dict(DBInstanceIdentifier=db_instance_identifier)
     if db_snapshot_identifier:
-        params['DBSnapshotIdentifier'] = db_snapshot_identifier
+        params["DBSnapshotIdentifier"] = db_snapshot_identifier
 
     try:
-        return client.stop_db_instance(**params)
+        call = client.stop_db_instance(**params)
+        until = time.time() + timeout
+
+        while (
+            client.describe_db_instances(
+                DBInstanceIdentifier=db_instance_identifier
+            )["DBInstances"][0]["DBInstanceStatus"] != "stopped"
+        ):
+            time.sleep(5)
+
+            if time.time() >= until:
+                raise FailedActivity(
+                    'Failed to stop RDS DB instance %s after a timeout of %d'
+                    % (db_instance_identifier, timeout)
+                )
+
+        return call
     except ClientError as e:
-        raise FailedActivity('Failed to stop RDS DB instance %s: %s' % (
-            db_instance_identifier, e.response['Error']['Message']))
+        raise FailedActivity(
+            "Failed to stop RDS DB instance %s: %s"
+            % (db_instance_identifier, e.response["Error"]["Message"])
+        )
 
 
 def stop_db_cluster(db_cluster_identifier: str,
