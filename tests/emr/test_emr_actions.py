@@ -65,7 +65,7 @@ class TestEmrActionsMoto:
         response = describe_instance_group(**params)
         group = response['InstanceGroups']
         assert group['Name'] == 'MasterGroupNodes'
-        assert group['RequestedInstanceCount'] == 4
+        assert group['RequestedInstanceCount'] == 3
 
         # modify RequestedInstanceCount and assert changed value
         params = {
