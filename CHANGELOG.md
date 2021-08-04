@@ -17,6 +17,9 @@
 ### Changed
 - update return value of asg action detach_random_instances to include instance IDs
 
+### Fixed
+- `chaosaws.route53.probes` now correctly exposes the `__all__` attribute
+
 ## [0.16.0][]
 [0.16.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.15.1...0.16.0
 
