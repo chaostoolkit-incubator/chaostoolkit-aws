@@ -1,0 +1,33 @@
+name: Build and Discover
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  discover:
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install chaostoolkit
+          python setup.py develop
+      - name: Discover
+        run: |
+          if chaos discover chaostoolkit-aws 2>&1 | grep "WARNING"; then
+            printf "\nchaos discover output a WARNING, failing step.\n"
+            exit 1
+          fi

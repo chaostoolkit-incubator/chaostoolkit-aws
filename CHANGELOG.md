@@ -9,6 +9,10 @@
 - adding delete_event_source_mapping to awslambda actions
 - adding toggle_event_source_mapping_state to awslambda actions
 - adding put_metric_data to cloudwatch actions
+- added GitHub Actions Workflows for Build and Test, Build and Discover, and Releasing
+
+### Removed
+- Removed TravisCI related files
 
 ### Changed
 - update return value of asg action detach_random_instances to include instance IDs
