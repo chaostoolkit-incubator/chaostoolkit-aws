@@ -4,6 +4,9 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...HEAD
 
+### Changed
+- update variable type `dimensions` in Cloudwatch probes get_metric_statistics and get_metric_data 
+
 ### Added
 - adding list_event_source_mapping to awslambda probes
 - adding delete_event_source_mapping to awslambda actions
