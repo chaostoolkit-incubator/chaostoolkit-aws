@@ -10,7 +10,7 @@
         "Market": "ON_DEMAND",
         "InstanceRole": "MASTER",
         "InstanceType": "m1.xlarge",
-        "InstanceCount": 4
+        "InstanceCount": 3
       }
     ],
     "InstanceFleets": [
