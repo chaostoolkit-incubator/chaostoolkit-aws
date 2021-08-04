@@ -5,7 +5,6 @@ from typing import Any, Dict, List
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
-
 from chaosaws import aws_client
 
 __all__ = ["get_alarm_state_value", "get_metric_statistics", "get_metric_data"]
@@ -46,17 +45,17 @@ def get_metric_statistics(namespace: str, metric_name: str,
     Example: A duration of 60 seconds and an offset of 30 seconds will yield a
     statistical value based on the time interval between 30 and 90 seconds in the past.
 
-        :param namespace: The AWS metric namespace.
-        :param metric_name: The name of the metric to pull data for.
+        :param namespace: The AWS metric namespace
+        :param metric_name: The name of the metric to pull data for
         :param dimensions: Are expected as:
-            Name: The name of the dimension to search for.
-            Value: The value to be used for searching the dimension.
-        :param unit: The type of unit desired to be collected.
-        :param statistic: The type of data to return.
-            One of: Average, Sum, Minimum, Maximum, SampleCount.
-        :param period: The window in which to pull datapoints for.
-        :param offset: The time (seconds) to offset the endtime (from now).
-        :param duration: The time (seconds) to set the start time (from now).
+            Name: The name of the dimension to search for
+            Value: The value to be used for searching the dimension
+        :param unit: The type of unit desired to be collected
+        :param statistic: The type of data to return
+            One of: Average, Sum, Minimum, Maximum, SampleCount
+        :param period: The window in which to pull datapoints for
+        :param offset: The time (seconds) to offset the endtime (from now)
+        :param duration: The time (seconds) to set the start time (from now)
 
     More information about input parameters are available in the documentation
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.get_metric_statistics
@@ -114,17 +113,17 @@ def get_metric_data(namespace: str, metric_name: str,
     """Gets metric data for a given metric in a given time period. This method
     allows for more data to be retrieved than get_metric_statistics.
 
-        :param namespace: The AWS metric namespace.
-        :param metric_name: The name of the metric to pull data for.
+        :param namespace: The AWS metric namespace
+        :param metric_name: The name of the metric to pull data for
         :param dimensions: Are expected as:
-            Name: The name of the dimension to search for.
-            Value: The value to be used for searching the dimension.
-        :param unit: The type of unit desired to be collected.
-        :param statistic: The type of data to return.
-            One of: Average, Sum, Minimum, Maximum, SampleCount.
-        :param period: The window in which to pull datapoints for.
-        :param offset: The time (seconds) to offset the endtime (from now).
-        :param duration: The time (seconds) to set the start time (from now).
+            Name: The name of the dimension to search for
+            Value: The value to be used for searching the dimension
+        :param unit: The type of unit desired to be collected
+        :param statistic: The type of data to return
+            One of: Average, Sum, Minimum, Maximum, SampleCount
+        :param period: The window in which to pull datapoints for
+        :param offset: The time (seconds) to offset the endtime (from now)
+        :param duration: The time (seconds) to set the start time (from now)
     """
     start_time = datetime.utcnow() - timedelta(seconds=duration)
     end_time = datetime.utcnow() - timedelta(seconds=offset)
