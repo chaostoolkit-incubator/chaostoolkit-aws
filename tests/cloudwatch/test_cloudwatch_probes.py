@@ -65,8 +65,7 @@ def test_cloudwatch_get_metric_statistics_ok(aws_client,
 
     namespace = 'AWS/Lambda'
     metric_name = 'Invocations'
-    dimension_name = 'FunctionName'
-    dimension_value = 'MyFunction'
+    dimensions = [{'FunctionName', 'MyFunction'}]
     duration = 120
     offset = 60
     statistic = 'Sum'
@@ -78,8 +77,7 @@ def test_cloudwatch_get_metric_statistics_ok(aws_client,
 
     result = get_metric_statistics(namespace=namespace,
                                    metric_name=metric_name,
-                                   dimension_name=dimension_name,
-                                   dimension_value=dimension_value,
+                                   dimensions=dimensions,
                                    duration=duration,
                                    offset=offset,
                                    statistic=statistic,
@@ -90,7 +88,7 @@ def test_cloudwatch_get_metric_statistics_ok(aws_client,
     client.get_metric_statistics.assert_called_with(
         Namespace=namespace,
         MetricName=metric_name,
-        Dimensions=[{'Name': dimension_name, 'Value': dimension_value}],
+        Dimensions= dimensions,
         Period=duration,
         StartTime=datetime(2015, 1, 1, 15, 12, tzinfo=timezone.utc),
         EndTime=datetime(2015, 1, 1, 15, 14, tzinfo=timezone.utc),
@@ -110,8 +108,7 @@ def test_cloudwatch_get_metric_statistics_extended_ok(aws_client,
 
     namespace = 'AWS/Lambda'
     metric_name = 'Invocations'
-    dimension_name = 'FunctionName'
-    dimension_value = 'MyFunction'
+    dimensions = [{'FunctionName', 'MyFunction'}]
     duration = 120
     offset = 60
     statistic = None
@@ -123,8 +120,7 @@ def test_cloudwatch_get_metric_statistics_extended_ok(aws_client,
 
     result = get_metric_statistics(namespace=namespace,
                                    metric_name=metric_name,
-                                   dimension_name=dimension_name,
-                                   dimension_value=dimension_value,
+                                   dimensions=dimensions,
                                    duration=duration,
                                    offset=offset,
                                    statistic=statistic,
@@ -135,7 +131,7 @@ def test_cloudwatch_get_metric_statistics_extended_ok(aws_client,
     client.get_metric_statistics.assert_called_with(
         Namespace=namespace,
         MetricName=metric_name,
-        Dimensions=[{'Name': dimension_name, 'Value': dimension_value}],
+        Dimensions=dimensions,
         Period=duration,
         StartTime=datetime(2015, 1, 1, 15, 12, tzinfo=timezone.utc),
         EndTime=datetime(2015, 1, 1, 15, 14, tzinfo=timezone.utc),
@@ -154,8 +150,7 @@ def test_cloudwatch_get_metric_statistics_no_datapoints(
 
     namespace = 'AWS/Lambda'
     metric_name = 'Invocations'
-    dimension_name = 'FunctionName'
-    dimension_value = 'MyFunction'
+    dimensions = [{'FunctionName', 'MyFunction'}]
     duration = 120
     offset = 60
     statistic = 'Sum'
@@ -167,7 +162,7 @@ def test_cloudwatch_get_metric_statistics_no_datapoints(
 
     response = get_metric_statistics(
         namespace=namespace, metric_name=metric_name,
-        dimension_name=dimension_name, dimension_value=dimension_value,
+        dimensions=dimensions,
         duration=duration, offset=offset, statistic=statistic,
         extended_statistic=extended_statistic, unit=unit)
 
@@ -176,7 +171,7 @@ def test_cloudwatch_get_metric_statistics_no_datapoints(
     client.get_metric_statistics.assert_called_with(
         Namespace=namespace,
         MetricName=metric_name,
-        Dimensions=[{'Name': dimension_name, 'Value': dimension_value}],
+        Dimensions=dimensions,
         Period=duration,
         StartTime=datetime(2015, 1, 1, 15, 12, tzinfo=timezone.utc),
         EndTime=datetime(2015, 1, 1, 15, 14, tzinfo=timezone.utc),
@@ -196,8 +191,7 @@ def test_cloudwatch_get_metric_statistics_bad_response(
 
     namespace = 'AWS/Lambda'
     metric_name = 'Invocations'
-    dimension_name = 'FunctionName'
-    dimension_value = 'MyFunction'
+    dimensions = [{'FunctionName', 'MyFunction'}]
     duration = 120
     offset = 60
     statistic = 'Sum'
@@ -209,8 +203,7 @@ def test_cloudwatch_get_metric_statistics_bad_response(
 
     with pytest.raises(FailedActivity):
         get_metric_statistics(namespace=namespace, metric_name=metric_name,
-                              dimension_name=dimension_name,
-                              dimension_value=dimension_value,
+                              dimensions=dimensions,
                               duration=duration, offset=offset,
                               statistic=statistic,
                               extended_statistic=extended_statistic, unit=unit)
@@ -218,7 +211,7 @@ def test_cloudwatch_get_metric_statistics_bad_response(
     client.get_metric_statistics.assert_called_with(
         Namespace=namespace,
         MetricName=metric_name,
-        Dimensions=[{'Name': dimension_name, 'Value': dimension_value}],
+        Dimensions=dimensions,
         Period=duration,
         StartTime=datetime(2015, 1, 1, 15, 12, tzinfo=timezone.utc),
         EndTime=datetime(2015, 1, 1, 15, 14, tzinfo=timezone.utc),
@@ -242,8 +235,7 @@ def test_get_cloudwatch_data_average(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'ActiveConnectionCount',
-        'dimension_name': 'LoadBalancer',
-        'dimension_value': 'app/my_test_alb/0000000000000000',
+        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Average',
@@ -291,8 +283,7 @@ def test_get_cloudwatch_data_minimum(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'ActiveConnectionCount',
-        'dimension_name': 'LoadBalancer',
-        'dimension_value': 'app/my_test_alb/0000000000000000',
+        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Minimum',
@@ -340,8 +331,7 @@ def test_get_cloudwatch_data_maximum(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'ActiveConnectionCount',
-        'dimension_name': 'LoadBalancer',
-        'dimension_value': 'app/my_test_alb/0000000000000000',
+        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Maximum',
@@ -389,8 +379,7 @@ def test_get_cloudwatch_data_sum(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'ActiveConnectionCount',
-        'dimension_name': 'LoadBalancer',
-        'dimension_value': 'app/my_test_alb/0000000000000000',
+        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Sum',
@@ -438,8 +427,7 @@ def test_get_cloudwatch_data_no_results(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'HTTPCode_ELB_504_Count',
-        'dimension_name': 'LoadBalancer',
-        'dimension_value': 'app/my_test_alb/0000000000000000',
+        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Average',

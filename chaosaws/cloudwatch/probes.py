@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 from statistics import mean
-
+from typing import Any, Dict, List
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
@@ -30,7 +30,7 @@ def get_alarm_state_value(alarm_name: str,
 
 
 def get_metric_statistics(namespace: str, metric_name: str,
-                          dimension_name: str, dimension_value: str,
+                          dimensions: List[Dict[str, Any]],
                           duration: int = 60, offset: int = 0,
                           statistic: str = None,
                           extended_statistic: str = None,
@@ -45,6 +45,18 @@ def get_metric_statistics(namespace: str, metric_name: str,
 
     Example: A duration of 60 seconds and an offset of 30 seconds will yield a
     statistical value based on the time interval between 30 and 90 seconds in the past.
+
+        :param namespace: The AWS metric namespace.
+        :param metric_name: The name of the metric to pull data for.
+        :param dimensions: Are expected as:
+            Name: The name of the dimension to search for.
+            Value: The value to be used for searching the dimension.
+        :param unit: The type of unit desired to be collected.
+        :param statistic: The type of data to return.
+            One of: Average, Sum, Minimum, Maximum, SampleCount.
+        :param period: The window in which to pull datapoints for.
+        :param offset: The time (seconds) to offset the endtime (from now).
+        :param duration: The time (seconds) to set the start time (from now).
 
     More information about input parameters are available in the documentation
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.get_metric_statistics
@@ -61,10 +73,7 @@ def get_metric_statistics(namespace: str, metric_name: str,
     request_kwargs = {
         'Namespace': namespace,
         'MetricName': metric_name,
-        'Dimensions': [{
-            'Name': dimension_name,
-            'Value': dimension_value
-        }],
+        'Dimensions': dimensions,
         'StartTime': start_time,
         'EndTime': end_time,
         'Period': duration
@@ -97,25 +106,25 @@ def get_metric_statistics(namespace: str, metric_name: str,
         )
 
 
-def get_metric_data(namespace: str, metric_name: str, dimension_name: str,
-                    dimension_value: str, statistic: str = None,
+def get_metric_data(namespace: str, metric_name: str,
+                    dimensions: List[Dict[str, Any]], statistic: str = None,
                     duration: int = 300, period: int = 60, offset: int = 0,
                     unit: str = None, configuration: Configuration = None,
                     secrets: Secrets = None) -> float:
     """Gets metric data for a given metric in a given time period. This method
-    allows for more data to be retrieved than get_metric_statistics
+    allows for more data to be retrieved than get_metric_statistics.
 
-    :params
-        namespace: The AWS metric namespace
-        metric_name: The name of the metric to pull data for
-        dimension_name: The name of the dimension to search for
-        dimension_value: The value to be used for searching the dimension
-        unit: The type of unit desired to be collected
-        statistic: The type of data to return.
-            One of: Average, Sum, Minimum, Maximum, SampleCount
-        period: The window in which to pull datapoints for
-        offset: The time (seconds) to offset the endtime (from now)
-        duration: The time (seconds) to set the start time (from now)
+        :param namespace: The AWS metric namespace.
+        :param metric_name: The name of the metric to pull data for.
+        :param dimensions: Are expected as:
+            Name: The name of the dimension to search for.
+            Value: The value to be used for searching the dimension.
+        :param unit: The type of unit desired to be collected.
+        :param statistic: The type of data to return.
+            One of: Average, Sum, Minimum, Maximum, SampleCount.
+        :param period: The window in which to pull datapoints for.
+        :param offset: The time (seconds) to offset the endtime (from now).
+        :param duration: The time (seconds) to set the start time (from now).
     """
     start_time = datetime.utcnow() - timedelta(seconds=duration)
     end_time = datetime.utcnow() - timedelta(seconds=offset)
@@ -126,10 +135,7 @@ def get_metric_data(namespace: str, metric_name: str, dimension_name: str,
                 'Metric': {
                     'Namespace': namespace,
                     'MetricName': metric_name,
-                    'Dimensions': [{
-                        'Name': dimension_name,
-                        'Value': dimension_value
-                    }]
+                    'Dimensions': dimensions
                 },
                 'Period': period,
                 'Stat': statistic
