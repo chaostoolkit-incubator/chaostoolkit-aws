@@ -235,7 +235,9 @@ def test_get_cloudwatch_data_average(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'ActiveConnectionCount',
-        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
+        'dimensions': [{
+            'Name': 'LoadBalancer', 
+            'Value': 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Average',
@@ -283,7 +285,9 @@ def test_get_cloudwatch_data_minimum(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'ActiveConnectionCount',
-        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
+        'dimensions': [{
+            'Name': 'LoadBalancer', 
+            'Value': 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Minimum',
@@ -331,7 +335,9 @@ def test_get_cloudwatch_data_maximum(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'ActiveConnectionCount',
-        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
+        'dimensions': [{
+            'Name': 'LoadBalancer', 
+            'Value': 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Maximum',
@@ -379,7 +385,9 @@ def test_get_cloudwatch_data_sum(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'ActiveConnectionCount',
-        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
+        'dimensions': [{
+            'Name': 'LoadBalancer', 
+            'Value': 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Sum',
@@ -427,7 +435,9 @@ def test_get_cloudwatch_data_no_results(m_client, m_datetime):
     args = {
         'namespace': 'AWS/ApplicationELB',
         'metric_name': 'HTTPCode_ELB_504_Count',
-        'dimensions': [{'LoadBalancer', 'app/my_test_alb/0000000000000000'}],
+        'dimensions': [{
+            'Name': 'LoadBalancer', 
+            'Value': 'app/my_test_alb/0000000000000000'}],
         'period': 60,
         'duration': 300,
         'statistic': 'Average',
