@@ -2,10 +2,7 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...HEAD
-
-### Changed
-- update variable type `dimensions` in Cloudwatch probes get_metric_statistics and get_metric_data 
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...HEAD 
 
 ### Added
 - adding list_event_source_mapping to awslambda probes
@@ -19,6 +16,7 @@
 
 ### Changed
 - update return value of asg action detach_random_instances to include instance IDs
+- added new variable for `get_metric_statistics` and `get_metric_data` called `dimensions: list[dict[str, Any]]` to allow for multiple dimension queries
 
 ### Fixed
 - `chaosaws.route53.probes` now correctly exposes the `__all__` attribute
