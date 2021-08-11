@@ -36,7 +36,7 @@ def deregister_target(tg_name: str,
             }]
         )
     except ClientError as e:
-        raise FailedActivity('Exception detaching %s: %s' % (
+        raise FailedActivity('Exception detaching {}: {}'.format(
             tg_name, e.response['Error']['Message']))
 
 

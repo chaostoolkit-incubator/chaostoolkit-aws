@@ -188,7 +188,7 @@ def terminate_instances(instance_ids: List[str] = None, az: str = None,
             raise FailedActivity(
                 'No instances found matching filters: %s' % str(filters))
 
-        logger.debug('Instances in AZ %s selected: %s}.' % (
+        logger.debug('Instances in AZ {} selected: {}}}.'.format(
             az, str(instance_types)))
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
@@ -234,7 +234,7 @@ def start_instances(instance_ids: List[str] = None, az: str = None,
             raise FailedActivity(
                 'No instances found matching filters: %s' % str(filters))
 
-        logger.debug('Instances in AZ %s selected: %s}.' % (
+        logger.debug('Instances in AZ {} selected: {}}}.'.format(
             az, str(instance_types)))
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
@@ -279,7 +279,7 @@ def restart_instances(instance_ids: List[str] = None, az: str = None,
             raise FailedActivity(
                 'No instances found matching filters: %s' % str(filters))
 
-        logger.debug('Instances in AZ %s selected: %s}.' % (
+        logger.debug('Instances in AZ {} selected: {}}}.'.format(
             az, str(instance_types)))
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
@@ -563,7 +563,7 @@ def terminate_instances_any_type(instance_types: dict = None,
     response = []
 
     for k, v in instance_types.items():
-        logger.debug('Terminating %s instance(s): %s' % (k, instance_types[k]))
+        logger.debug('Terminating {} instance(s): {}'.format(k, instance_types[k]))
         if k == 'spot':
             instances = get_spot_request_ids_from_response(
                 client.describe_instances(InstanceIds=v))
@@ -583,7 +583,7 @@ def start_instances_any_type(instance_types: dict,
     """
     results = []
     for k, v in instance_types.items():
-        logger.debug('Starting %s instance(s): %s' % (k, v))
+        logger.debug('Starting {} instance(s): {}'.format(k, v))
         response = client.start_instances(InstanceIds=v)
         results.extend(response.get('StartingInstances', []))
     return results
@@ -596,7 +596,7 @@ def restart_instances_any_type(instance_types: dict,
     """
     results = []
     for k, v in instance_types.items():
-        logger.debug('Restarting %s instance(s): %s' % (k, v))
+        logger.debug('Restarting {} instance(s): {}'.format(k, v))
         client.reboot_instances(InstanceIds=v)
     return results
 
@@ -620,12 +620,12 @@ def detach_instance_volume(client: boto3.client,
             Tags=[
                 {
                     'Key': 'ChaosToolkitDetached',
-                    'Value': 'DeviceName=%s;InstanceId=%s' % (
+                    'Value': 'DeviceName={};InstanceId={}'.format(
                         volume['DeviceName'], volume['InstanceId'])
                 }])
         return response
     except ClientError as e:
-        raise FailedActivity('unable to detach volume %s from %s: %s' % (
+        raise FailedActivity('unable to detach volume {} from {}: {}'.format(
             volume['VolumeId'], volume['InstanceId'],
             e.response['Error']['Message']))
 
@@ -649,11 +649,11 @@ def attach_instance_volume(client: boto3.client,
             Device=mount_point,
             InstanceId=instance_id,
             VolumeId=volume_id)
-        logger.debug('Attached volume %s to instance %s' % (
+        logger.debug('Attached volume {} to instance {}'.format(
             volume_id, instance_id))
     except ClientError as e:
         raise FailedActivity(
-            'Unable to attach volume %s to instance %s: %s' % (
+            'Unable to attach volume {} to instance {}: {}'.format(
                 volume_id, instance_id, e.response['Error']['Message']))
     return response
 

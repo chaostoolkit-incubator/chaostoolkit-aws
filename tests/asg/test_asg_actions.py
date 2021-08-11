@@ -904,7 +904,7 @@ def test_attach_volume_asg_name(aws_client):
                     'VolumeId': 'vol-00000001',
                     'Tags': [{
                         'Key': 'ChaosToolkitDetached',
-                        'Value': 'DeviceName=/dev/sdc;InstanceId=%s;ASG=%s' % (
+                        'Value': 'DeviceName=/dev/sdc;InstanceId={};ASG={}'.format(
                             'i-987654321fabcde', asg_names[0])}]
                 },
                 {
@@ -959,7 +959,7 @@ def test_attach_volume_asg_tags(aws_client):
                 'VolumeId': 'vol-00000001',
                 'Tags': [{
                     'Key': 'ChaosToolkitDetached',
-                    'Value': 'DeviceName=/dev/sdb;InstanceId=%s;ASG=%s' % (
+                    'Value': 'DeviceName=/dev/sdb;InstanceId={};ASG={}'.format(
                         'i-00000000000000001', asg_names[0])}]
             },
             {

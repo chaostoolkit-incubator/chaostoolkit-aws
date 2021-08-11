@@ -54,7 +54,7 @@ def describe_cache_cluster(cluster_id: str,
                                  'find cache cluster with id: %s' % cluster_id)
         return response
     except ClientError as e:
-        raise FailedActivity('describe_cache_cluster failed: (%s) %s' % (
+        raise FailedActivity('describe_cache_cluster failed: ({}) {}'.format(
             e.response['Error']['Code'], e.response['Error']['Message']))
 
 

@@ -110,7 +110,7 @@ def describe_service(cluster: str,
     response = client.describe_services(cluster=cluster, services=[service])
 
     if not response.get('services', []):
-        raise FailedActivity('Unable to collect service %s on cluster %s' % (
+        raise FailedActivity('Unable to collect service {} on cluster {}'.format(
             cluster, service))
     return response
 

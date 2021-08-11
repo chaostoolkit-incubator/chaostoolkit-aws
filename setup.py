@@ -48,7 +48,7 @@ url = 'http://chaostoolkit.org'
 license = 'Apache License Version 2.0'
 packages = setuptools.find_packages(include=['chaosaws', 'chaosaws.*'])
 
-needs_pytest = set(['pytest', 'test']).intersection(sys.argv)
+needs_pytest = {'pytest', 'test'}.intersection(sys.argv)
 
 install_require = []
 with io.open('requirements.txt') as f:

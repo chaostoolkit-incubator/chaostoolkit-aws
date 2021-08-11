@@ -143,6 +143,6 @@ def validate_cluster_nodes(cache_cluster: Dict[str, Any],
             missing_nodes.append(n)
 
     if missing_nodes:
-        raise FailedActivity('Cache Cluster %s has no node(s) matching: %s' % (
+        raise FailedActivity('Cache Cluster {} has no node(s) matching: {}'.format(
             cache_cluster['CacheClusterId'], missing_nodes))
     return node_ids
