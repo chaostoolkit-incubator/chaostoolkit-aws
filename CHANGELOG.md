@@ -13,6 +13,7 @@
 
 ### Removed
 - Removed TravisCI related files
+- All `# -*- coding: utf-8 -*-` statements
 
 ### Changed
 - update return value of asg action detach_random_instances to include instance IDs
