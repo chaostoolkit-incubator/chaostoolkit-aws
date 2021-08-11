@@ -70,7 +70,7 @@ def terminate_random_instances(asg_names: List[str] = None,
 
             if not instances:
                 raise FailedActivity(
-                    'No instances found in Availability Zone: {}'.format(az))
+                    f'No instances found in Availability Zone: {az}')
         else:
             if instance_percent:
                 instance_count = int(float(
@@ -154,7 +154,7 @@ def stop_random_instances(asg_names: List[str] = None,
 
             if not instances:
                 raise FailedActivity(
-                    'No instances found in Availability Zone: {}'.format(az))
+                    f'No instances found in Availability Zone: {az}')
         else:
             if instance_percent:
                 instance_count = int(float(
@@ -507,13 +507,13 @@ def validate_asgs(asg_names: List[str] = None,
 
 def get_asg_by_name(asg_names: List[str],
                     client: boto3.client) -> AWSResponse:
-    logger.debug('Searching for ASG(s): {}.'.format(asg_names))
+    logger.debug(f'Searching for ASG(s): {asg_names}.')
 
     asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
 
     if not asgs.get('AutoScalingGroups', []):
         raise FailedActivity(
-            'Unable to locate ASG(s): {}'.format(asg_names))
+            f'Unable to locate ASG(s): {asg_names}')
 
     found_asgs = [a['AutoScalingGroupName'] for a in asgs['AutoScalingGroups']]
     invalid_asgs = [a for a in asg_names if a not in found_asgs]
@@ -540,7 +540,7 @@ def get_asg_by_tags(tags: List[Dict[str, str]],
 
     if not results:
         raise FailedActivity(
-            'No ASG(s) found with matching tag(s): {}.'.format(tags))
+            f'No ASG(s) found with matching tag(s): {tags}.')
     return get_asg_by_name(list(results), client)
 
 

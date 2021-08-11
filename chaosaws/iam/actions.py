@@ -29,7 +29,7 @@ def create_policy(name: str, policy: Dict[str, Any], path: str = "/",
         )
     except Exception as x:
         raise FailedActivity(
-            "failed creating a policy: {}".format(str(x)))
+            f"failed creating a policy: {str(x)}")
 
 
 def attach_role_policy(arn: str, role_name: str,

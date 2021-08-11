@@ -49,7 +49,7 @@ def stop_instance(instance_id: str = None, az: str = None, force: bool = False,
 
         if not instance_types:
             raise FailedActivity(
-                "No instances in availability zone: {}".format(az))
+                f"No instances in availability zone: {az}")
     else:
         instance_types = get_instance_type_by_id([instance_id], client)
 
@@ -92,7 +92,7 @@ def stop_instances(instance_ids: List[str] = None, az: str = None,
 
         if not instance_types:
             raise FailedActivity(
-                "No instances in availability zone: {}".format(az))
+                f"No instances in availability zone: {az}")
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
 
@@ -373,9 +373,9 @@ def list_instances_by_type(filters: List[Dict[str, Any]],
     Return all instance ids matching the given filters by type
     (InstanceLifecycle) ie spot, on demand, etc.
     """
-    logger.debug("EC2 instances query: {}".format(str(filters)))
+    logger.debug(f"EC2 instances query: {str(filters)}")
     res = client.describe_instances(Filters=filters)
-    logger.debug("Instances matching the filter query: {}".format(str(res)))
+    logger.debug(f"Instances matching the filter query: {str(res)}")
 
     return get_instance_type_from_response(res)
 
@@ -538,7 +538,7 @@ def stop_instances_any_type(instance_types: dict = None,
         spot_request_ids = get_spot_request_ids_from_response(
             client.describe_instances(InstanceIds=instance_types['spot']))
 
-        logger.debug("Canceling spot requests: {}".format(spot_request_ids))
+        logger.debug(f"Canceling spot requests: {spot_request_ids}")
         client.cancel_spot_instance_requests(
             SpotInstanceRequestIds=spot_request_ids)
         logger.debug("Terminating spot instances: {}".format(
@@ -563,7 +563,7 @@ def terminate_instances_any_type(instance_types: dict = None,
     response = []
 
     for k, v in instance_types.items():
-        logger.debug('Terminating {} instance(s): {}'.format(k, instance_types[k]))
+        logger.debug(f'Terminating {k} instance(s): {instance_types[k]}')
         if k == 'spot':
             instances = get_spot_request_ids_from_response(
                 client.describe_instances(InstanceIds=v))
@@ -583,7 +583,7 @@ def start_instances_any_type(instance_types: dict,
     """
     results = []
     for k, v in instance_types.items():
-        logger.debug('Starting {} instance(s): {}'.format(k, v))
+        logger.debug(f'Starting {k} instance(s): {v}')
         response = client.start_instances(InstanceIds=v)
         results.extend(response.get('StartingInstances', []))
     return results
@@ -596,7 +596,7 @@ def restart_instances_any_type(instance_types: dict,
     """
     results = []
     for k, v in instance_types.items():
-        logger.debug('Restarting {} instance(s): {}'.format(k, v))
+        logger.debug(f'Restarting {k} instance(s): {v}')
         client.reboot_instances(InstanceIds=v)
     return results
 

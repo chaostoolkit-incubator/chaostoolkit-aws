@@ -63,7 +63,7 @@ def stop_random_tasks(cluster: str,
 
     results = []
     for task in tasks:
-        logger.debug("Stopping ECS task: {}".format(task))
+        logger.debug(f"Stopping ECS task: {task}")
         response = client.stop_task(cluster=cluster, task=task, reason=reason)
         results.append({
             'Task_Id': response['task']['taskArn'],
@@ -87,11 +87,11 @@ def stop_task(cluster: str = None, task_id: str = None, service: str = None,
         tasks = list_tasks(cluster=cluster, client=client, service=service)
         if not tasks:
             raise FailedActivity(
-                "No ECS tasks found for service: {}".format(service))
+                f"No ECS tasks found for service: {service}")
         task_id = random.choice(tasks)
         task_id = task_id.rsplit("/", 1)[1]
 
-    logger.debug("Stopping ECS task: {}".format(task_id))
+    logger.debug(f"Stopping ECS task: {task_id}")
     return client.stop_task(cluster=cluster, task=task_id, reason=reason)
 
 
@@ -128,7 +128,7 @@ def delete_service(service: str = None, cluster: str = None,
         service = random.choice(services)
         service = service.rsplit("/", 1)[1]
 
-    logger.debug("Updating ECS service: {}".format(service))
+    logger.debug(f"Updating ECS service: {service}")
     client.update_service(cluster=cluster, service=service,
                           desiredCount=0,
                           deploymentConfiguration={
@@ -136,7 +136,7 @@ def delete_service(service: str = None, cluster: str = None,
                               'minimumHealthyPercent': 0
                           })
 
-    logger.debug("Deleting ECS service: {}".format(service))
+    logger.debug(f"Deleting ECS service: {service}")
     return client.delete_service(cluster=cluster, service=service)
 
 
@@ -152,7 +152,7 @@ def delete_cluster(cluster: str,
     :return: Dict[str, Any]
     """
     client = aws_client("ecs", configuration, secrets)
-    logger.debug("Deleting ECS cluster: {}".format(cluster))
+    logger.debug(f"Deleting ECS cluster: {cluster}")
     return client.delete_cluster(cluster=cluster)
 
 

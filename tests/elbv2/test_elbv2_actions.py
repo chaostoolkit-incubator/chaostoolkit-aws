@@ -325,7 +325,7 @@ def test_set_subnets_invalid_subnet(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         set_subnets(alb_names, subnet_ids)
-    assert 'Invalid subnet id(s): {}'.format([subnet_ids[1]]) in str(x.value)
+    assert f'Invalid subnet id(s): {[subnet_ids[1]]}' in str(x.value)
 
 
 def test_set_subnet_no_subnets():

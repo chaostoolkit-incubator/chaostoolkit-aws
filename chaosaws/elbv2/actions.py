@@ -191,7 +191,7 @@ def get_load_balancer_arns(load_balancer_names: List[str],
     missing_lbs = [l for l in load_balancer_names if l not in results['Names']]
     if missing_lbs:
         raise FailedActivity(
-            'Unable to locate load balancer(s): {}'.format(missing_lbs))
+            f'Unable to locate load balancer(s): {missing_lbs}')
 
     if not results:
         raise FailedActivity(
@@ -219,7 +219,7 @@ def get_target_group_arns(tg_names: List[str],
 
     for tg in res['TargetGroups']:
         tg_arns[tg['TargetGroupName']] = tg['TargetGroupArn']
-    logger.debug("Target groups ARN: {}".format(str(tg_arns)))
+    logger.debug(f"Target groups ARN: {str(tg_arns)}")
 
     return tg_arns
 

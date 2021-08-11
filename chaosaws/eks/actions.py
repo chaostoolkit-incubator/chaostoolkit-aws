@@ -16,7 +16,7 @@ def create_cluster(name: str, role_arn: str, vpc_config: Dict[str, Any],
     Create a new EKS cluster.
     """
     client = aws_client("eks", configuration, secrets)
-    logger.debug("Creating EKS cluster: {}".format(name))
+    logger.debug(f"Creating EKS cluster: {name}")
     return client.create_cluster(
         name=name, version=version, roleArn=role_arn,
         resourcesVpcConfig=vpc_config)
@@ -28,5 +28,5 @@ def delete_cluster(name: str = None, configuration: Configuration = None,
     Delete the given EKS cluster.
     """
     client = aws_client("eks", configuration, secrets)
-    logger.debug("Deleting EKS cluster: {}".format(name))
+    logger.debug(f"Deleting EKS cluster: {name}")
     return client.delete_cluster(name=name)

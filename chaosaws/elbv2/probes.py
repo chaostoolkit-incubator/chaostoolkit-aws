@@ -85,7 +85,7 @@ def get_target_group_arns(tg_names: List[str],
 
     for tg in res['TargetGroups']:
         tg_arns[tg['TargetGroupName']] = tg['TargetGroupArn']
-    logger.debug("Target groups ARNs: {}".format(str(tg_arns)))
+    logger.debug(f"Target groups ARNs: {str(tg_arns)}")
 
     return tg_arns
 

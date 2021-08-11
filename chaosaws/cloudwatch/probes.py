@@ -23,7 +23,7 @@ def get_alarm_state_value(alarm_name: str,
     response = client.describe_alarms(AlarmNames=[alarm_name])
     if len(response["MetricAlarms"]) == 0:
         raise FailedActivity(
-            "CloudWatch alarm name {} not found".format(alarm_name)
+            f"CloudWatch alarm name {alarm_name} not found"
         )
     return response["MetricAlarms"][0]["StateValue"]
 
@@ -76,7 +76,7 @@ def get_metric_statistics(namespace: str, metric_name: str,
     if unit is not None:
         request_kwargs['Unit'] = unit
 
-    logger.debug('Request arguments: {}'.format(request_kwargs))
+    logger.debug(f'Request arguments: {request_kwargs}')
     response = client.get_metric_statistics(**request_kwargs)
 
     datapoints = response['Datapoints']
@@ -84,7 +84,7 @@ def get_metric_statistics(namespace: str, metric_name: str,
         return 0
 
     datapoint = datapoints[0]
-    logger.debug('Response: {}'.format(response))
+    logger.debug(f'Response: {response}')
     try:
         if statistic is not None:
             return datapoint[statistic]
@@ -92,7 +92,7 @@ def get_metric_statistics(namespace: str, metric_name: str,
             return datapoint['ExtendedStatistics'][extended_statistic]
     except Exception as x:
         raise FailedActivity(
-            "Unable to parse response '{}': '{}'".format(response, str(x))
+            f"Unable to parse response '{response}': '{str(x)}'"
         )
 
 
