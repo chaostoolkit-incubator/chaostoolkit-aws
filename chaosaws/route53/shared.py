@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import boto3
 from chaosaws.types import AWSResponse
 from logzero import logger

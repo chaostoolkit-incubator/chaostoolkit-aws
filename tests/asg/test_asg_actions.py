@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
 from chaoslib.exceptions import FailedActivity
 from chaosaws.asg.actions import (
