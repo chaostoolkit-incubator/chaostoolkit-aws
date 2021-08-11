@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
 

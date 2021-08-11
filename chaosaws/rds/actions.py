@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import boto3
 
 from typing import Any, Dict, List

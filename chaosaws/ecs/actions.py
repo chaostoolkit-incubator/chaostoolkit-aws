@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import random
 import re
 from typing import List, Union, Dict

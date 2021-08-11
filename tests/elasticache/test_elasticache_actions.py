@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
 from chaosaws.elasticache.actions import (
     reboot_cache_clusters, delete_replication_groups, delete_cache_clusters)

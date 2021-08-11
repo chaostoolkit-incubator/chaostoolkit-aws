@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from json import loads
 from unittest.mock import ANY, MagicMock, patch

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import boto3
 from chaoslib.types import Configuration, Secrets
 

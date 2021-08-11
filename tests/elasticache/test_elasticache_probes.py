@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
 from chaosaws.elasticache.probes import (
     describe_cache_cluster, get_cache_node_status, get_cache_node_count, count_cache_clusters_from_replication_group)

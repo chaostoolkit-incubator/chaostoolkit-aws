@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
 
 from chaosaws.eks.actions import create_cluster, delete_cluster
