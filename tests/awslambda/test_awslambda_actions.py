@@ -22,7 +22,7 @@ def mock_client_error(operation_name: str):
 def read_in_test_data(filename):
     module_path = os.path.dirname(os.path.abspath(__file__))
     test_path = os.path.join(module_path, 'test_data', filename)
-    with open(test_path, 'r') as fh:
+    with open(test_path) as fh:
         test_data = json.loads(fh.read())
     return test_data
 

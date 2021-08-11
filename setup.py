@@ -24,7 +24,7 @@ def get_version_from_package() -> str:
 name = 'chaostoolkit-aws'
 desc = 'Chaos Toolkit Extension for AWS'
 
-with io.open('README.md', encoding='utf-8') as strm:
+with open('README.md', encoding='utf-8') as strm:
     long_desc = strm.read()
 
 classifiers = [
@@ -51,12 +51,12 @@ packages = setuptools.find_packages(include=['chaosaws', 'chaosaws.*'])
 needs_pytest = {'pytest', 'test'}.intersection(sys.argv)
 
 install_require = []
-with io.open('requirements.txt') as f:
+with open('requirements.txt') as f:
     install_require = [l.strip() for l in f if not l.startswith('#')]
 pytest_runner = ['pytest_runner'] if needs_pytest else []
 
 test_require = []
-with io.open('requirements-dev.txt') as f:
+with open('requirements-dev.txt') as f:
     test_require = [l.strip() for l in f if not l.startswith('#')]
 
 setup_params = dict(

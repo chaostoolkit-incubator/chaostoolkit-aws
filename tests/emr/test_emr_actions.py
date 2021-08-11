@@ -18,7 +18,7 @@ data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 def read_configs(filename):
     config = os.path.join(data_path, filename)
-    with open(config, 'r') as fh:
+    with open(config) as fh:
         return loads(fh.read())
 
 
@@ -36,7 +36,7 @@ def mock_client_error(*args, **kwargs):
 @mock_emr
 def start_cluster():
     config = os.path.join(data_path, 'cluster_properties.json')
-    with open(config, 'r') as fh:
+    with open(config) as fh:
         config_data = loads(fh.read())
 
     client = boto3.client('emr', region_name='us-east-1')

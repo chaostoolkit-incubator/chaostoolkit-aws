@@ -14,7 +14,7 @@ class TestRDSProbes(TestCase):
     def setUp(self) -> None:
         data_file = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), 'rds_data.json')
-        with open(data_file, 'r') as fh:
+        with open(data_file) as fh:
             self.test_data = json.loads(fh.read())
 
     @patch('chaosaws.rds.probes.aws_client', autospec=True)
