@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from typing import Any, Dict, List
 
 from chaosaws import aws_client

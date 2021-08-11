@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 from base64 import b64encode
 from json.decoder import JSONDecodeError

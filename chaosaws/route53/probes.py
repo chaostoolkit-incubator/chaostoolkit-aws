@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from typing import List
 
 from chaoslib.types import Configuration, Secrets

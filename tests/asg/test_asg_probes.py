@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from sys import maxsize
 from unittest.mock import MagicMock, patch
 

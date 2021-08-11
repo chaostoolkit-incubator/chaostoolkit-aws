@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import time
 from collections import Counter
 from sys import maxsize

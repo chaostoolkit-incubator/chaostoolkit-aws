@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import random
 from typing import Dict, List
 
