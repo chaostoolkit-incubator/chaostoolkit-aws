@@ -1,6 +1,5 @@
 coverage
 moto
-pycodestyle
 pytest>=6.0
 pytest-cov
 pytest-sugar
