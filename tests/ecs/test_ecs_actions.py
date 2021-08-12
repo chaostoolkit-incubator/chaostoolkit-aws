@@ -62,13 +62,13 @@ def test_stop_random_tasks_count_too_high(aws_client):
     client.list_tasks.side_effect = [
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"
+                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"  # Noqa
             ],
             "nextToken": "token0",
         },
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"
+                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"  # Noqa
             ],
             "nextToken": None,
         },
@@ -91,13 +91,13 @@ def test_stop_random_tasks_count_no_service(aws_client):
     client.list_tasks.side_effect = [
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"
+                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"  # Noqa
             ],
             "nextToken": "token0",
         },
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"
+                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"  # Noqa
             ],
             "nextToken": None,
         },
@@ -107,12 +107,12 @@ def test_stop_random_tasks_count_no_service(aws_client):
     assert client.stop_task.call_count == 2
     client.stop_task.assert_any_call(
         cluster=cluster,
-        task="arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da",
+        task="arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da",  # Noqa
         reason=reason,
     )
     client.stop_task.assert_any_call(
         cluster=cluster,
-        task="arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk",
+        task="arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk",  # Noqa
         reason=reason,
     )
 
@@ -127,13 +127,13 @@ def test_stop_random_tasks_percent_no_service(aws_client):
     client.list_tasks.side_effect = [
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"
+                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"  # Noqa
             ],
             "nextToken": "token0",
         },
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"
+                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"  # Noqa
             ],
             "nextToken": None,
         },
@@ -167,13 +167,13 @@ def test_stop_random_tasks_percent_yes_service(aws_client):
     client.list_tasks.side_effect = [
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"
+                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"  # Noqa
             ],
             "nextToken": "token0",
         },
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"
+                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"  # Noqa
             ],
             "nextToken": None,
         },
@@ -209,13 +209,13 @@ def test_stop_random_tasks_count_yes_service(aws_client):
     client.list_tasks.side_effect = [
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"
+                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"  # Noqa
             ],
             "nextToken": "token0",
         },
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"
+                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"  # Noqa
             ],
             "nextToken": None,
         },
@@ -227,12 +227,12 @@ def test_stop_random_tasks_count_yes_service(aws_client):
     assert client.stop_task.call_count == 2
     client.stop_task.assert_any_call(
         cluster=cluster,
-        task="arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da",
+        task="arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da",  # Noqa
         reason=reason,
     )
     client.stop_task.assert_any_call(
         cluster=cluster,
-        task="arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk",
+        task="arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk",  # Noqa
         reason=reason,
     )
 
@@ -258,13 +258,13 @@ def test_stop_tasks(aws_client):
     client.list_tasks.side_effect = [
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"
+                "arn:aws:ecs:us-east-1:012345678910:task/16fd2706-8baf-433b-82eb-8c7fada847da"  # Noqa
             ],
             "nextToken": "token0",
         },
         {
             "taskArns": [
-                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"
+                "arn:aws:ecs:us-east-1:012345678910:task/84th9568-3tth-55g1-35ki-4o9amby245lk"  # Noqa
             ],
             "nextToken": None,
         },
