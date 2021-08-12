@@ -11,12 +11,7 @@ from chaoslib.discovery.discover import (
     initialize_discovery_result,
 )
 from chaoslib.exceptions import InterruptExecution
-from chaoslib.types import (
-    Configuration,
-    DiscoveredActivities,
-    Discovery,
-    Secrets,
-)
+from chaoslib.types import Configuration, DiscoveredActivities, Discovery, Secrets
 from logzero import logger
 
 __version__ = "0.16.0"
