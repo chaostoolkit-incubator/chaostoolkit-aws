@@ -7,8 +7,9 @@ from chaosaws.types import AWSResponse
 __all__ = ["describe_cluster", "list_clusters"]
 
 
-def describe_cluster(name: str, configuration: Configuration = None,
-                     secrets: Secrets = None) -> AWSResponse:
+def describe_cluster(
+    name: str, configuration: Configuration = None, secrets: Secrets = None
+) -> AWSResponse:
     """
     Describe an EKS cluster.
     """
@@ -20,8 +21,9 @@ def describe_cluster(name: str, configuration: Configuration = None,
         return None
 
 
-def list_clusters(configuration: Configuration = None,
-                  secrets: Secrets = None) -> AWSResponse:
+def list_clusters(
+    configuration: Configuration = None, secrets: Secrets = None
+) -> AWSResponse:
     """
     List EKS clusters available to the authenticated account.
     """

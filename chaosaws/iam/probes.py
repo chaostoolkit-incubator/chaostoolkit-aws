@@ -6,8 +6,9 @@ from chaosaws import aws_client
 __all__ = ["get_policy"]
 
 
-def get_policy(arn: str, configuration: Configuration = None,
-               secrets: Secrets = None) -> bool:
+def get_policy(
+    arn: str, configuration: Configuration = None, secrets: Secrets = None
+) -> bool:
     """
     Get a policy by its ARN
     """
