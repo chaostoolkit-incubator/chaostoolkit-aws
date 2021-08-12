@@ -6,7 +6,6 @@ from chaoslib.types import Configuration, Secrets
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-
 __all__ = ["start_experiment"]
 
 
@@ -36,6 +35,4 @@ def start_experiment(
     try:
         return fis_client.start_experiment(**params)
     except Exception as ex:
-        raise FailedActivity(
-            f"Start Experiment failed, reason was: {ex}"
-        )
+        raise FailedActivity(f"Start Experiment failed, reason was: {ex}")

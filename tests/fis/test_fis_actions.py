@@ -8,6 +8,7 @@ from chaosaws.fis.actions import start_experiment
 
 def test_that_fis_module_exposes_correct_all_attributes():
     import chaosaws.fis.actions as actions
+
     all = actions.__all__
     assert "start_experiment" in all
 
