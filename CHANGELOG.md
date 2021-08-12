@@ -10,6 +10,7 @@
 - adding toggle_event_source_mapping_state to awslambda actions
 - adding put_metric_data to cloudwatch actions
 - added GitHub Actions Workflows for Build and Test, Build and Discover, and Releasing
+- added `Makefile` to abstract away common commands: `install`, `install-dev`, `lint`, `format`, `tests`
 
 ### Removed
 - Removed TravisCI related files
@@ -17,6 +18,7 @@
 
 ### Changed
 - update return value of asg action detach_random_instances to include instance IDs
+- switch from `pycodestyle` to `black`, `flake8`, and `isort` for linting/formatting
 
 ### Fixed
 - `chaosaws.route53.probes` now correctly exposes the `__all__` attribute
