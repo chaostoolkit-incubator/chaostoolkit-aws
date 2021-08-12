@@ -6,15 +6,17 @@ from logzero import logger
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ['associate_vpc_with_zone', 'disassociate_vpc_from_zone']
+__all__ = ["associate_vpc_with_zone", "disassociate_vpc_from_zone"]
 
 
-def associate_vpc_with_zone(zone_id: str,
-                            vpc_id: str,
-                            vpc_region: str,
-                            comment: str = None,
-                            configuration: Configuration = None,
-                            secrets: Secrets = None) -> AWSResponse:
+def associate_vpc_with_zone(
+    zone_id: str,
+    vpc_id: str,
+    vpc_region: str,
+    comment: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
     """Associate a VPC with a private hosted zone
 
     :param zone_id: The hosted zone id
@@ -25,28 +27,27 @@ def associate_vpc_with_zone(zone_id: str,
     :param secrets: values that need to be passed on to actions/probes
     :returns: Dict[str, Any]
     """
-    client = aws_client('route53', configuration, secrets)
+    client = aws_client("route53", configuration, secrets)
     params = {
-        'HostedZoneId': zone_id,
-        'VPC': {
-            'VPCId': vpc_id,
-            'VPCRegion': vpc_region
-        },
-        **({'Comment': comment} if comment else {})
+        "HostedZoneId": zone_id,
+        "VPC": {"VPCId": vpc_id, "VPCRegion": vpc_region},
+        **({"Comment": comment} if comment else {}),
     }
     try:
         return client.associate_vpc_with_hosted_zone(**params)
     except ClientError as e:
-        logger.exception(e.response['Error']['Message'])
-        raise FailedActivity(e.response['Error']['Message'])
+        logger.exception(e.response["Error"]["Message"])
+        raise FailedActivity(e.response["Error"]["Message"])
 
 
-def disassociate_vpc_from_zone(zone_id: str,
-                               vpc_id: str,
-                               vpc_region: str,
-                               comment: str = None,
-                               configuration: Configuration = None,
-                               secrets: Secrets = None) -> AWSResponse:
+def disassociate_vpc_from_zone(
+    zone_id: str,
+    vpc_id: str,
+    vpc_region: str,
+    comment: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
     """Remove an association between a VPC and a private hosted zone
 
     :param zone_id: The hosted zone id
@@ -57,17 +58,14 @@ def disassociate_vpc_from_zone(zone_id: str,
     :param secrets: values that need to be passed on to actions/probes
     :returns: Dict[str, Any]
     """
-    client = aws_client('route53', configuration, secrets)
+    client = aws_client("route53", configuration, secrets)
     params = {
-        'HostedZoneId': zone_id,
-        'VPC': {
-            'VPCId': vpc_id,
-            'VPCRegion': vpc_region
-        },
-        **({'Comment': comment} if comment else {})
+        "HostedZoneId": zone_id,
+        "VPC": {"VPCId": vpc_id, "VPCRegion": vpc_region},
+        **({"Comment": comment} if comment else {}),
     }
     try:
         return client.disassociate_vpc_from_hosted_zone(**params)
     except ClientError as e:
-        logger.exception(e.response['Error']['Message'])
-        raise FailedActivity(e.response['Error']['Message'])
+        logger.exception(e.response["Error"]["Message"])
+        raise FailedActivity(e.response["Error"]["Message"])

@@ -1,11 +1,10 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from chaosaws.iam.actions import (attach_role_policy, create_policy,
-                                  detach_role_policy)
+from chaosaws.iam.actions import attach_role_policy, create_policy, detach_role_policy
 
 
-@patch('chaosaws.iam.actions.aws_client', autospec=True)
+@patch("chaosaws.iam.actions.aws_client", autospec=True)
 def test_create_policy(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -16,19 +15,21 @@ def test_create_policy(aws_client):
             {
                 "Effect": "Allow",
                 "Action": "logs:CreateLogGroup",
-                "Resource": "RESOURCE_ARN"
+                "Resource": "RESOURCE_ARN",
             }
-        ]
+        ],
     }
 
     create_policy("mypolicy", policy, "/user/Jon")
     client.create_policy.assert_called_with(
-        PolicyName="mypolicy", Path="/user/Jon",
+        PolicyName="mypolicy",
+        Path="/user/Jon",
         PolicyDocument=json.dumps(policy),
-        Description="")
+        Description="",
+    )
 
 
-@patch('chaosaws.iam.actions.aws_client', autospec=True)
+@patch("chaosaws.iam.actions.aws_client", autospec=True)
 def test_attach_role_policy(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -36,11 +37,10 @@ def test_attach_role_policy(aws_client):
     arn = "aws:iam:whatever"
     role = "somerole"
     attach_role_policy(arn, role)
-    client.attach_role_policy.assert_called_with(
-        PolicyArn=arn, RoleName=role)
+    client.attach_role_policy.assert_called_with(PolicyArn=arn, RoleName=role)
 
 
-@patch('chaosaws.iam.actions.aws_client', autospec=True)
+@patch("chaosaws.iam.actions.aws_client", autospec=True)
 def test_detach_role_policy(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -48,5 +48,4 @@ def test_detach_role_policy(aws_client):
     arn = "aws:iam:whatever"
     role = "somerole"
     detach_role_policy(arn, role)
-    client.detach_role_policy.assert_called_with(
-        PolicyArn=arn, RoleName=role)
+    client.detach_role_policy.assert_called_with(PolicyArn=arn, RoleName=role)

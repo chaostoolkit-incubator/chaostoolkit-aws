@@ -1,7 +1,8 @@
 import boto3
-from chaosaws.types import AWSResponse
-from logzero import logger
 from botocore.exceptions import ClientError
+from logzero import logger
+
+from chaosaws.types import AWSResponse
 
 
 def hosted_zone_by_id(client: boto3.client, zone_id: str) -> AWSResponse:
@@ -14,5 +15,5 @@ def hosted_zone_by_id(client: boto3.client, zone_id: str) -> AWSResponse:
     try:
         return client.get_hosted_zone(Id=zone_id)
     except ClientError as e:
-        logger.exception(e.response['Error']['Message'])
-        return {'HostedZone': []}
+        logger.exception(e.response["Error"]["Message"])
+        return {"HostedZone": []}

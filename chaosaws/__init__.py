@@ -5,16 +5,16 @@ import boto3
 import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
-from botocore import parsers
-from chaosaws.types import AWSResponse
-from chaoslib.discovery.discover import (discover_actions, discover_probes,
-                                         initialize_discovery_result)
-from chaoslib.exceptions import DiscoveryFailed, InterruptExecution
-from chaoslib.types import (Configuration, DiscoveredActivities,
-                            DiscoveredSystemInfo, Discovery, Secrets)
+from chaoslib.discovery.discover import (
+    discover_actions,
+    discover_probes,
+    initialize_discovery_result,
+)
+from chaoslib.exceptions import InterruptExecution
+from chaoslib.types import Configuration, DiscoveredActivities, Discovery, Secrets
 from logzero import logger
 
-__version__ = '0.16.0'
+__version__ = "0.16.0"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
@@ -27,8 +27,8 @@ def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
     See: https://boto3.readthedocs.io/en/latest/guide/configuration.html#guide-configuration
     """  # noqa: E501
     creds = dict(
-        aws_access_key_id=None, aws_secret_access_key=None,
-        aws_session_token=None)
+        aws_access_key_id=None, aws_secret_access_key=None, aws_session_token=None
+    )
 
     if secrets:
         creds["aws_access_key_id"] = secrets.get("aws_access_key_id")
@@ -38,8 +38,9 @@ def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
     return creds
 
 
-def aws_client(resource_name: str, configuration: Configuration = None,
-               secrets: Secrets = None):
+def aws_client(
+    resource_name: str, configuration: Configuration = None, secrets: Secrets = None
+):
     """
     Create a boto3 client for the given resource.
 
@@ -64,7 +65,8 @@ def aws_client(resource_name: str, configuration: Configuration = None,
     if not region:
         logger.debug(
             "The configuration key `aws_region` is not set, looking in the "
-            "environment instead for `AWS_REGION` or `AWS_DEFAULT_REGION`")
+            "environment instead for `AWS_REGION` or `AWS_DEFAULT_REGION`"
+        )
         region = os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION"))
         if not region:
             raise InterruptExecution("AWS requires a region to be set!")
@@ -81,37 +83,44 @@ def aws_client(resource_name: str, configuration: Configuration = None,
     if not aws_assume_role_arn:
         logger.debug(
             "Client will be using profile '{}' from boto3 session".format(
-                aws_profile_name or "default"))
+                aws_profile_name or "default"
+            )
+        )
         return boto3.client(resource_name, **params)
     else:
         logger.debug(
             "Fetching credentials dynamically assuming role '{}'".format(
-                aws_assume_role_arn))
+                aws_assume_role_arn
+            )
+        )
 
-        aws_assume_role_session_name = configuration.get(
-            "aws_assume_role_session_name")
+        aws_assume_role_session_name = configuration.get("aws_assume_role_session_name")
         if not aws_assume_role_session_name:
             aws_assume_role_session_name = "ChaosToolkit"
             logger.debug(
                 "You are missing the `aws_assume_role_session_name` "
                 "configuration key. A unique one was generated: '{}'".format(
-                    aws_assume_role_session_name))
+                    aws_assume_role_session_name
+                )
+            )
 
-        client = boto3.client('sts', **params)
+        client = boto3.client("sts", **params)
         params = {
             "RoleArn": aws_assume_role_arn,
-            "RoleSessionName": aws_assume_role_session_name
+            "RoleSessionName": aws_assume_role_session_name,
         }
         response = client.assume_role(**params)
-        creds = response['Credentials']
+        creds = response["Credentials"]
         logger.debug(
             "Temporary credentials will expire on {}".format(
-                creds["Expiration"].isoformat()))
+                creds["Expiration"].isoformat()
+            )
+        )
 
         params = {
-            "aws_access_key_id": creds['AccessKeyId'],
-            "aws_secret_access_key": creds['SecretAccessKey'],
-            "aws_session_token": creds['SessionToken']
+            "aws_access_key_id": creds["AccessKeyId"],
+            "aws_secret_access_key": creds["SecretAccessKey"],
+            "aws_session_token": creds["SessionToken"],
         }
         if region:
             params["region_name"] = region
@@ -119,10 +128,14 @@ def aws_client(resource_name: str, configuration: Configuration = None,
         return boto3.client(resource_name, **params)
 
 
-def signed_api_call(service: str, path: str = "/", method: str = 'GET',
-                    configuration: Configuration = None,
-                    secrets: Secrets = None,
-                    params: Dict[str, Any] = None) -> requests.Response:
+def signed_api_call(
+    service: str,
+    path: str = "/",
+    method: str = "GET",
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+    params: Dict[str, Any] = None,
+) -> requests.Response:
     """
     Perform an API call against an AWS service.
 
@@ -164,8 +177,8 @@ def signed_api_call(service: str, path: str = "/", method: str = 'GET',
     scheme = configuration.get("aws_endpoint_scheme", "https")
     host = "{s}.{r}.{h}".format(s=service, r=region, h=host)
     endpoint = configuration.get(
-        "aws_endpoint", '{scheme}://{h}'.format(
-            scheme=scheme, h=host)).replace('..', '.')
+        "aws_endpoint", "{scheme}://{h}".format(scheme=scheme, h=host)
+    ).replace("..", ".")
     endpoint = "{e}{p}".format(e=endpoint, p=path)
     creds = get_credentials(secrets)
 
@@ -178,23 +191,21 @@ def signed_api_call(service: str, path: str = "/", method: str = 'GET',
             aws_secret_access_key=creds["aws_secret_access_key"],
             aws_host=host,
             aws_region=region,
-            aws_service=service)
+            aws_service=service,
+        )
     else:
         auth = BotoAWSRequestsAuth(
-            aws_host=host,
-            aws_region=region,
-            aws_service=service)
+            aws_host=host, aws_region=region, aws_service=service
+        )
 
-    headers = {
-        "Accept": "application/json"
-    }
+    headers = {"Accept": "application/json"}
 
-    if method in ('DELETE', 'GET'):
+    if method in ("DELETE", "GET"):
         return requests.request(
-            method, endpoint, headers=headers, auth=auth, params=params)
+            method, endpoint, headers=headers, auth=auth, params=params
+        )
 
-    return requests.request(
-        method, endpoint, headers=headers, auth=auth, json=params)
+    return requests.request(method, endpoint, headers=headers, auth=auth, json=params)
 
 
 def discover(discover_system: bool = True) -> Discovery:
@@ -204,8 +215,7 @@ def discover(discover_system: bool = True) -> Discovery:
     """
     logger.info("Discovering capabilities from chaostoolkit-aws")
 
-    discovery = initialize_discovery_result(
-        "chaostoolkit-aws", __version__, "aws")
+    discovery = initialize_discovery_result("chaostoolkit-aws", __version__, "aws")
     discovery["activities"].extend(load_exported_activities())
 
     return discovery
@@ -238,13 +248,12 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.rds.actions"))
     activities.extend(discover_probes("chaosaws.rds.probes"))
     activities.extend(discover_actions("chaosaws.elasticache.actions"))
-    activities.extend(discover_probes('chaosaws.elasticache.probes'))
+    activities.extend(discover_probes("chaosaws.elasticache.probes"))
     activities.extend(discover_actions("chaosaws.emr.actions"))
-    activities.extend(discover_probes('chaosaws.emr.probes'))
+    activities.extend(discover_probes("chaosaws.emr.probes"))
     activities.extend(discover_actions("chaosaws.route53.actions"))
     activities.extend(discover_probes('chaosaws.route53.probes'))
     activities.extend(discover_actions('chaosaws.ssm.actions'))
     activities.extend(discover_probes('chaosaws.s3.probes'))
     activities.extend(discover_actions('chaosaws.s3.actions'))
-
     return activities

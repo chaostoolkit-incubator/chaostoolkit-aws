@@ -10,9 +10,9 @@ from chaosaws import aws_client
 __all__ = ["get_alarm_state_value", "get_metric_statistics", "get_metric_data"]
 
 
-def get_alarm_state_value(alarm_name: str,
-                          configuration: Configuration = None,
-                          secrets: Secrets = None) -> str:
+def get_alarm_state_value(
+    alarm_name: str, configuration: Configuration = None, secrets: Secrets = None
+) -> str:
     """
     Return the state value of an alarm.
 
@@ -22,20 +22,23 @@ def get_alarm_state_value(alarm_name: str,
     client = aws_client("cloudwatch", configuration, secrets)
     response = client.describe_alarms(AlarmNames=[alarm_name])
     if len(response["MetricAlarms"]) == 0:
-        raise FailedActivity(
-            "CloudWatch alarm name {} not found".format(alarm_name)
-        )
+        raise FailedActivity("CloudWatch alarm name {} not found".format(alarm_name))
     return response["MetricAlarms"][0]["StateValue"]
 
 
-def get_metric_statistics(namespace: str, metric_name: str,
-                          dimension_name: str, dimension_value: str,
-                          duration: int = 60, offset: int = 0,
-                          statistic: str = None,
-                          extended_statistic: str = None,
-                          unit: str = None,
-                          configuration: Configuration = None,
-                          secrets: Secrets = None):
+def get_metric_statistics(
+    namespace: str,
+    metric_name: str,
+    dimension_name: str,
+    dimension_value: str,
+    duration: int = 60,
+    offset: int = 0,
+    statistic: str = None,
+    extended_statistic: str = None,
+    unit: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+):
     """
     Get the value of a statistical calculation for a given metric.
 
@@ -52,55 +55,60 @@ def get_metric_statistics(namespace: str, metric_name: str,
 
     if statistic is None and extended_statistic is None:
         raise FailedActivity(
-            'You must supply argument for statistic or extended_statistic'
+            "You must supply argument for statistic or extended_statistic"
         )
 
     end_time = datetime.utcnow() - timedelta(seconds=offset)
     start_time = end_time - timedelta(seconds=duration)
     request_kwargs = {
-        'Namespace': namespace,
-        'MetricName': metric_name,
-        'Dimensions': [{
-            'Name': dimension_name,
-            'Value': dimension_value
-        }],
-        'StartTime': start_time,
-        'EndTime': end_time,
-        'Period': duration
+        "Namespace": namespace,
+        "MetricName": metric_name,
+        "Dimensions": [{"Name": dimension_name, "Value": dimension_value}],
+        "StartTime": start_time,
+        "EndTime": end_time,
+        "Period": duration,
     }
 
     if statistic is not None:
-        request_kwargs['Statistics'] = [statistic]
+        request_kwargs["Statistics"] = [statistic]
     if extended_statistic is not None:
-        request_kwargs['ExtendedStatistics'] = [extended_statistic]
+        request_kwargs["ExtendedStatistics"] = [extended_statistic]
     if unit is not None:
-        request_kwargs['Unit'] = unit
+        request_kwargs["Unit"] = unit
 
-    logger.debug('Request arguments: {}'.format(request_kwargs))
+    logger.debug("Request arguments: {}".format(request_kwargs))
     response = client.get_metric_statistics(**request_kwargs)
 
-    datapoints = response['Datapoints']
+    datapoints = response["Datapoints"]
     if not datapoints:
         return 0
 
     datapoint = datapoints[0]
-    logger.debug('Response: {}'.format(response))
+    logger.debug("Response: {}".format(response))
     try:
         if statistic is not None:
             return datapoint[statistic]
         elif extended_statistic is not None:
-            return datapoint['ExtendedStatistics'][extended_statistic]
+            return datapoint["ExtendedStatistics"][extended_statistic]
     except Exception as x:
         raise FailedActivity(
             "Unable to parse response '{}': '{}'".format(response, str(x))
         )
 
 
-def get_metric_data(namespace: str, metric_name: str, dimension_name: str,
-                    dimension_value: str, statistic: str = None,
-                    duration: int = 300, period: int = 60, offset: int = 0,
-                    unit: str = None, configuration: Configuration = None,
-                    secrets: Secrets = None) -> float:
+def get_metric_data(
+    namespace: str,
+    metric_name: str,
+    dimension_name: str,
+    dimension_value: str,
+    statistic: str = None,
+    duration: int = 300,
+    period: int = 60,
+    offset: int = 0,
+    unit: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> float:
     """Gets metric data for a given metric in a given time period. This method
     allows for more data to be retrieved than get_metric_statistics
 
@@ -119,46 +127,47 @@ def get_metric_data(namespace: str, metric_name: str, dimension_name: str,
     start_time = datetime.utcnow() - timedelta(seconds=duration)
     end_time = datetime.utcnow() - timedelta(seconds=offset)
     args = {
-        'MetricDataQueries': [{
-            'Id': 'm1',
-            'MetricStat': {
-                'Metric': {
-                    'Namespace': namespace,
-                    'MetricName': metric_name,
-                    'Dimensions': [{
-                        'Name': dimension_name,
-                        'Value': dimension_value
-                    }]
+        "MetricDataQueries": [
+            {
+                "Id": "m1",
+                "MetricStat": {
+                    "Metric": {
+                        "Namespace": namespace,
+                        "MetricName": metric_name,
+                        "Dimensions": [
+                            {"Name": dimension_name, "Value": dimension_value}
+                        ],
+                    },
+                    "Period": period,
+                    "Stat": statistic,
                 },
-                'Period': period,
-                'Stat': statistic
-            },
-            'Label': metric_name,
-        }],
-        'StartTime': start_time,
-        'EndTime': end_time
+                "Label": metric_name,
+            }
+        ],
+        "StartTime": start_time,
+        "EndTime": end_time,
     }
 
     if unit:
-        args['MetricDataQueries'][0]['MetricStat']['Unit'] = unit
+        args["MetricDataQueries"][0]["MetricStat"]["Unit"] = unit
 
-    client = aws_client('cloudwatch', configuration, secrets)
-    response = client.get_metric_data(**args)['MetricDataResults']
+    client = aws_client("cloudwatch", configuration, secrets)
+    response = client.get_metric_data(**args)["MetricDataResults"]
 
     results = {}
     for r in response:
-        results.setdefault(r['Label'], []).extend(r['Values'])
+        results.setdefault(r["Label"], []).extend(r["Values"])
 
     result = 0
     for k, v in results.items():
         if not v:
             continue
 
-        if statistic == 'Sum':
+        if statistic == "Sum":
             result = sum(v)
-        elif statistic == 'Minimum':
+        elif statistic == "Minimum":
             result = min(v)
-        elif statistic == 'Maximum':
+        elif statistic == "Maximum":
             result = max(v)
         else:
             result = mean(v)
