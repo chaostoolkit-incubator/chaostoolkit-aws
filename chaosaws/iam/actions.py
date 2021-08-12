@@ -1,8 +1,6 @@
 import json
 from typing import Any, Dict
 
-from botocore.errorfactory import BaseClientExceptions
-from botocore.exceptions import BotoCoreError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 

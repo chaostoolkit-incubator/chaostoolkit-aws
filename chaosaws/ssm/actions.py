@@ -1,12 +1,8 @@
-import random
-import re
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
-import boto3
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import ActivityFailed
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse

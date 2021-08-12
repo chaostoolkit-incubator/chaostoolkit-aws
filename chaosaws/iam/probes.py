@@ -1,4 +1,3 @@
-from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
 from chaosaws import aws_client

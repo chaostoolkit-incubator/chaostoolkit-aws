@@ -5,23 +5,19 @@ import boto3
 import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
-from botocore import parsers
 from chaoslib.discovery.discover import (
     discover_actions,
     discover_probes,
     initialize_discovery_result,
 )
-from chaoslib.exceptions import DiscoveryFailed, InterruptExecution
+from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import (
     Configuration,
     DiscoveredActivities,
-    DiscoveredSystemInfo,
     Discovery,
     Secrets,
 )
 from logzero import logger
-
-from chaosaws.types import AWSResponse
 
 __version__ = "0.16.0"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]

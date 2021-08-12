@@ -1,5 +1,3 @@
-from typing import Any, Dict, List
-
 import boto3
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity

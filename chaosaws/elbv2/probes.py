@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import boto3
 from chaoslib.exceptions import FailedActivity
