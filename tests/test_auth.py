@@ -123,7 +123,6 @@ def test_create_client_from_profile_name(boto3: object):
 def test_create_client_with_aws_role_arn(boto3: object):
     boto3.DEFAULT_SESSION = None
     creds = get_credentials(dict())
-    finalArgs = {}
 
     aws_client("ecs", configuration=CONFIG_WITH_ARN)
     boto3.client.assert_any_call("sts", region_name="us-east-1", **creds)
@@ -153,7 +152,6 @@ def test_create_client_with_aws_role_arn(boto3: object):
 def test_create_client_with_aws_role_arn_and_profile(boto3: object):
     boto3.DEFAULT_SESSION = None
     creds = get_credentials(dict())
-    finalArgs = {}
 
     aws_client("ecs", configuration=CONFIG_WITH_ARN_AND_PROFILE)
     boto3.client.assert_any_call("sts", region_name="us-east-1", **creds)
@@ -183,7 +181,6 @@ def test_create_client_with_aws_role_arn_and_profile(boto3: object):
 @patch("chaosaws.logger", autospec=True)
 def test_region_must_be_set(logger: logging.Logger, boto3: object):
     boto3.DEFAULT_SESSION = None
-    creds = get_credentials(dict())
 
     with pytest.raises(InterruptExecution):
         aws_client("ecs")
@@ -197,7 +194,6 @@ def test_region_must_be_set(logger: logging.Logger, boto3: object):
 @patch("chaosaws.logger", autospec=True)
 def test_region_can_be_set_as_AWS_REGION(logger: logging.Logger, boto3: object):
     boto3.DEFAULT_SESSION = None
-    creds = get_credentials(dict())
 
     try:
         os.environ["AWS_REGION"] = "us-west-2"
@@ -208,7 +204,7 @@ def test_region_can_be_set_as_AWS_REGION(logger: logging.Logger, boto3: object):
         )
         logger.warning.assert_not_called()
         logger.debug.assert_any_call("Using AWS region 'us-west2'")
-    except:
+    except Exception:
         os.environ.pop("AWS_REGION", None)
 
 
@@ -216,7 +212,6 @@ def test_region_can_be_set_as_AWS_REGION(logger: logging.Logger, boto3: object):
 @patch("chaosaws.logger", autospec=True)
 def test_region_can_be_set_as_AWS_DEFAULT_REGION(logger: logging.Logger, boto3: object):
     boto3.DEFAULT_SESSION = None
-    creds = get_credentials(dict())
 
     try:
         os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
@@ -227,7 +222,7 @@ def test_region_can_be_set_as_AWS_DEFAULT_REGION(logger: logging.Logger, boto3: 
         )
         logger.warning.assert_not_called()
         logger.debug.assert_any_call("Using AWS region 'us-west2'")
-    except:
+    except Exception:
         os.environ.pop("AWS_DEFAULT_REGION", None)
 
 
@@ -235,7 +230,6 @@ def test_region_can_be_set_as_AWS_DEFAULT_REGION(logger: logging.Logger, boto3: 
 @patch("chaosaws.logger", autospec=True)
 def test_region_can_be_set_via_config(logger: logging.Logger, boto3: object):
     boto3.DEFAULT_SESSION = None
-    creds = get_credentials(dict())
 
     aws_client("ecs", configuration={"aws_region": "us-west2"})
     logger.debug.assert_any_call("Using AWS region 'us-west2'")

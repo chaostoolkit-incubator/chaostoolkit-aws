@@ -572,7 +572,6 @@ def get_instance_type_by_id(instance_ids: List[str], client: boto3.client) -> Di
     """
     Return dict object with instance ids grouped by instance types
     """
-    instances_type = defaultdict(List)
     res = client.describe_instances(InstanceIds=instance_ids)
 
     return get_instance_type_from_response(res)

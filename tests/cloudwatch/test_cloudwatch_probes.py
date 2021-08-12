@@ -20,7 +20,7 @@ def datetime_parser(json_data: dict):
     for k, v in json_data.items():
         try:
             json_data[k] = datetime.strptime(v, datetime)
-        except:
+        except Exception:
             pass
     return json_data
 

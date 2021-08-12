@@ -34,7 +34,6 @@ def test_instance_state_no_state(aws_client):
 
 @patch("chaosaws.ec2.probes.aws_client", autospec=True)
 def test_instance_state_no_query(aws_client):
-    instance_ids = ["i-987654321fedcba", "i-392024ac3252ecb"]
     with pytest.raises(FailedActivity) as x:
         instance_state(state="running")
     assert (
