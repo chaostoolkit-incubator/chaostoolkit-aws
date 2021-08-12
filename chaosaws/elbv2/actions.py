@@ -84,13 +84,13 @@ def set_security_groups(
         raise FailedActivity("Cannot change security groups of network load balancers.")
 
     results = []
-    for l in load_balancers["application"]:
+    for load_balancer in load_balancers["application"]:
         response = client.set_security_groups(
-            LoadBalancerArn=l, SecurityGroups=security_group_ids
+            LoadBalancerArn=load_balancer, SecurityGroups=security_group_ids
         )
 
         # add load balancer arn to response
-        response["LoadBalancerArn"] = l
+        response["LoadBalancerArn"] = load_balancer
         results.append(response)
     return results
 
@@ -137,9 +137,9 @@ def set_subnets(
         raise FailedActivity("Cannot change subnets of network load balancers.")
 
     results = []
-    for l in load_balancers["application"]:
-        response = client.set_subnets(LoadBalancerArn=l, Subnets=subnet_ids)
-        response["LoadBalancerArn"] = l
+    for load_balancer in load_balancers["application"]:
+        response = client.set_subnets(LoadBalancerArn=load_balancer, Subnets=subnet_ids)
+        response["LoadBalancerArn"] = load_balancer
         results.append(response)
     return results
 
@@ -162,9 +162,9 @@ def delete_load_balancer(
         if k not in ("application", "network"):
             continue
 
-        for l in v:
-            logger.debug("Deleting load balancer %s" % l)
-            client.delete_load_balancer(LoadBalancerArn=l)
+        for load_balancer in v:
+            logger.debug("Deleting load balancer %s" % load_balancer)
+            client.delete_load_balancer(LoadBalancerArn=load_balancer)
 
 
 ###############################################################################
@@ -201,7 +201,11 @@ def get_load_balancer_arns(
     except ClientError as e:
         raise FailedActivity(e.response["Error"]["Message"])
 
-    missing_lbs = [l for l in load_balancer_names if l not in results["Names"]]
+    missing_lbs = [
+        load_balancer
+        for load_balancer in load_balancer_names
+        if load_balancer not in results["Names"]
+    ]
     if missing_lbs:
         raise FailedActivity(
             "Unable to locate load balancer(s): {}".format(missing_lbs)
