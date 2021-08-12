@@ -5,15 +5,20 @@ from chaoslib.types import Configuration, Secrets
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ['describe_cache_cluster', 'get_cache_node_count',
-           'get_cache_node_status',
-           'count_cache_clusters_from_replication_group']
+__all__ = [
+    "describe_cache_cluster",
+    "get_cache_node_count",
+    "get_cache_node_status",
+    "count_cache_clusters_from_replication_group",
+]
 
 
-def describe_cache_cluster(cluster_id: str,
-                           show_node_info: bool = False,
-                           configuration: Configuration = None,
-                           secrets: Secrets = None) -> AWSResponse:
+def describe_cache_cluster(
+    cluster_id: str,
+    show_node_info: bool = False,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
     """Returns cache cluster data for given cluster
 
     :param cluster_id: str: the name of the cache cluster
@@ -43,24 +48,27 @@ def describe_cache_cluster(cluster_id: str,
     Full list of possible paths can be found:
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/elasticache.html#ElastiCache.Client.describe_cache_clusters
     """
-    params = dict(CacheClusterId=cluster_id,
-                  ShowCacheNodeInfo=show_node_info or False)
-    client = aws_client('elasticache', configuration, secrets)
+    params = dict(CacheClusterId=cluster_id, ShowCacheNodeInfo=show_node_info or False)
+    client = aws_client("elasticache", configuration, secrets)
 
     try:
         response = client.describe_cache_clusters(**params)
-        if not response.get('CacheClusters'):
-            raise FailedActivity('describe_cache_cluster failed: unable to '
-                                 'find cache cluster with id: %s' % cluster_id)
+        if not response.get("CacheClusters"):
+            raise FailedActivity(
+                "describe_cache_cluster failed: unable to "
+                "find cache cluster with id: %s" % cluster_id
+            )
         return response
     except ClientError as e:
-        raise FailedActivity('describe_cache_cluster failed: (%s) %s' % (
-            e.response['Error']['Code'], e.response['Error']['Message']))
+        raise FailedActivity(
+            "describe_cache_cluster failed: (%s) %s"
+            % (e.response["Error"]["Code"], e.response["Error"]["Message"])
+        )
 
 
-def get_cache_node_count(cluster_id: str,
-                         configuration: Configuration = None,
-                         secrets: Secrets = None) -> int:
+def get_cache_node_count(
+    cluster_id: str, configuration: Configuration = None, secrets: Secrets = None
+) -> int:
     """Returns the number of cache nodes associated to the cluster
 
     :param cluster_id: str: the name of the cache cluster
@@ -83,13 +91,14 @@ def get_cache_node_count(cluster_id: str,
     }
     """
     response = describe_cache_cluster(
-        cluster_id, configuration=configuration, secrets=secrets)
-    return response['CacheClusters'][0].get('NumCacheNodes', 0)
+        cluster_id, configuration=configuration, secrets=secrets
+    )
+    return response["CacheClusters"][0].get("NumCacheNodes", 0)
 
 
-def get_cache_node_status(cluster_id: str,
-                          configuration: Configuration = None,
-                          secrets: Secrets = None) -> str:
+def get_cache_node_status(
+    cluster_id: str, configuration: Configuration = None, secrets: Secrets = None
+) -> str:
     """Returns the status of the given cache cluster
 
     :param cluster_id: str: the name of the cache cluster
@@ -113,14 +122,15 @@ def get_cache_node_status(cluster_id: str,
 
     """
     response = describe_cache_cluster(
-        cluster_id, configuration=configuration, secrets=secrets)
-    return response['CacheClusters'][0].get('CacheClusterStatus', '')
+        cluster_id, configuration=configuration, secrets=secrets
+    )
+    return response["CacheClusters"][0].get("CacheClusterStatus", "")
 
 
 def count_cache_clusters_from_replication_group(
-        replication_group_id: str,
-        configuration: Configuration = None,
-        secrets: Secrets = None
+    replication_group_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> int:
     """
     Returns the number of cache clusters that are part of the given
@@ -147,9 +157,7 @@ def count_cache_clusters_from_replication_group(
             }
         }
     """
-    client = aws_client(
-        "elasticache", configuration=configuration, secrets=secrets
-    )
+    client = aws_client("elasticache", configuration=configuration, secrets=secrets)
 
     response = client.describe_replication_groups(
         ReplicationGroupId=replication_group_id
@@ -158,8 +166,7 @@ def count_cache_clusters_from_replication_group(
     rep_groups = response.get("ReplicationGroups", [])
     if not rep_groups:
         raise FailedActivity(
-            "Error retrieving ReplicationGroups for "
-            "{}".format(replication_group_id)
+            "Error retrieving ReplicationGroups for " "{}".format(replication_group_id)
         )
 
     return len(rep_groups[0].get("MemberClusters", []))
