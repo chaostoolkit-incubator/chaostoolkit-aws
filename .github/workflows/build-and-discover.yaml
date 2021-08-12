@@ -23,9 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install chaostoolkit
-          python setup.py develop
+          pip install chaostoolkit .
       - name: Discover
         run: |
           if chaos discover chaostoolkit-aws 2>&1 | grep "WARNING"; then

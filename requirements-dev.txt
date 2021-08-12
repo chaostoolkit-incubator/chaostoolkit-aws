@@ -1,8 +1,10 @@
+black
 coverage
+cryptography
+flake8
+isort
 moto
-pycodestyle
 pytest>=6.0
 pytest-cov
 pytest-sugar
 requests_mock
-cryptography

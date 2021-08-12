@@ -255,11 +255,12 @@ If none of these are set, your experiment will likely fail.
 ## Contribute
 
 If you wish to contribute more functions to this package, you are more than
-welcome to do so. Please, fork this project, make your changes following the
-usual [PEP 8][pep8] code style, sprinkling with tests and submit a PR for
-review.
+welcome to do so. Please, fork this project, write unit tests to cover the proposed changes,
+implement the changes, ensure they meet the formatting standards set out by `black`,
+`flake8`, and `isort`, and then raise a PR to the repository for review.
 
-[pep8]: https://pycodestyle.readthedocs.io/en/latest/
+Please refer to the [formatting][#formatting-and-linting] section for more information
+on the formatting standards.
 
 The Chaos Toolkit projects require all contributors must sign a
 [Developer Certificate of Origin][dco] on each commit they would like to merge
@@ -277,25 +278,44 @@ those dependencies.
 [venv]: http://chaostoolkit.org/reference/usage/install/#create-a-virtual-environment
 
 ```console
-$ pip install -r requirements-dev.txt -r requirements.txt 
-```
-
-Then, point your environment to this directory:
-
-```console
-$ python setup.py develop
+$ make install-dev
 ```
 
 Now, you can edit the files and they will be automatically be seen by your
 environment, even when running from the `chaos` command locally.
 
-### Test
+### Tests
 
 To run the tests for the project execute the following:
 
+```console
+$ make tests
 ```
-$ pytest
+
+### Formatting and Linting
+
+We use a combination of [`black`][black], [`flake8`][flake8], and [`isort`][isort] to both
+lint and format this repositories code.
+
+[black]: https://github.com/psf/black
+[flake8]: https://github.com/PyCQA/flake8
+[isort]: https://github.com/PyCQA/isort
+
+Before raising a Pull Request, we recommend you run formatting against your code with:
+
+```console
+$ make format
 ```
+
+This will automatically format any code that doesn't adhere to the formatting standards.
+
+As some things are not picked up by the formatting, we also recommend you run:
+
+```console
+$ make lint
+```
+
+To ensure that any unused import statements/strings that are too long, etc. are also picked up.
 
 ### Add new AWS API Support
 
