@@ -254,4 +254,5 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.route53.actions"))
     activities.extend(discover_probes("chaosaws.route53.probes"))
     activities.extend(discover_probes("chaosaws.ssm.actions"))
+    activities.extend(discover_actions("chaosaws.fis.actions"))
     return activities
