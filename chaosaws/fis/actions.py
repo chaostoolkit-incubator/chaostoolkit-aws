@@ -6,7 +6,7 @@ from chaoslib.types import Configuration, Secrets
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["start_experiment"]
+__all__ = ["start_experiment", "stop_experiment"]
 
 
 def start_experiment(
@@ -94,4 +94,16 @@ def stop_experiment(
     ...'experiment': {'id': 'EXPTUCK2dxepXgkR38',
     'experimentTemplateId': 'EXT6oWVA1WrLNy4XS', ... }
     """
-    pass
+    if not experiment_id:
+        raise FailedActivity(
+            "You must pass a valid experiment id, id provided was empty"
+        )
+
+    fis_client = aws_client(
+        resource_name="fis", configuration=configuration, secrets=secrets
+    )
+
+    try:
+        return fis_client.stop_experiment(id=experiment_id)
+    except Exception as ex:
+        raise FailedActivity(f"Stop Experiment failed, reason was: {ex}")
