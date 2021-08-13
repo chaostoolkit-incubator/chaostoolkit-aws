@@ -6,7 +6,7 @@ from chaoslib.exceptions import FailedActivity
 from chaosaws.fis.actions import start_experiment
 
 
-def test_that_fis_module_exposes_correct_all_attributes():
+def test_that_fis_modules___all___attribute_exposed_correctly():
     import chaosaws.fis.actions as actions
 
     all = actions.__all__
