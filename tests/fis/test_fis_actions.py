@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from chaoslib.exceptions import FailedActivity
 
-from chaosaws.fis.actions import start_experiment
+from chaosaws.fis.actions import start_experiment, stop_experiment
 
 
 def test_that_fis_modules___all___attribute_exposed_correctly():

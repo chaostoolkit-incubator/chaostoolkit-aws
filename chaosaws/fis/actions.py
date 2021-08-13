@@ -70,3 +70,28 @@ def start_experiment(
         return fis_client.start_experiment(**params)
     except Exception as ex:
         raise FailedActivity(f"Start Experiment failed, reason was: {ex}")
+
+
+def stop_experiment(
+    experiment_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Stops the specified experiment.
+
+    :param experiment_id: str representing the running experiment to stop
+    :param configuration: Configuration object representing the CTK Configuration
+    :param secrets: Secret object representing the CTK Secrets
+    :returns: AWSResponse representing the response from FIS upon stopping the
+        experiment
+
+    Examples
+    --------
+    >>> stop_experiment(experiment_id="EXPTUCK2dxepXgkR38")
+    {'ResponseMetadata': {'RequestId': 'e5e9f9a9-f4d0-4d72-8704-1f26cc8b6ad6',
+    'HTTPStatusCode': 200, 'HTTPHeaders': {'date': 'Fri, 13 Aug 2021 09:12:17 GMT',
+    ...'experiment': {'id': 'EXPTUCK2dxepXgkR38',
+    'experimentTemplateId': 'EXT6oWVA1WrLNy4XS', ... }
+    """
+    pass
