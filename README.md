@@ -259,7 +259,7 @@ welcome to do so. Please, fork this project, write unit tests to cover the propo
 implement the changes, ensure they meet the formatting standards set out by `black`,
 `flake8`, and `isort`, and then raise a PR to the repository for review.
 
-Please refer to the [formatting][#formatting-and-linting] section for more information
+Please refer to the [formatting](#formatting-and-linting) section for more information
 on the formatting standards.
 
 The Chaos Toolkit projects require all contributors must sign a
