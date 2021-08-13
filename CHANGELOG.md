@@ -13,6 +13,7 @@
 - adding put_metric_data to cloudwatch actions
 - added GitHub Actions Workflows for Build and Test, Build and Discover, and Releasing
 - added `Makefile` to abstract away common commands: `install`, `install-dev`, `lint`, `format`, `tests`
+- added `chaosaws.fis.actions.start_experiment` to start an AWS FIS experiment
 
 ### Removed
 - Removed TravisCI related files
