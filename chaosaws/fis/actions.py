@@ -6,7 +6,7 @@ from chaoslib.types import Configuration, Secrets
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["start_experiment"]
+__all__ = ["start_experiment", "stop_experiment"]
 
 
 def start_experiment(
@@ -70,3 +70,40 @@ def start_experiment(
         return fis_client.start_experiment(**params)
     except Exception as ex:
         raise FailedActivity(f"Start Experiment failed, reason was: {ex}")
+
+
+def stop_experiment(
+    experiment_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Stops the specified experiment.
+
+    :param experiment_id: str representing the running experiment to stop
+    :param configuration: Configuration object representing the CTK Configuration
+    :param secrets: Secret object representing the CTK Secrets
+    :returns: AWSResponse representing the response from FIS upon stopping the
+        experiment
+
+    Examples
+    --------
+    >>> stop_experiment(experiment_id="EXPTUCK2dxepXgkR38")
+    {'ResponseMetadata': {'RequestId': 'e5e9f9a9-f4d0-4d72-8704-1f26cc8b6ad6',
+    'HTTPStatusCode': 200, 'HTTPHeaders': {'date': 'Fri, 13 Aug 2021 09:12:17 GMT',
+    ...'experiment': {'id': 'EXPTUCK2dxepXgkR38',
+    'experimentTemplateId': 'EXT6oWVA1WrLNy4XS', ... }
+    """
+    if not experiment_id:
+        raise FailedActivity(
+            "You must pass a valid experiment id, id provided was empty"
+        )
+
+    fis_client = aws_client(
+        resource_name="fis", configuration=configuration, secrets=secrets
+    )
+
+    try:
+        return fis_client.stop_experiment(id=experiment_id)
+    except Exception as ex:
+        raise FailedActivity(f"Stop Experiment failed, reason was: {ex}")
