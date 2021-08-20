@@ -34,7 +34,7 @@ def instance_status(
     # eg: "available"
     # if an instances has a different status, return list
     # eg: ["available", "creating"]
-    results = list(set([r["DBInstanceStatus"] for r in results["DBInstances"]]))
+    results = list({r["DBInstanceStatus"] for r in results["DBInstances"]})
     if len(results) == 1:
         return results[0]
     return results
@@ -61,7 +61,7 @@ def cluster_status(
     # eg: "available"
     # if an instances has a different status, return list of unique values
     # eg: ["available", "backing-up"]
-    results = list(set([r["Status"] for r in results["DBClusters"]]))
+    results = list({r["Status"] for r in results["DBClusters"]})
     if len(results) == 1:
         return results[0]
     return results

@@ -73,7 +73,7 @@ def stop_random_tasks(
 
     results = []
     for task in tasks:
-        logger.debug("Stopping ECS task: {}".format(task))
+        logger.debug(f"Stopping ECS task: {task}")
         response = client.stop_task(cluster=cluster, task=task, reason=reason)
         results.append(
             {
@@ -102,11 +102,11 @@ def stop_task(
     if not task_id and service:
         tasks = list_tasks(cluster=cluster, client=client, service=service)
         if not tasks:
-            raise FailedActivity("No ECS tasks found for service: {}".format(service))
+            raise FailedActivity(f"No ECS tasks found for service: {service}")
         task_id = random.choice(tasks)
         task_id = task_id.rsplit("/", 1)[1]
 
-    logger.debug("Stopping ECS task: {}".format(task_id))
+    logger.debug(f"Stopping ECS task: {task_id}")
     return client.stop_task(cluster=cluster, task=task_id, reason=reason)
 
 
@@ -130,20 +130,20 @@ def delete_service(
     if not service:
         services = list_services_arns(cluster=cluster, client=client)
         if not services:
-            raise FailedActivity("No ECS services found in cluster: {}".format(cluster))
+            raise FailedActivity(f"No ECS services found in cluster: {cluster}")
 
         # should we filter the number of services to take into account?
         if service_pattern:
             services = filter_services(services=services, pattern=service_pattern)
             if not services:
                 raise FailedActivity(
-                    "No ECS services matching pattern: {}".format(service_pattern)
+                    f"No ECS services matching pattern: {service_pattern}"
                 )
 
         service = random.choice(services)
         service = service.rsplit("/", 1)[1]
 
-    logger.debug("Updating ECS service: {}".format(service))
+    logger.debug(f"Updating ECS service: {service}")
     client.update_service(
         cluster=cluster,
         service=service,
@@ -151,7 +151,7 @@ def delete_service(
         deploymentConfiguration={"maximumPercent": 100, "minimumHealthyPercent": 0},
     )
 
-    logger.debug("Deleting ECS service: {}".format(service))
+    logger.debug(f"Deleting ECS service: {service}")
     return client.delete_service(cluster=cluster, service=service)
 
 
@@ -167,7 +167,7 @@ def delete_cluster(
     :return: Dict[str, Any]
     """
     client = aws_client("ecs", configuration, secrets)
-    logger.debug("Deleting ECS cluster: {}".format(cluster))
+    logger.debug(f"Deleting ECS cluster: {cluster}")
     return client.delete_cluster(cluster=cluster)
 
 
@@ -275,7 +275,7 @@ def set_service_deployment_configuration(
     if not validate_cluster(cluster, client):
         raise FailedActivity("unable to locate cluster: %s" % cluster)
     if not validate_service(cluster, service, client):
-        raise FailedActivity("unable to locate service: %s on %s" % (service, cluster))
+        raise FailedActivity(f"unable to locate service: {service} on {cluster}")
 
     params = {
         "cluster": cluster,
@@ -454,7 +454,7 @@ def validate(client: boto3.client, cluster: str = None, service: str = None):
         ]
         if not response:
             raise FailedActivity(
-                "unable to locate service: %s on cluster: %s" % (service, cluster)
+                f"unable to locate service: {service} on cluster: {cluster}"
             )
 
 

@@ -14,7 +14,7 @@ def describe_cluster(
     Describe an EKS cluster.
     """
     client = aws_client("eks", configuration, secrets)
-    logger.debug("Describing EKS cluster: {}".format(name))
+    logger.debug(f"Describing EKS cluster: {name}")
     try:
         return client.describe_cluster(name=name)
     except client.exceptions.ResourceNotFoundException:

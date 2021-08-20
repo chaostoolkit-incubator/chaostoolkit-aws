@@ -22,7 +22,7 @@ def get_alarm_state_value(
     client = aws_client("cloudwatch", configuration, secrets)
     response = client.describe_alarms(AlarmNames=[alarm_name])
     if len(response["MetricAlarms"]) == 0:
-        raise FailedActivity("CloudWatch alarm name {} not found".format(alarm_name))
+        raise FailedActivity(f"CloudWatch alarm name {alarm_name} not found")
     return response["MetricAlarms"][0]["StateValue"]
 
 
@@ -76,7 +76,7 @@ def get_metric_statistics(
     if unit is not None:
         request_kwargs["Unit"] = unit
 
-    logger.debug("Request arguments: {}".format(request_kwargs))
+    logger.debug(f"Request arguments: {request_kwargs}")
     response = client.get_metric_statistics(**request_kwargs)
 
     datapoints = response["Datapoints"]
@@ -84,16 +84,14 @@ def get_metric_statistics(
         return 0
 
     datapoint = datapoints[0]
-    logger.debug("Response: {}".format(response))
+    logger.debug(f"Response: {response}")
     try:
         if statistic is not None:
             return datapoint[statistic]
         elif extended_statistic is not None:
             return datapoint["ExtendedStatistics"][extended_statistic]
     except Exception as x:
-        raise FailedActivity(
-            "Unable to parse response '{}': '{}'".format(response, str(x))
-        )
+        raise FailedActivity(f"Unable to parse response '{response}': '{str(x)}'")
 
 
 def get_metric_data(

@@ -78,9 +78,7 @@ def terminate_random_instances(
             instances = [e for e in instances if e["AvailabilityZone"] == az]
 
             if not instances:
-                raise FailedActivity(
-                    "No instances found in Availability Zone: {}".format(az)
-                )
+                raise FailedActivity(f"No instances found in Availability Zone: {az}")
         else:
             if instance_percent:
                 instance_count = int(
@@ -100,7 +98,7 @@ def terminate_random_instances(
         client = aws_client("ec2", configuration, secrets)
         try:
             response = client.terminate_instances(
-                InstanceIds=sorted([e["InstanceId"] for e in instances])
+                InstanceIds=sorted(e["InstanceId"] for e in instances)
             )
             results.append(
                 {
@@ -172,9 +170,7 @@ def stop_random_instances(
             instances = [e for e in instances if e["AvailabilityZone"] == az]
 
             if not instances:
-                raise FailedActivity(
-                    "No instances found in Availability Zone: {}".format(az)
-                )
+                raise FailedActivity(f"No instances found in Availability Zone: {az}")
         else:
             if instance_percent:
                 instance_count = int(
@@ -193,7 +189,7 @@ def stop_random_instances(
         client = aws_client("ec2", configuration, secrets)
         try:
             response = client.stop_instances(
-                InstanceIds=sorted([e["InstanceId"] for e in instances]), Force=force
+                InstanceIds=sorted(e["InstanceId"] for e in instances), Force=force
             )
             results.append(
                 {
@@ -561,17 +557,17 @@ def validate_asgs(asg_names: List[str] = None, tags: List[Dict[str, str]] = None
 
 
 def get_asg_by_name(asg_names: List[str], client: boto3.client) -> AWSResponse:
-    logger.debug("Searching for ASG(s): {}.".format(asg_names))
+    logger.debug(f"Searching for ASG(s): {asg_names}.")
 
     asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
 
     if not asgs.get("AutoScalingGroups", []):
-        raise FailedActivity("Unable to locate ASG(s): {}".format(asg_names))
+        raise FailedActivity(f"Unable to locate ASG(s): {asg_names}")
 
     found_asgs = [a["AutoScalingGroupName"] for a in asgs["AutoScalingGroups"]]
     invalid_asgs = [a for a in asg_names if a not in found_asgs]
     if invalid_asgs:
-        raise FailedActivity("No ASG(s) found with name(s): {}".format(invalid_asgs))
+        raise FailedActivity(f"No ASG(s) found with name(s): {invalid_asgs}")
     return asgs
 
 
@@ -593,7 +589,7 @@ def get_asg_by_tags(tags: List[Dict[str, str]], client: boto3.client) -> AWSResp
             results.add(a["ResourceId"])
 
     if not results:
-        raise FailedActivity("No ASG(s) found with matching tag(s): {}.".format(tags))
+        raise FailedActivity(f"No ASG(s) found with matching tag(s): {tags}.")
     return get_asg_by_name(list(results), client)
 
 
@@ -704,7 +700,7 @@ def attach_instance_volume(
         response = client.attach_volume(
             Device=mount_point, InstanceId=instance_id, VolumeId=volume_id
         )
-        logger.debug("Attached volume %s to instance %s" % (volume_id, instance_id))
+        logger.debug(f"Attached volume {volume_id} to instance {instance_id}")
     except ClientError as e:
         raise FailedActivity(
             "Unable to attach volume %s to instance %s: %s"

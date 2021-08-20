@@ -12,7 +12,7 @@ extension to the [Chaos Toolkit][chaostoolkit].
 
 ## Install
 
-This package requires Python 3.5+
+This package requires Python 3.6+
 
 To be used from your experiment, this package must be installed in the Python
 environment where [chaostoolkit][] already lives.
