@@ -78,9 +78,7 @@ def terminate_random_instances(
             instances = [e for e in instances if e["AvailabilityZone"] == az]
 
             if not instances:
-                raise FailedActivity(
-                    f"No instances found in Availability Zone: {az}"
-                )
+                raise FailedActivity(f"No instances found in Availability Zone: {az}")
         else:
             if instance_percent:
                 instance_count = int(
@@ -172,9 +170,7 @@ def stop_random_instances(
             instances = [e for e in instances if e["AvailabilityZone"] == az]
 
             if not instances:
-                raise FailedActivity(
-                    f"No instances found in Availability Zone: {az}"
-                )
+                raise FailedActivity(f"No instances found in Availability Zone: {az}")
         else:
             if instance_percent:
                 instance_count = int(

@@ -39,9 +39,7 @@ def all_targets_healthy(
         raise FailedActivity("Non-empty list of target groups is required")
 
     client = aws_client("elbv2", configuration, secrets)
-    logger.debug(
-        f"Checking if all targets are healthy for targets: {str(tg_names)}"
-    )
+    logger.debug(f"Checking if all targets are healthy for targets: {str(tg_names)}")
     tg_arns = get_target_group_arns(tg_names=tg_names, client=client)
     tg_health = get_targets_health_description(tg_arns=tg_arns, client=client)
     result = True
@@ -98,9 +96,7 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
         ....
     }
     """
-    logger.debug(
-        f"Target group ARN: {str(tg_arns)} Getting health descriptions"
-    )
+    logger.debug(f"Target group ARN: {str(tg_arns)} Getting health descriptions")
     tg_health_descr = {}
 
     for tg in tg_arns:
@@ -109,9 +105,7 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
         tg_health_descr[tg]["TargetHealthDescriptions"] = client.describe_target_health(
             TargetGroupArn=tg_arns[tg]
         )["TargetHealthDescriptions"]
-    logger.debug(
-        f"Health descriptions for target group(s) are: {str(tg_health_descr)}"
-    )
+    logger.debug(f"Health descriptions for target group(s) are: {str(tg_health_descr)}")
 
     return tg_health_descr
 
@@ -143,8 +137,6 @@ def get_targets_health_count(tg_names: List[str], client: boto3.client) -> Dict:
         for health_descr in tg_health[tg]["TargetHealthDescriptions"]:
             cnt[health_descr["TargetHealth"]["State"]] += 1
         tg_targets_health_count[tg] = dict(cnt)
-    logger.debug(
-        f"Healthy targets by targetgroup: {str(tg_targets_health_count)}"
-    )
+    logger.debug(f"Healthy targets by targetgroup: {str(tg_targets_health_count)}")
 
     return tg_targets_health_count

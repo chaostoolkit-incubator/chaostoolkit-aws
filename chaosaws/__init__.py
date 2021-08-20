@@ -176,9 +176,9 @@ def signed_api_call(
     host = configuration.get("aws_host", "amazonaws.com")
     scheme = configuration.get("aws_endpoint_scheme", "https")
     host = f"{service}.{region}.{host}"
-    endpoint = configuration.get(
-        "aws_endpoint", f"{scheme}://{host}"
-    ).replace("..", ".")
+    endpoint = configuration.get("aws_endpoint", f"{scheme}://{host}").replace(
+        "..", "."
+    )
     endpoint = f"{endpoint}{path}"
     creds = get_credentials(secrets)
 

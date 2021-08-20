@@ -54,9 +54,7 @@ def invoke_function(
     try:
         response = client.invoke(**request_kwargs)
     except Exception as x:
-        raise FailedActivity(
-            f"failed invoking function '{function_name}': '{str(x)}'"
-        )
+        raise FailedActivity(f"failed invoking function '{function_name}': '{str(x)}'")
     if "Payload" in response:
         # The payload is of type StreamingBody and
         # cannot be directly serialized into JSON

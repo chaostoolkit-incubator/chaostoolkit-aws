@@ -67,9 +67,7 @@ def stop_instance(
     else:
         instance_types = get_instance_type_by_id([instance_id], client)
 
-    logger.debug(
-        f"Picked EC2 instance '{instance_types}' from AZ '{az}' to be stopped"
-    )
+    logger.debug(f"Picked EC2 instance '{instance_types}' from AZ '{az}' to be stopped")
 
     return stop_instances_any_type(
         instance_types=instance_types, force=force, client=client

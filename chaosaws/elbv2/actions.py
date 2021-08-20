@@ -207,9 +207,7 @@ def get_load_balancer_arns(
         if load_balancer not in results["Names"]
     ]
     if missing_lbs:
-        raise FailedActivity(
-            f"Unable to locate load balancer(s): {missing_lbs}"
-        )
+        raise FailedActivity(f"Unable to locate load balancer(s): {missing_lbs}")
 
     if not results:
         raise FailedActivity(
@@ -254,9 +252,7 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
         ....
     }
     """
-    logger.debug(
-        f"Target group ARN: {str(tg_arns)} Getting health descriptions"
-    )
+    logger.debug(f"Target group ARN: {str(tg_arns)} Getting health descriptions")
     tg_health_descr = {}
 
     for tg in tg_arns:
@@ -265,9 +261,7 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
         tg_health_descr[tg]["TargetHealthDescriptions"] = client.describe_target_health(
             TargetGroupArn=tg_arns[tg]
         )["TargetHealthDescriptions"]
-    logger.debug(
-        f"Health descriptions for target group(s) are: {str(tg_health_descr)}"
-    )
+    logger.debug(f"Health descriptions for target group(s) are: {str(tg_health_descr)}")
     return tg_health_descr
 
 

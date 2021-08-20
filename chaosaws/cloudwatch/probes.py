@@ -91,9 +91,7 @@ def get_metric_statistics(
         elif extended_statistic is not None:
             return datapoint["ExtendedStatistics"][extended_statistic]
     except Exception as x:
-        raise FailedActivity(
-            f"Unable to parse response '{response}': '{str(x)}'"
-        )
+        raise FailedActivity(f"Unable to parse response '{response}': '{str(x)}'")
 
 
 def get_metric_data(
