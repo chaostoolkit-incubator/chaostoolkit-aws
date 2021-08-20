@@ -14,7 +14,7 @@ from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import Configuration, DiscoveredActivities, Discovery, Secrets
 from logzero import logger
 
-__version__ = "0.16.0"
+__version__ = "0.17.0"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
