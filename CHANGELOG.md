@@ -18,11 +18,13 @@
 ### Removed
 - Removed TravisCI related files
 - All `# -*- coding: utf-8 -*-` statements
+- Python 3.5 support
 
 ### Changed
 - update return value of asg action detach_random_instances to include instance IDs
 - switch from `pycodestyle` to `black`, `flake8`, and `isort` for linting/formatting
 - applied `black`, `flake8`, and `isort` across the codebase
+- applied `pyupgrade --py36-plus`
 
 ### Fixed
 - `chaosaws.route53.probes` now correctly exposes the `__all__` attribute
