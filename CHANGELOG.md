@@ -13,6 +13,7 @@
 - added `Makefile` to abstract away common commands: `install`, `install-dev`, `lint`, `format`, `tests`
 - added `chaosaws.fis.actions.start_experiment` to start an AWS FIS experiment
 - added `chaosaws.fis.actions.stop_experiment` to stop an AWS FIS experiment
+- added `chaosaws.fis.probes.get_experiment` to retrieve an AWS FIS experiments details
 
 ### Removed
 - Removed TravisCI related files
