@@ -2,9 +2,13 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.17.0...HEAD
 - adding s3 probes `bucket_exists`, `object_exists`, & `versioning_status`
 - adding s3 actions `delete_object`, `toggle_versioning`
+
+## [0.17.0][]
+[0.17.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...0.17.0
+
 
 ### Added
 - adding list_event_source_mapping to awslambda probes
