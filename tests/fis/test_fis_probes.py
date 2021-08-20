@@ -13,7 +13,7 @@ def test_that_fis_action_modules___all___attribute_exposed_correctly():
     assert "get_experiment" in all
 
 
-@patch("chaosaws.fis.actions.aws_client", autospec=True)
+@patch("chaosaws.fis.probes.aws_client", autospec=True)
 def test_that_get_experiment_invoked_correctly_if_only_given_experiment_id(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -22,7 +22,7 @@ def test_that_get_experiment_invoked_correctly_if_only_given_experiment_id(aws_c
     client.get_experiment.assert_called_once_with(id="an-id")
 
 
-@patch("chaosaws.fis.actions.aws_client", autospec=True)
+@patch("chaosaws.fis.probes.aws_client", autospec=True)
 def test_that_get_experiment_fails_if_experiment_id_empty_or_none(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -36,7 +36,7 @@ def test_that_get_experiment_fails_if_experiment_id_empty_or_none(aws_client):
     assert str(ex.value) == "You must pass a valid experiment id, id provided was empty"
 
 
-@patch("chaosaws.fis.actions.aws_client", autospec=True)
+@patch("chaosaws.fis.probes.aws_client", autospec=True)
 def test_that_get_experiment_fails_if_exception_raised(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -47,7 +47,7 @@ def test_that_get_experiment_fails_if_exception_raised(aws_client):
     assert str(ex.value) == "Get Experiment failed, reason was: Something went wrong"
 
 
-@patch("chaosaws.fis.actions.aws_client", autospec=True)
+@patch("chaosaws.fis.probes.aws_client", autospec=True)
 def test_that_get_experiment_returns_client_response(aws_client):
     client = MagicMock()
     aws_client.return_value = client
