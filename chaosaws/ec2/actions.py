@@ -63,13 +63,11 @@ def stop_instance(
         instance_types = pick_random_instance(filters, client)
 
         if not instance_types:
-            raise FailedActivity("No instances in availability zone: {}".format(az))
+            raise FailedActivity(f"No instances in availability zone: {az}")
     else:
         instance_types = get_instance_type_by_id([instance_id], client)
 
-    logger.debug(
-        "Picked EC2 instance '{}' from AZ '{}' to be stopped".format(instance_types, az)
-    )
+    logger.debug(f"Picked EC2 instance '{instance_types}' from AZ '{az}' to be stopped")
 
     return stop_instances_any_type(
         instance_types=instance_types, force=force, client=client
@@ -113,7 +111,7 @@ def stop_instances(
         instance_types = list_instances_by_type(filters, client)
 
         if not instance_types:
-            raise FailedActivity("No instances in availability zone: {}".format(az))
+            raise FailedActivity(f"No instances in availability zone: {az}")
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
 
@@ -228,7 +226,7 @@ def terminate_instances(
                 "No instances found matching filters: %s" % str(filters)
             )
 
-        logger.debug("Instances in AZ %s selected: %s}." % (az, str(instance_types)))
+        logger.debug(f"Instances in AZ {az} selected: {str(instance_types)}}}.")
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
 
@@ -281,7 +279,7 @@ def start_instances(
                 "No instances found matching filters: %s" % str(filters)
             )
 
-        logger.debug("Instances in AZ %s selected: %s}." % (az, str(instance_types)))
+        logger.debug(f"Instances in AZ {az} selected: {str(instance_types)}}}.")
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
     return start_instances_any_type(instance_types, client)
@@ -333,7 +331,7 @@ def restart_instances(
                 "No instances found matching filters: %s" % str(filters)
             )
 
-        logger.debug("Instances in AZ %s selected: %s}." % (az, str(instance_types)))
+        logger.debug(f"Instances in AZ {az} selected: {str(instance_types)}}}.")
     else:
         instance_types = get_instance_type_by_id(instance_ids, client)
     return restart_instances_any_type(instance_types, client)
@@ -435,9 +433,9 @@ def list_instances_by_type(
     Return all instance ids matching the given filters by type
     (InstanceLifecycle) ie spot, on demand, etc.
     """
-    logger.debug("EC2 instances query: {}".format(str(filters)))
+    logger.debug(f"EC2 instances query: {str(filters)}")
     res = client.describe_instances(Filters=filters)
-    logger.debug("Instances matching the filter query: {}".format(str(res)))
+    logger.debug(f"Instances matching the filter query: {str(res)}")
 
     return get_instance_type_from_response(res)
 
@@ -601,7 +599,7 @@ def stop_instances_any_type(
             client.describe_instances(InstanceIds=instance_types["spot"])
         )
 
-        logger.debug("Canceling spot requests: {}".format(spot_request_ids))
+        logger.debug(f"Canceling spot requests: {spot_request_ids}")
         client.cancel_spot_instance_requests(SpotInstanceRequestIds=spot_request_ids)
         logger.debug("Terminating spot instances: {}".format(instance_types["spot"]))
 
@@ -623,7 +621,7 @@ def terminate_instances_any_type(
     response = []
 
     for k, v in instance_types.items():
-        logger.debug("Terminating %s instance(s): %s" % (k, instance_types[k]))
+        logger.debug(f"Terminating {k} instance(s): {instance_types[k]}")
         if k == "spot":
             instances = get_spot_request_ids_from_response(
                 client.describe_instances(InstanceIds=v)
@@ -644,7 +642,7 @@ def start_instances_any_type(
     """
     results = []
     for k, v in instance_types.items():
-        logger.debug("Starting %s instance(s): %s" % (k, v))
+        logger.debug(f"Starting {k} instance(s): {v}")
         response = client.start_instances(InstanceIds=v)
         results.extend(response.get("StartingInstances", []))
     return results
@@ -656,7 +654,7 @@ def restart_instances_any_type(instance_types: dict, client: boto3.client):
     """
     results = []
     for k, v in instance_types.items():
-        logger.debug("Restarting %s instance(s): %s" % (k, v))
+        logger.debug(f"Restarting {k} instance(s): {v}")
         client.reboot_instances(InstanceIds=v)
     return results
 
@@ -712,7 +710,7 @@ def attach_instance_volume(
         response = client.attach_volume(
             Device=mount_point, InstanceId=instance_id, VolumeId=volume_id
         )
-        logger.debug("Attached volume %s to instance %s" % (volume_id, instance_id))
+        logger.debug(f"Attached volume {volume_id} to instance {instance_id}")
     except ClientError as e:
         raise FailedActivity(
             "Unable to attach volume %s to instance %s: %s"

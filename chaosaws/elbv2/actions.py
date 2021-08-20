@@ -45,7 +45,7 @@ def deregister_target(
         )
     except ClientError as e:
         raise FailedActivity(
-            "Exception detaching %s: %s" % (tg_name, e.response["Error"]["Message"])
+            "Exception detaching {}: {}".format(tg_name, e.response["Error"]["Message"])
         )
 
 
@@ -183,7 +183,7 @@ def get_load_balancer_arns(
     }
     """
     results = {}
-    logger.debug("Searching for load balancer name(s): {}.".format(load_balancer_names))
+    logger.debug(f"Searching for load balancer name(s): {load_balancer_names}.")
 
     try:
         response = client.describe_load_balancers(Names=load_balancer_names)
@@ -207,9 +207,7 @@ def get_load_balancer_arns(
         if load_balancer not in results["Names"]
     ]
     if missing_lbs:
-        raise FailedActivity(
-            "Unable to locate load balancer(s): {}".format(missing_lbs)
-        )
+        raise FailedActivity(f"Unable to locate load balancer(s): {missing_lbs}")
 
     if not results:
         raise FailedActivity(
@@ -231,13 +229,13 @@ def get_target_group_arns(tg_names: List[str], client: boto3.client) -> Dict:
         ....
     }
     """
-    logger.debug("Target group name(s): {} Looking for ARN".format(str(tg_names)))
+    logger.debug(f"Target group name(s): {str(tg_names)} Looking for ARN")
     res = client.describe_target_groups(Names=tg_names)
     tg_arns = {}
 
     for tg in res["TargetGroups"]:
         tg_arns[tg["TargetGroupName"]] = tg["TargetGroupArn"]
-    logger.debug("Target groups ARN: {}".format(str(tg_arns)))
+    logger.debug(f"Target groups ARN: {str(tg_arns)}")
 
     return tg_arns
 
@@ -254,9 +252,7 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
         ....
     }
     """
-    logger.debug(
-        "Target group ARN: {} Getting health descriptions".format(str(tg_arns))
-    )
+    logger.debug(f"Target group ARN: {str(tg_arns)} Getting health descriptions")
     tg_health_descr = {}
 
     for tg in tg_arns:
@@ -265,9 +261,7 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
         tg_health_descr[tg]["TargetHealthDescriptions"] = client.describe_target_health(
             TargetGroupArn=tg_arns[tg]
         )["TargetHealthDescriptions"]
-    logger.debug(
-        "Health descriptions for target group(s) are: {}".format(str(tg_health_descr))
-    )
+    logger.debug(f"Health descriptions for target group(s) are: {str(tg_health_descr)}")
     return tg_health_descr
 
 
@@ -280,7 +274,7 @@ def get_security_groups(sg_ids: List[str], client: boto3.client) -> List[str]:
 
     missing_sgs = [s for s in sg_ids if s not in results]
     if missing_sgs:
-        raise FailedActivity("Invalid security group id(s): {}".format(missing_sgs))
+        raise FailedActivity(f"Invalid security group id(s): {missing_sgs}")
     return results
 
 
@@ -293,5 +287,5 @@ def get_subnets(subnet_ids: List[str], client: boto3.client) -> List[str]:
 
     missing_subnets = [s for s in subnet_ids if s not in results]
     if missing_subnets:
-        raise FailedActivity("Invalid subnet id(s): {}".format(missing_subnets))
+        raise FailedActivity(f"Invalid subnet id(s): {missing_subnets}")
     return results

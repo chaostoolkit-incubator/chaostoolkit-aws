@@ -31,7 +31,7 @@ def create_policy(
             Description=description or "",
         )
     except Exception as x:
-        raise FailedActivity("failed creating a policy: {}".format(str(x)))
+        raise FailedActivity(f"failed creating a policy: {str(x)}")
 
 
 def attach_role_policy(

@@ -37,7 +37,7 @@ ENDPOINT = "http://eks.us-east-1.localhost"
 
 def test_signed_api_call_with_params():
     with requests_mock.Mocker() as m:
-        url = "{}/some/path".format(ENDPOINT)
+        url = f"{ENDPOINT}/some/path"
         m.get(url, complete_qs=False, text="someresponse")
 
         r = signed_api_call(
@@ -65,7 +65,7 @@ def test_signed_api_call_with_params():
 
 def test_signed_api_call_with_body():
     with requests_mock.Mocker() as m:
-        url = "{}/some/path".format(ENDPOINT)
+        url = f"{ENDPOINT}/some/path"
         m.post(url, complete_qs=False, text="someresponse")
 
         r = signed_api_call(

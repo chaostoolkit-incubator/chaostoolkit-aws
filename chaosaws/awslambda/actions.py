@@ -54,9 +54,7 @@ def invoke_function(
     try:
         response = client.invoke(**request_kwargs)
     except Exception as x:
-        raise FailedActivity(
-            "failed invoking function '{}': '{}'".format(function_name, str(x))
-        )
+        raise FailedActivity(f"failed invoking function '{function_name}': '{str(x)}'")
     if "Payload" in response:
         # The payload is of type StreamingBody and
         # cannot be directly serialized into JSON
@@ -88,7 +86,7 @@ def put_function_concurrency(
         )
     except Exception as x:
         raise FailedActivity(
-            "failed throttling lambda function '{}': '{}'".format(function_name, str(x))
+            f"failed throttling lambda function '{function_name}': '{str(x)}'"
         )
 
 

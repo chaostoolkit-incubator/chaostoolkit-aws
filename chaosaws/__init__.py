@@ -72,7 +72,7 @@ def aws_client(
             raise InterruptExecution("AWS requires a region to be set!")
 
     if region:
-        logger.debug("Using AWS region '{}'".format(region))
+        logger.debug(f"Using AWS region '{region}'")
         params["region_name"] = region
 
     if boto3.DEFAULT_SESSION is None:
@@ -175,11 +175,11 @@ def signed_api_call(
     region = configuration.get("aws_region", "us-east-1") or ""
     host = configuration.get("aws_host", "amazonaws.com")
     scheme = configuration.get("aws_endpoint_scheme", "https")
-    host = "{s}.{r}.{h}".format(s=service, r=region, h=host)
-    endpoint = configuration.get(
-        "aws_endpoint", "{scheme}://{h}".format(scheme=scheme, h=host)
-    ).replace("..", ".")
-    endpoint = "{e}{p}".format(e=endpoint, p=path)
+    host = f"{service}.{region}.{host}"
+    endpoint = configuration.get("aws_endpoint", f"{scheme}://{host}").replace(
+        "..", "."
+    )
+    endpoint = f"{endpoint}{path}"
     creds = get_credentials(secrets)
 
     # when creds weren't provided via secrets, we let boto search for them
