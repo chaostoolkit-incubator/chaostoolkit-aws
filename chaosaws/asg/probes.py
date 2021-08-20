@@ -139,7 +139,7 @@ def wait_desired_equals_healthy(
 
         if result:
             waiting_time = int(time.time() - start)
-            logger.debug("Waiting time was: {}".format(waiting_time))
+            logger.debug(f"Waiting time was: {waiting_time}")
             return waiting_time
         time.sleep(0.1)
 
@@ -185,7 +185,7 @@ def wait_desired_not_equals_healthy_tags(
 
         if not result:
             waiting_time = int(time.time() - start)
-            logger.debug("Waiting time was: {}".format(waiting_time))
+            logger.debug(f"Waiting time was: {waiting_time}")
 
             return waiting_time
         time.sleep(0.1)
@@ -232,7 +232,7 @@ def wait_desired_equals_healthy_tags(
 
         if result:
             waiting_time = int(time.time() - start)
-            logger.debug("Waiting time was: {}".format(waiting_time))
+            logger.debug(f"Waiting time was: {waiting_time}")
 
             return waiting_time
 
@@ -263,10 +263,10 @@ def is_scaling_in_progress(
                 or instance["HealthStatus"] != "Healthy"
             ):
 
-                logger.debug("Scaling activities in progress: {}".format(True))
+                logger.debug(f"Scaling activities in progress: {True}")
                 return True
 
-    logger.debug("Scaling activities in progress: {}".format(False))
+    logger.debug(f"Scaling activities in progress: {False}")
     return False
 
 
@@ -422,7 +422,7 @@ def get_asg_by_name(asg_names: List[str], client: boto3.client) -> AWSResponse:
     invalid_asgs = [a for a in asg_names if a not in valid_asgs]
 
     if invalid_asgs:
-        raise FailedActivity("No ASG(s) found matching: {}".format(invalid_asgs))
+        raise FailedActivity(f"No ASG(s) found matching: {invalid_asgs}")
     return results
 
 
@@ -457,7 +457,7 @@ def get_asg_by_tags(
 
     filtered_groups = [g["Name"] for g in group_sets if filter_set.issubset(g["Tags"])]
 
-    logger.debug("filtered groups: {}".format(filtered_groups))
+    logger.debug(f"filtered groups: {filtered_groups}")
 
     if filtered_groups:
         groups_descr = client.describe_auto_scaling_groups(

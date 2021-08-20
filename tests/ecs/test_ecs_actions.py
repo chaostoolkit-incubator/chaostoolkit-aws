@@ -25,7 +25,7 @@ data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 def read_configs(filename):
     config = os.path.join(data_path, filename)
-    with open(config, "r") as fh:
+    with open(config) as fh:
         return loads(fh.read())
 
 

@@ -235,8 +235,7 @@ def test_cloudwatch_get_metric_statistics_bad_response(aws_client, mock_datetime
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_average(m_client, m_datetime):
     with open(
-        os.path.join(module_path, "data", "cloudwatch_data_full.json"), "r"
-    ) as fh:
+        os.path.join(module_path, "data", "cloudwatch_data_full.json")) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
@@ -286,8 +285,7 @@ def test_get_cloudwatch_data_average(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_minimum(m_client, m_datetime):
     with open(
-        os.path.join(module_path, "data", "cloudwatch_data_full.json"), "r"
-    ) as fh:
+        os.path.join(module_path, "data", "cloudwatch_data_full.json")) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
@@ -337,8 +335,7 @@ def test_get_cloudwatch_data_minimum(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_maximum(m_client, m_datetime):
     with open(
-        os.path.join(module_path, "data", "cloudwatch_data_full.json"), "r"
-    ) as fh:
+        os.path.join(module_path, "data", "cloudwatch_data_full.json")) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
@@ -388,8 +385,7 @@ def test_get_cloudwatch_data_maximum(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_sum(m_client, m_datetime):
     with open(
-        os.path.join(module_path, "data", "cloudwatch_data_full.json"), "r"
-    ) as fh:
+        os.path.join(module_path, "data", "cloudwatch_data_full.json")) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
@@ -439,8 +435,7 @@ def test_get_cloudwatch_data_sum(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_no_results(m_client, m_datetime):
     with open(
-        os.path.join(module_path, "data", "cloudwatch_data_none.json"), "r"
-    ) as fh:
+        os.path.join(module_path, "data", "cloudwatch_data_none.json")) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client

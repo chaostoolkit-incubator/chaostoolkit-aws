@@ -122,7 +122,7 @@ def describe_service(
 
     if not response.get("services", []):
         raise FailedActivity(
-            "Unable to collect service %s on cluster %s" % (cluster, service)
+            f"Unable to collect service {cluster} on cluster {service}"
         )
     return response
 
