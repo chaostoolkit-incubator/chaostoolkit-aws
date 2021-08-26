@@ -9,6 +9,8 @@
 - adding delete_event_source_mapping to awslambda actions
 - adding toggle_event_source_mapping_state to awslambda actions
 - adding put_metric_data to cloudwatch actions
+- adding s3 probes `bucket_exists` & `object_exists`
+- adding s3 actions `delete_object`, `toggle_versioning`
 
 ### Changed
 - update return value of asg action detach_random_instances to include instance IDs
