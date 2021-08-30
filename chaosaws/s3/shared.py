@@ -58,6 +58,6 @@ def validate_object_exists(client: boto3.client,
         return False
 
 
-def get_bucket_versioning(client: boto3.client, bucket_name: str):
+def get_bucket_versioning(client: boto3.client, bucket_name: str) -> str:
     response = client.get_bucket_versioning(Bucket=bucket_name)
     return response["Status"]

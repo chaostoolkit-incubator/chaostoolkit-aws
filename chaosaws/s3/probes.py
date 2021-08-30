@@ -3,7 +3,8 @@ from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
 from chaosaws import aws_client
-from chaosaws.s3.shared import validate_bucket_exists, validate_object_exists
+from chaosaws.s3.shared import (
+    validate_bucket_exists, validate_object_exists, get_bucket_versioning)
 
 __all__ = ['bucket_exists', 'object_exists']
 
@@ -41,3 +42,29 @@ def object_exists(bucket_name: str,
         raise FailedActivity('Bucket "%s" does not exist!' % bucket_name)
     return validate_object_exists(client, bucket_name, object_key, version_id)
 
+
+def versioning_status(bucket_name: str,
+                      status: str,
+                      configuration: Configuration = None,
+                      secrets: Secrets = None) -> bool:
+    """
+    Checks the versioning status of a bucket against the provided status
+
+    :param bucket_name: the name of the S3 bucket
+    :param status: either 'Enabled' or 'Suspended'
+    :param configuration: access values used by actions/probes (optional)
+    :param secrets: values that need to be passed on to actions/probes (optional)
+    :return: boolean
+    """  # noqa: E501
+    if status not in ('Enabled', 'Suspended'):
+        raise FailedActivity(
+            'Parameter "status" not one of "Enabled" or "Suspended"')
+
+    client = aws_client('s3', configuration, secrets)
+    if not validate_bucket_exists(client, bucket_name):
+        raise FailedActivity('Bucket "%s" does not exist!' % bucket_name)
+
+    versioning = get_bucket_versioning(client, bucket_name)
+    if versioning.lower() == status.lower():
+        return True
+    return False
