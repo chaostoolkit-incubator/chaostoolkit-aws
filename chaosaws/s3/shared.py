@@ -15,13 +15,12 @@ def list_buckets(client: boto3.client) -> List[str]:
     :return: List[str]
     """
     response = client.list_buckets()
-    return [r['Name'] for r in response['Buckets']]
+    return [r["Name"] for r in response["Buckets"]]
 
 
-def get_object(client: boto3.client,
-               bucket_name: str,
-               object_key: str,
-               version_id: str = None) -> AWSResponse:
+def get_object(
+    client: boto3.client, bucket_name: str, object_key: str, version_id: str = None
+) -> AWSResponse:
     """Get an object in a S3 bucket
 
     :param client: boto3 client
@@ -31,15 +30,16 @@ def get_object(client: boto3.client,
     :return: AWSResponse (Dict[str, Any])
     """
     params = {
-        'Bucket': bucket_name,
-        'Key': object_key,
-        **({'VersionId': version_id} if version_id else {})
+        "Bucket": bucket_name,
+        "Key": object_key,
+        **({"VersionId": version_id} if version_id else {}),
     }
     try:
         return client.get_object(**params)
     except ClientError as e:
-        raise FailedActivity("[%s] %s" % (
-            e.response['Error']['Code'], e.response['Error']['Message']))
+        raise FailedActivity(
+            "[%s] %s" % (e.response["Error"]["Code"], e.response["Error"]["Message"])
+        )
 
 
 def validate_bucket_exists(client: boto3.client, bucket_name: str) -> bool:
@@ -47,10 +47,9 @@ def validate_bucket_exists(client: boto3.client, bucket_name: str) -> bool:
     return bucket_name in buckets
 
 
-def validate_object_exists(client: boto3.client,
-                           bucket_name: str,
-                           object_key: str,
-                           version_id: str = None) -> bool:
+def validate_object_exists(
+    client: boto3.client, bucket_name: str, object_key: str, version_id: str = None
+) -> bool:
     try:
         get_object(client, bucket_name, object_key, version_id)
         return True

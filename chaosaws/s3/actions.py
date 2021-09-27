@@ -4,18 +4,23 @@ from chaoslib.types import Configuration, Secrets
 
 from chaosaws import aws_client
 from chaosaws.s3.shared import (
-    validate_bucket_exists, validate_object_exists, get_bucket_versioning)
+    get_bucket_versioning,
+    validate_bucket_exists,
+    validate_object_exists,
+)
 
 __all__ = ["delete_object", "toggle_versioning"]
 
 
-def delete_object(bucket_name: str,
-                  object_key: str,
-                  version_id: str = None,
-                  configuration: Configuration = None,
-                  secrets: Secrets = None):
+def delete_object(
+    bucket_name: str,
+    object_key: str,
+    version_id: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+):
     """Delete an object in a S3 bucket
-    
+
     :param bucket_name: the S3 bucket name
     :param object_key: the path to the object
     :param version_id: the version id of the object (optional)
@@ -23,40 +28,43 @@ def delete_object(bucket_name: str,
     :param secrets: values that need to be passed on to actions/probes (optional)
     :return: None
     """  # noqa: E501
-    client = aws_client('s3', configuration, secrets)
+    client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):
         raise FailedActivity('Bucket "%s" does not exist!' % bucket_name)
 
-    if not validate_object_exists(
-            client, bucket_name, object_key, version_id):
-        message = 'Object "s3://%s/%s" does not exist!' % (
-            bucket_name, object_key)
+    if not validate_object_exists(client, bucket_name, object_key, version_id):
+        message = 'Object "s3://%s/%s" does not exist!' % (bucket_name, object_key)
         if version_id:
             message = 'Object "s3://%s/%s[%s]" does not exist!' % (
-                bucket_name, object_key, version_id)
+                bucket_name,
+                object_key,
+                version_id,
+            )
         raise FailedActivity(message)
 
     params = {
-        'Bucket': bucket_name,
-        'Key': object_key,
-        **({'VersionId': version_id} if version_id else {})
+        "Bucket": bucket_name,
+        "Key": object_key,
+        **({"VersionId": version_id} if version_id else {}),
     }
     client.delete_object(**params)
 
 
-def toggle_versioning(bucket_name: str,
-                      mfa_delete: str = None,
-                      status: str = None,
-                      mfa: str = None,
-                      owner: str = None,
-                      configuration: Configuration = None,
-                      secrets: Secrets = None) -> None:
+def toggle_versioning(
+    bucket_name: str,
+    mfa_delete: str = None,
+    status: str = None,
+    mfa: str = None,
+    owner: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> None:
     """Toggles versioning on a S3 bucket
-    
+
     If the "status" parameter is not provided, the bucket will be scanned to determine if
     versioning is enabled. If it is enabled, it will be suspended. If it is suspended it will
     be enabled using basic values unless MFA is provided.
-    
+
     :param bucket_name: The S3 bucket name
     :param status: "Enabled" to turn on versioning, "Suspended" to disable
     :param mfa: The authentication device serial number, a space, and the value from the device (optional)
@@ -72,8 +80,9 @@ def toggle_versioning(bucket_name: str,
 
     is_enabled = get_bucket_versioning(client, bucket_name)
     if is_enabled == status:
-        raise FailedActivity("Bucket %s versioning is already %s!" % (
-            bucket_name, status))
+        raise FailedActivity(
+            "Bucket %s versioning is already %s!" % (bucket_name, status)
+        )
 
     if not status:
         status = "Suspended" if is_enabled == "Enabled" else "Enabled"
@@ -84,7 +93,7 @@ def toggle_versioning(bucket_name: str,
         **({"ExpectedBucketOwner": owner} if owner else {}),
         "VersioningConfiguration": {
             "Status": status,
-            **({"MFADelete": mfa_delete} if mfa_delete else {})
-        }
+            **({"MFADelete": mfa_delete} if mfa_delete else {}),
+        },
     }
     client.put_bucket_versioning(**params)
