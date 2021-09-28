@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from statistics import mean
+from typing import Any, Dict, List
 
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
@@ -29,8 +30,9 @@ def get_alarm_state_value(
 def get_metric_statistics(
     namespace: str,
     metric_name: str,
-    dimension_name: str,
-    dimension_value: str,
+    dimension_name: str = None,
+    dimension_value: str = None,
+    dimensions: List[Dict[str, Any]] = None,
     duration: int = 60,
     offset: int = 0,
     statistic: str = None,
@@ -48,6 +50,11 @@ def get_metric_statistics(
     Example: A duration of 60 seconds and an offset of 30 seconds will yield a
     statistical value based on the time interval between 30 and 90 seconds in the past.
 
+    Is required one of:
+            dimension_name, dimension_value: Required to search for ONE dimension
+            dimensions: Required to search for dimensions combinations 
+            Are expected as a list of dictionary objects: [ {‘Name’: ‘DimName1’, ‘Value’: ‘Value1’}, {‘Name’: ‘DimName2’, ‘Value’: ‘Value2’}, … ]
+
     More information about input parameters are available in the documentation
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.get_metric_statistics
     """  # noqa: E501
@@ -57,17 +64,26 @@ def get_metric_statistics(
         raise FailedActivity(
             "You must supply argument for statistic or extended_statistic"
         )
+    
+    if dimensions is None and dimension_name is None and dimension_value is None:
+        raise FailedActivity(
+            'You must supply argument for dimensions'
+        )
 
     end_time = datetime.utcnow() - timedelta(seconds=offset)
     start_time = end_time - timedelta(seconds=duration)
     request_kwargs = {
         "Namespace": namespace,
         "MetricName": metric_name,
-        "Dimensions": [{"Name": dimension_name, "Value": dimension_value}],
         "StartTime": start_time,
         "EndTime": end_time,
         "Period": duration,
     }
+
+    if dimensions is not None:
+        request_kwargs['Dimensions'] = dimensions
+    else:
+        request_kwargs['Dimensions'] = [{'Name': dimension_name, 'Value': dimension_value}]
 
     if statistic is not None:
         request_kwargs["Statistics"] = [statistic]
@@ -97,8 +113,9 @@ def get_metric_statistics(
 def get_metric_data(
     namespace: str,
     metric_name: str,
-    dimension_name: str,
-    dimension_value: str,
+    dimension_name: str = None,
+    dimension_value: str = None,
+    dimensions: List[Dict[str, Any]] = None,
     statistic: str = None,
     duration: int = 300,
     period: int = 60,
@@ -113,8 +130,10 @@ def get_metric_data(
     :params
         namespace: The AWS metric namespace
         metric_name: The name of the metric to pull data for
-        dimension_name: The name of the dimension to search for
-        dimension_value: The value to be used for searching the dimension
+        One of:
+            dimension_name, dimension_value: Required to search for ONE dimension
+            dimensions: Required to search for dimensions combinations 
+            Are expected as a list of dictionary objects: [ {‘Name’: ‘DimName1’, ‘Value’: ‘Value1’}, {‘Name’: ‘DimName2’, ‘Value’: ‘Value2’}, … ]
         unit: The type of unit desired to be collected
         statistic: The type of data to return.
             One of: Average, Sum, Minimum, Maximum, SampleCount
@@ -124,6 +143,12 @@ def get_metric_data(
     """
     start_time = datetime.utcnow() - timedelta(seconds=duration)
     end_time = datetime.utcnow() - timedelta(seconds=offset)
+
+    if dimensions is None and dimension_name is None and dimension_value is None:
+        raise FailedActivity(
+            'You must supply argument for dimensions'
+        )
+
     args = {
         "MetricDataQueries": [
             {
@@ -132,9 +157,6 @@ def get_metric_data(
                     "Metric": {
                         "Namespace": namespace,
                         "MetricName": metric_name,
-                        "Dimensions": [
-                            {"Name": dimension_name, "Value": dimension_value}
-                        ],
                     },
                     "Period": period,
                     "Stat": statistic,
@@ -145,6 +167,11 @@ def get_metric_data(
         "StartTime": start_time,
         "EndTime": end_time,
     }
+
+    if dimensions:
+        args['MetricDataQueries'][0]['MetricStat']['Metric']['Dimensions'] = dimensions
+    elif dimension_name and dimension_value:
+        args['MetricDataQueries'][0]['MetricStat']['Metric']['Dimensions'] = [{'Name': dimension_name, 'Value': dimension_value}]
 
     if unit:
         args["MetricDataQueries"][0]["MetricStat"]["Unit"] = unit
