@@ -34,11 +34,12 @@ def get_object(
         "Key": object_key,
         **({"VersionId": version_id} if version_id else {}),
     }
+    print(params)
     try:
         return client.get_object(**params)
     except ClientError as e:
         response = e.response["Error"]
-        raise FailedActivity(f"[{response['Code']}] {e.response['Message']}")
+        raise FailedActivity(f"[{response['Code']}] {response['Message']}")
 
 
 def validate_bucket_exists(client: boto3.client, bucket_name: str) -> bool:
