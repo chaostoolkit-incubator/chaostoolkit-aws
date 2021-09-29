@@ -30,15 +30,14 @@ def delete_object(
     """  # noqa: E501
     client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):
-        raise FailedActivity('Bucket "%s" does not exist!' % bucket_name)
+        raise FailedActivity(f'Bucket "{bucket_name}" does not exist!')
 
     if not validate_object_exists(client, bucket_name, object_key, version_id):
-        message = 'Object "s3://%s/%s" does not exist!' % (bucket_name, object_key)
+        message = f'Object "s3://{bucket_name}/{object_key}" does not exist!'
         if version_id:
-            message = 'Object "s3://%s/%s[%s]" does not exist!' % (
-                bucket_name,
-                object_key,
-                version_id,
+            message = (
+                f'Object "s3://{bucket_name}/{object_key}'
+                f'[{version_id}]" does not exist!'
             )
         raise FailedActivity(message)
 
@@ -76,13 +75,11 @@ def toggle_versioning(
     """  # noqa: E501
     client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):
-        raise FailedActivity('Bucket "%s" does not exist!' % bucket_name)
+        raise FailedActivity(f'Bucket "{bucket_name}" does not exist!')
 
     is_enabled = get_bucket_versioning(client, bucket_name)
     if is_enabled == status:
-        raise FailedActivity(
-            "Bucket %s versioning is already %s!" % (bucket_name, status)
-        )
+        raise FailedActivity(f"Bucket {bucket_name} versioning is already {status}!")
 
     if not status:
         status = "Suspended" if is_enabled == "Enabled" else "Enabled"

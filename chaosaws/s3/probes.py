@@ -44,7 +44,7 @@ def object_exists(
     """  # noqa: E501
     client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):
-        raise FailedActivity('Bucket "%s" does not exist!' % bucket_name)
+        raise FailedActivity(f'Bucket "{bucket_name}" does not exist!')
     return validate_object_exists(client, bucket_name, object_key, version_id)
 
 
@@ -68,7 +68,7 @@ def versioning_status(
 
     client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):
-        raise FailedActivity('Bucket "%s" does not exist!' % bucket_name)
+        raise FailedActivity(f'Bucket "{bucket_name}" does not exist!')
 
     versioning = get_bucket_versioning(client, bucket_name)
     if versioning.lower() == status.lower():
