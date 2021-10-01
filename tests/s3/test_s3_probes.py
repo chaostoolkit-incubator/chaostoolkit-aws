@@ -7,18 +7,19 @@ import pytest
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 
+from chaosaws import aws_client
 from chaosaws.s3.probes import bucket_exists, object_exists, versioning_status
 
 data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 
-def read_configs(filename):
+def read_configs(filename: str) -> dict:
     config = os.path.join(data_path, filename)
     with open(config, "r") as fh:
         return json.loads(fh.read())
 
 
-def mock_client_error(*args, **kwargs):
+def mock_client_error(*args, **kwargs) -> ClientError:
     return ClientError(
         operation_name=kwargs["op"],
         error_response={
@@ -28,9 +29,9 @@ def mock_client_error(*args, **kwargs):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_bucket_exists_true(aws_client):
+def test_bucket_exists_true(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
 
     response = bucket_exists("Test-Bucket-7")
@@ -38,9 +39,9 @@ def test_bucket_exists_true(aws_client):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_bucket_exists_false(aws_client):
+def test_bucket_exists_false(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
 
     response = bucket_exists("Test-Bucket-99")
@@ -48,9 +49,9 @@ def test_bucket_exists_false(aws_client):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_object_exists_true(aws_client):
+def test_object_exists_true(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
     client.get_object.return_value = read_configs("get_object_1.json")
 
@@ -65,9 +66,9 @@ def test_object_exists_true(aws_client):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_object_exists_false(aws_client):
+def test_object_exists_false(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
     client.get_object.side_effect = mock_client_error(
         op="GetObject", Code="NoSuchKey", Message="The specified key does not exist."
@@ -84,9 +85,9 @@ def test_object_exists_false(aws_client):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_object_exists_invalid_bucket(aws_client):
+def test_object_exists_invalid_bucket(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
 
     with pytest.raises(FailedActivity) as x:
@@ -98,9 +99,9 @@ def test_object_exists_invalid_bucket(aws_client):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_object_version_exists_true(aws_client):
+def test_object_version_exists_true(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
     client.get_object.return_value = read_configs("get_object_1.json")
 
@@ -119,9 +120,9 @@ def test_object_version_exists_true(aws_client):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_object_version_exists_false(aws_client):
+def test_object_version_exists_false(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
     client.get_object.side_effect = mock_client_error(
         op="GetObject", Code="InvalidArgument", Message="Invalid version id specified"
@@ -142,9 +143,9 @@ def test_object_version_exists_false(aws_client):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_bucket_versioning_suspended_true(aws_client):
+def test_bucket_versioning_suspended_true(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
     client.get_bucket_versioning.return_value = read_configs(
         "get_bucket_versioning_1.json"
@@ -155,9 +156,9 @@ def test_bucket_versioning_suspended_true(aws_client):
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_bucket_versioning_suspended_false(aws_client):
+def test_bucket_versioning_suspended_false(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
     client.get_bucket_versioning.return_value = read_configs(
         "get_bucket_versioning_1.json"
@@ -174,9 +175,9 @@ def test_bucket_versioning_invalid_status():
 
 
 @patch("chaosaws.s3.probes.aws_client", autospec=True)
-def test_bucket_versioning_invalid_bucket(aws_client):
+def test_bucket_versioning_invalid_bucket(test_client: aws_client):
     client = MagicMock()
-    aws_client.return_value = client
+    test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
 
     with pytest.raises(FailedActivity) as x:

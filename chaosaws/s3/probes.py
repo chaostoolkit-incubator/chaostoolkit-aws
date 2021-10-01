@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
@@ -41,7 +40,7 @@ def object_exists(
     :param configuration: access values used by actions/probes (optional)
     :param secrets: values that need to be passed on to actions/probes (optional)
     :return: boolean
-    """  # noqa: E501
+    """
     client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):
         raise FailedActivity(f'Bucket "{bucket_name}" does not exist!')
@@ -62,7 +61,7 @@ def versioning_status(
     :param configuration: access values used by actions/probes (optional)
     :param secrets: values that need to be passed on to actions/probes (optional)
     :return: boolean
-    """  # noqa: E501
+    """
     if status not in ("Enabled", "Suspended"):
         raise FailedActivity('Parameter "status" not one of "Enabled" or "Suspended"')
 

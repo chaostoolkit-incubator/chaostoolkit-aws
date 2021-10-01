@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from typing import List
 
 import boto3
@@ -34,7 +33,7 @@ def get_object(
         "Key": object_key,
         **({"VersionId": version_id} if version_id else {}),
     }
-    print(params)
+
     try:
         return client.get_object(**params)
     except ClientError as e:

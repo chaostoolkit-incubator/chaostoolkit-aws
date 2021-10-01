@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
 from chaosaws import aws_client
-from chaosaws.s3.shared import (
-    get_bucket_versioning,
-    validate_bucket_exists,
-    validate_object_exists,
-)
+from chaosaws.s3.shared import get_bucket_versioning, validate_bucket_exists
 
 __all__ = ["delete_object", "toggle_versioning"]
 
@@ -27,19 +22,10 @@ def delete_object(
     :param configuration: access values used by actions/probes (optional)
     :param secrets: values that need to be passed on to actions/probes (optional)
     :return: None
-    """  # noqa: E501
+    """
     client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):
         raise FailedActivity(f'Bucket "{bucket_name}" does not exist!')
-
-    if not validate_object_exists(client, bucket_name, object_key, version_id):
-        message = f'Object "s3://{bucket_name}/{object_key}" does not exist!'
-        if version_id:
-            message = (
-                f'Object "s3://{bucket_name}/{object_key}'
-                f'[{version_id}]" does not exist!'
-            )
-        raise FailedActivity(message)
 
     params = {
         "Bucket": bucket_name,
@@ -60,19 +46,21 @@ def toggle_versioning(
 ) -> None:
     """Toggles versioning on a S3 bucket
 
-    If the "status" parameter is not provided, the bucket will be scanned to determine if
-    versioning is enabled. If it is enabled, it will be suspended. If it is suspended it will
-    be enabled using basic values unless MFA is provided.
+    If the "status" parameter is not provided, the bucket will be scanned to
+    determine if versioning is enabled. If it is enabled, it will be suspended.
+    If it is suspended it will be enabled using basic values unless MFA is provided.
 
     :param bucket_name: The S3 bucket name
     :param status: "Enabled" to turn on versioning, "Suspended" to disable
-    :param mfa: The authentication device serial number, a space, and the value from the device (optional)
-    :param mfa_delete: Specifies if MFA delete is enabled in the bucket versioning (optional)
+    :param mfa: The authentication device serial number, a space, and the value from
+        the device (optional)
+    :param mfa_delete: Specifies if MFA delete is enabled in the bucket versioning
+        (optional)
     :param owner: The account ID of the expected bucket owner (optional)
     :param configuration: access values used by actions/probes (optional)
     :param secrets: values that need to be passed on to actions/probes (optional)
     :return: None
-    """  # noqa: E501
+    """
     client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):
         raise FailedActivity(f'Bucket "{bucket_name}" does not exist!')
