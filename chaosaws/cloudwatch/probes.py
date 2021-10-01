@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from statistics import mean
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
@@ -32,7 +32,7 @@ def get_metric_statistics(
     metric_name: str,
     dimension_name: str = None,
     dimension_value: str = None,
-    dimensions: List[Dict[str, Any]] = None,
+    dimensions: List[Dict[str, str]] = None,
     duration: int = 60,
     offset: int = 0,
     statistic: str = None,
@@ -52,7 +52,7 @@ def get_metric_statistics(
 
     Is required one of:
             dimension_name, dimension_value: Required to search for ONE dimension
-            dimensions: Required to search for dimensions combinations 
+            dimensions: Required to search for dimensions combinations
             Are expected as a list of dictionary objects: [ {‘Name’: ‘DimName1’, ‘Value’: ‘Value1’}, {‘Name’: ‘DimName2’, ‘Value’: ‘Value2’}, … ]
 
     More information about input parameters are available in the documentation
@@ -64,11 +64,9 @@ def get_metric_statistics(
         raise FailedActivity(
             "You must supply argument for statistic or extended_statistic"
         )
-    
+
     if dimensions is None and dimension_name is None and dimension_value is None:
-        raise FailedActivity(
-            'You must supply argument for dimensions'
-        )
+        raise FailedActivity("You must supply argument for dimensions")
 
     end_time = datetime.utcnow() - timedelta(seconds=offset)
     start_time = end_time - timedelta(seconds=duration)
@@ -81,9 +79,11 @@ def get_metric_statistics(
     }
 
     if dimensions is not None:
-        request_kwargs['Dimensions'] = dimensions
+        request_kwargs["Dimensions"] = dimensions
     else:
-        request_kwargs['Dimensions'] = [{'Name': dimension_name, 'Value': dimension_value}]
+        request_kwargs["Dimensions"] = [
+            {"Name": dimension_name, "Value": dimension_value}
+        ]
 
     if statistic is not None:
         request_kwargs["Statistics"] = [statistic]
@@ -115,7 +115,7 @@ def get_metric_data(
     metric_name: str,
     dimension_name: str = None,
     dimension_value: str = None,
-    dimensions: List[Dict[str, Any]] = None,
+    dimensions: List[Dict[str, str]] = None,
     statistic: str = None,
     duration: int = 300,
     period: int = 60,
@@ -132,8 +132,9 @@ def get_metric_data(
         metric_name: The name of the metric to pull data for
         One of:
             dimension_name, dimension_value: Required to search for ONE dimension
-            dimensions: Required to search for dimensions combinations 
-            Are expected as a list of dictionary objects: [ {‘Name’: ‘DimName1’, ‘Value’: ‘Value1’}, {‘Name’: ‘DimName2’, ‘Value’: ‘Value2’}, … ]
+            dimensions: Required to search for dimensions combinations
+            Are expected as a list of dictionary objects:
+            [{‘Name’: ‘Dim1’, ‘Value’: ‘Val1’}, {‘Name’: ‘Dim2’, ‘Value’: ‘Val2’}, …]
         unit: The type of unit desired to be collected
         statistic: The type of data to return.
             One of: Average, Sum, Minimum, Maximum, SampleCount
@@ -145,9 +146,7 @@ def get_metric_data(
     end_time = datetime.utcnow() - timedelta(seconds=offset)
 
     if dimensions is None and dimension_name is None and dimension_value is None:
-        raise FailedActivity(
-            'You must supply argument for dimensions'
-        )
+        raise FailedActivity("You must supply argument for dimensions")
 
     args = {
         "MetricDataQueries": [
@@ -169,9 +168,11 @@ def get_metric_data(
     }
 
     if dimensions:
-        args['MetricDataQueries'][0]['MetricStat']['Metric']['Dimensions'] = dimensions
+        args["MetricDataQueries"][0]["MetricStat"]["Metric"]["Dimensions"] = dimensions
     elif dimension_name and dimension_value:
-        args['MetricDataQueries'][0]['MetricStat']['Metric']['Dimensions'] = [{'Name': dimension_name, 'Value': dimension_value}]
+        args["MetricDataQueries"][0]["MetricStat"]["Metric"]["Dimensions"] = [
+            {"Name": dimension_name, "Value": dimension_value}
+        ]
 
     if unit:
         args["MetricDataQueries"][0]["MetricStat"]["Unit"] = unit
