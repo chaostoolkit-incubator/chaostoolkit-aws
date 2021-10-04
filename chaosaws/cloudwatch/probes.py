@@ -51,9 +51,10 @@ def get_metric_statistics(
     statistical value based on the time interval between 30 and 90 seconds in the past.
 
     Is required one of:
-            dimension_name, dimension_value: Required to search for ONE dimension
-            dimensions: Required to search for dimensions combinations
-            Are expected as a list of dictionary objects: [ {‘Name’: ‘DimName1’, ‘Value’: ‘Value1’}, {‘Name’: ‘DimName2’, ‘Value’: ‘Value2’}, … ]
+        dimension_name, dimension_value: Required to search for ONE dimension
+        dimensions: Required to search for dimensions combinations
+        Are expected as a list of dictionary objects:
+        [{‘Name’: ‘Dim1’, ‘Value’: ‘Val1’}, {‘Name’: ‘Dim2’, ‘Value’: ‘Val2’}, …]
 
     More information about input parameters are available in the documentation
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.get_metric_statistics

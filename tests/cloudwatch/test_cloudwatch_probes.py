@@ -109,7 +109,6 @@ def test_cloudwatch_get_metric_statistics_ok(aws_client, mock_datetime):
     metric_name = "Invocations"
     dimension_name = "FunctionName"
     dimension_value = "MyFunction"
-    dimensions = None
     duration = 120
     offset = 60
     statistic = "Sum"
@@ -122,7 +121,6 @@ def test_cloudwatch_get_metric_statistics_ok(aws_client, mock_datetime):
         metric_name=metric_name,
         dimension_name=dimension_name,
         dimension_value=dimension_value,
-        dimensions=dimensions,
         duration=duration,
         offset=offset,
         statistic=statistic,
@@ -156,7 +154,6 @@ def test_cloudwatch_get_metric_statistics_extended_ok(aws_client, mock_datetime)
     metric_name = "Invocations"
     dimension_name = "FunctionName"
     dimension_value = "MyFunction"
-    dimensions = None
     duration = 120
     offset = 60
     statistic = None
@@ -171,7 +168,6 @@ def test_cloudwatch_get_metric_statistics_extended_ok(aws_client, mock_datetime)
         metric_name=metric_name,
         dimension_name=dimension_name,
         dimension_value=dimension_value,
-        dimensions=dimensions,
         duration=duration,
         offset=offset,
         statistic=statistic,
@@ -204,7 +200,6 @@ def test_cloudwatch_get_metric_statistics_no_datapoints(aws_client, mock_datetim
     metric_name = "Invocations"
     dimension_name = "FunctionName"
     dimension_value = "MyFunction"
-    dimensions = None
     duration = 120
     offset = 60
     statistic = "Sum"
@@ -217,7 +212,6 @@ def test_cloudwatch_get_metric_statistics_no_datapoints(aws_client, mock_datetim
         metric_name=metric_name,
         dimension_name=dimension_name,
         dimension_value=dimension_value,
-        dimensions=dimensions,
         duration=duration,
         offset=offset,
         statistic=statistic,
@@ -252,7 +246,6 @@ def test_cloudwatch_get_metric_statistics_bad_response(aws_client, mock_datetime
     metric_name = "Invocations"
     dimension_name = "FunctionName"
     dimension_value = "MyFunction"
-    dimensions = None
     duration = 120
     offset = 60
     statistic = "Sum"
@@ -266,7 +259,6 @@ def test_cloudwatch_get_metric_statistics_bad_response(aws_client, mock_datetime
             metric_name=metric_name,
             dimension_name=dimension_name,
             dimension_value=dimension_value,
-            dimensions=dimensions,
             duration=duration,
             offset=offset,
             statistic=statistic,
