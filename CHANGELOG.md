@@ -5,9 +5,13 @@
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.17.0...HEA
 
 ### Added
-- added new variable for cloudwatch probes `get_metric_statistics` and `get_metric_data` called `dimensions` to allow for multiple dimension queries
-* Added `.github/workflows/check_pr.yaml` which checks if a PR has modified the
+
+- added new variable for cloudwatch probes `get_metric_statistics` and `get_metric_data`
+called `dimensions` to allow for multiple dimension queries
+- Added `.github/workflows/check_pr.yaml` which checks if a PR has modified the
 CHANGELOG.md and if it changed/added tests
+- adding s3 probes `bucket_exists`, `object_exists`, & `versioning_status`
+- adding s3 actions `delete_object`, `toggle_versioning`
 
 ## [0.17.0][]
 [0.17.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...0.17.0
