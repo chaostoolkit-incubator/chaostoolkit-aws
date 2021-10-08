@@ -65,12 +65,11 @@ def toggle_versioning(
     if not validate_bucket_exists(client, bucket_name):
         raise FailedActivity(f'Bucket "{bucket_name}" does not exist!')
 
-    is_enabled = get_bucket_versioning(client, bucket_name)
-    if is_enabled == status:
-        raise FailedActivity(f"Bucket {bucket_name} versioning is already {status}!")
-
+    versioning_status = get_bucket_versioning(client, bucket_name)
     if not status:
-        status = "Suspended" if is_enabled == "Enabled" else "Enabled"
+        status = "Suspended"
+        if versioning_status == "Suspended":
+            status = "Enabled"
 
     params = {
         "Bucket": bucket_name,

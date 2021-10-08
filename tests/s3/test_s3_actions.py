@@ -111,23 +111,6 @@ def test_toggle_versioning_enable(test_client: aws_client):
 
 
 @patch("chaosaws.s3.actions.aws_client", autospec=True)
-def test_toggle_versioning_enable_exception(test_client: aws_client):
-    client = MagicMock()
-    test_client.return_value = client
-    client.list_buckets.return_value = read_configs("list_buckets_1.json")
-    client.get_bucket_versioning.return_value = read_configs(
-        "get_bucket_versioning_2.json"
-    )
-
-    params = {"bucket_name": "Test-Bucket-8", "status": "Enabled"}
-
-    with pytest.raises(FailedActivity) as x:
-        toggle_versioning(**params)
-
-    assert "Bucket Test-Bucket-8 versioning is already Enabled!" in str(x)
-
-
-@patch("chaosaws.s3.actions.aws_client", autospec=True)
 def test_toggle_versioning_enable_auto(test_client: aws_client):
     client = MagicMock()
     test_client.return_value = client
