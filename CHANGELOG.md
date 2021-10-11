@@ -12,6 +12,7 @@ called `dimensions` to allow for multiple dimension queries
 CHANGELOG.md and if it changed/added tests
 - adding s3 probes `bucket_exists`, `object_exists`, & `versioning_status`
 - adding s3 actions `delete_object`, `toggle_versioning`
+- explicitly support python 3.9
 
 ## [0.17.0][]
 [0.17.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...0.17.0
