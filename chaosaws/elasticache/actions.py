@@ -12,6 +12,7 @@ __all__ = [
     "reboot_cache_clusters",
     "delete_cache_clusters",
     "delete_replication_groups",
+    "test_failover",
 ]
 
 
@@ -105,6 +106,42 @@ def delete_replication_groups(
 
         results.append(client.delete_replication_group(**params)["ReplicationGroup"])
     return results
+
+
+def test_failover(
+    replication_group_id: str,
+    node_group_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> List[AWSResponse]:
+    """
+    Tests automatic failover on a single shard (also known as node groups).
+    You can only invoke test_failover for no more than 5 shards in any rolling 24-hour
+    period.
+
+    Parameters:
+        replication_group_id: str: the name of the replication group
+            (also known as cluster) whose automatic failover is being
+            tested by this operation.
+        node_group_id: str: the name of the node group (also known as shard)
+            in this replication group on which automatic failover is to be tested.
+    """
+    client = aws_client("elasticache", configuration, secrets)
+
+    if not (replication_group_id and node_group_id):
+        raise FailedActivity(
+            "you must specify the replication group id and node group id"
+        )
+
+    try:
+        return client.test_failover(
+            ReplicationGroupId=replication_group_id, NodeGroupId=node_group_id
+        )
+    except Exception as e:
+        raise FailedActivity(
+            f"failed invoking the test failover API for replication group "
+            f"'{replication_group_id}' and node group '{node_group_id}': '{str(e)}'"
+        ) from e
 
 
 ###############################################################################
