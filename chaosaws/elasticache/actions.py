@@ -139,10 +139,8 @@ def test_failover(
         )
     except Exception as e:
         raise FailedActivity(
-            """failed invoking the test failover API for replication group '{}' and
-            node group '{}': '{}'""".format(
-                replication_group_id, node_group_id, str(e)
-            )
+            f"failed invoking the test failover API for replication group "
+            f"'{replication_group_id}' and node group '{node_group_id}': '{str(e)}'"
         ) from e
 
 
