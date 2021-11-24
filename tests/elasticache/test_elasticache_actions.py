@@ -1,12 +1,14 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from chaoslib.exceptions import FailedActivity
 
 from chaosaws.elasticache.actions import (
     delete_cache_clusters,
     delete_replication_groups,
     reboot_cache_clusters,
 )
+from chaosaws.elasticache.actions import test_failover as failover
 
 
 def test_reboot_cache_clusters_invalid():
@@ -242,3 +244,38 @@ def test_delete_replication_group_no_snapshot(aws_client):
 
     assert results[0]["ReplicationGroupId"] == group_ids[0]
     assert results[0]["Status"] == "deleting"
+
+
+@patch("chaosaws.elasticache.actions.aws_client", autospec=True)
+def test_failover(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    replication_group_id = "my-redis-rg"
+    node_group_id = "0001"
+    failover(replication_group_id, node_group_id)
+    client.test_failover.assert_called_with(
+        ReplicationGroupId=replication_group_id, NodeGroupId=node_group_id
+    )
+
+
+@patch("chaosaws.elasticache.actions.aws_client", autospec=True)
+def test_failover_missing_required_params(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    replication_group_id = ""
+    node_group_id = ""
+
+    with pytest.raises(FailedActivity):
+        failover(replication_group_id, node_group_id)
+
+
+@patch("chaosaws.elasticache.actions.aws_client", autospec=True)
+def test_failover_exception(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    replication_group_id = "my-redis-rg"
+    node_group_id = "0001"
+
+    with patch.object(client, "test_failover", FailedActivity):
+        with pytest.raises(Exception):
+            failover(replication_group_id, node_group_id)

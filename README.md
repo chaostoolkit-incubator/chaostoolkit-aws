@@ -1,6 +1,6 @@
 # [Chaos Toolkit Extension for AWS](https://docs.chaostoolkit.org/drivers/aws/)
 
-[![Build Status](https://travis-ci.org/chaostoolkit-incubator/chaostoolkit-aws.svg?branch=master)](https://travis-ci.org/chaostoolkit-incubator/chaostoolkit-aws)
+[![Build Status](https://github.com/chaostoolkit-incubator/chaostoolkit-aws/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/chaostoolkit-incubator/chaostoolkit-aws/actions/workflows/build-and-test.yaml)
 [![Python versions](https://img.shields.io/pypi/pyversions/chaostoolkit-aws.svg)](https://www.python.org/)
 
 This project is a collection of [actions][] and [probes][], gathered as an

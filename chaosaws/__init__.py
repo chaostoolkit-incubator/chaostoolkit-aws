@@ -14,7 +14,7 @@ from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import Configuration, DiscoveredActivities, Discovery, Secrets
 from logzero import logger
 
-__version__ = "0.17.0"
+__version__ = "0.18.0"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
@@ -255,4 +255,6 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_probes("chaosaws.route53.probes"))
     activities.extend(discover_actions("chaosaws.ssm.actions"))
     activities.extend(discover_actions("chaosaws.fis.actions"))
+    activities.extend(discover_probes("chaosaws.s3.probes"))
+    activities.extend(discover_actions("chaosaws.s3.actions"))
     return activities

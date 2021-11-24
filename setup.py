@@ -2,7 +2,6 @@
 """chaostoolkit AWS builder and installer"""
 import os
 import sys
-import io
 
 import setuptools
 
@@ -16,7 +15,7 @@ def get_version_from_package() -> str:
     with open(path) as f:
         for line in f:
             if line.startswith("__version__"):
-                token, version = line.split(" = ", 1)
+                _, version = line.split(" = ", 1)
                 version = version.replace("\"", "").strip()
                 return version
 
@@ -38,6 +37,7 @@ classifiers = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: Implementation',
     'Programming Language :: Python :: Implementation :: CPython'
 ]

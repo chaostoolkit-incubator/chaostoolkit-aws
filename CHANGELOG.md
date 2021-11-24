@@ -2,7 +2,26 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.17.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.18.0...HEAD
+
+### Added
+
+- workflow to mark issues as `stale` and remove them after 7 days of being `stale`
+- added `chaosaws.elasticache.actions.test_failover` for testing automatic failover on specified shards 
+- adding `put_parameter` to ssm actions
+
+## [0.18.0][] - 2021-10-11
+[0.18.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.17.0...0.18.0
+
+### Added
+
+- added new variable for cloudwatch probes `get_metric_statistics` and `get_metric_data`
+called `dimensions` to allow for multiple dimension queries
+- Added `.github/workflows/check_pr.yaml` which checks if a PR has modified the
+CHANGELOG.md and if it changed/added tests
+- adding s3 probes `bucket_exists`, `object_exists`, & `versioning_status`
+- adding s3 actions `delete_object`, `toggle_versioning`
+- explicitly support python 3.9
 
 ## [0.17.0][]
 [0.17.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...0.17.0
