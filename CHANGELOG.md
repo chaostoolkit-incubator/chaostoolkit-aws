@@ -8,6 +8,7 @@
 
 - workflow to mark issues as `stale` and remove them after 7 days of being `stale`
 - added `chaosaws.elasticache.actions.test_failover` for testing automatic failover on specified shards 
+- adding `put_parameter` to ssm actions
 
 ## [0.18.0][] - 2021-10-11
 [0.18.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.17.0...0.18.0
