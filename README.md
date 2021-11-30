@@ -240,7 +240,7 @@ or
 {
     "configuration": {
         "aws_region": {
-            "env": "type",
+            "type": "env",
             "key": "AWS_REGION"
         }
     }
