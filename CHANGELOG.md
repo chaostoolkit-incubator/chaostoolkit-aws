@@ -3,6 +3,8 @@
 ## [Unreleased][]
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.19.0...HEAD
+- adding `put_metric_data_incremental` to CloudWatch disruptions to introduce metrics over time
+
 
 ## [0.19.0][] - 2021-12-02
 [0.19.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.18.0...0.19.0

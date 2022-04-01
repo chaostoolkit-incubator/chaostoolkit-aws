@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+from time import sleep
 from typing import Any, Dict, List, Union
 
 import boto3
@@ -17,6 +19,7 @@ __all__ = [
     "put_rule",
     "put_rule_targets",
     "remove_rule_targets",
+    "put_metric_data_incremental",
 ]
 
 
@@ -159,6 +162,52 @@ def put_metric_data(
         client.put_metric_data(**params)
     except ClientError as e:
         raise FailedActivity(e.response["Error"]["Message"])
+
+
+def put_metric_data_incremental(
+    namespace: str,
+    metric_name: str,
+    dimensions: List[Dict[str, Any]],
+    metric_value: float,
+    metric_unit: str,
+    duration: int = 300,
+    increment: float = 0.0,
+    storage_resolution: int = 60,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+):
+    """
+    Publish metric data to Cloudwatch over a period of time
+
+    :param namespace: The metric namespace
+    :param metric_name: The name of the metric
+    :param dimensions: The dimensions associated with the metric
+    :param metric_value: The value for the metric
+    :param metric_unit: The unit to use when storing the metric
+    :param duration: The amount of time (in seconds) over which the data will be added
+    :param increment: The amount the data count will increment each put
+    :param storage_resolution: Resolution value of the metric (1 = high-resolution)
+    :param configuration: AWS authentication configuration
+    :param secrets: Additional authentication secrets
+    :return: None
+
+    Additional Info: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data
+    """  # noqa: E501
+    put_data_end = datetime.now() + timedelta(seconds=duration)
+    while datetime.now() < put_data_end:
+        metric_data = [
+            {
+                "MetricName": metric_name,
+                "Dimensions": dimensions,
+                "Value": metric_value,
+                "Unit": metric_unit,
+                "StorageResolution": storage_resolution,
+                "Timestamp": datetime.now().replace(microsecond=0),
+            }
+        ]
+        put_metric_data(namespace, metric_data, configuration, secrets)
+        metric_value = metric_value + increment
+        sleep(1)
 
 
 ###############################################################################

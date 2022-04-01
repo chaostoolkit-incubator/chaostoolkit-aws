@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, call, patch
 
 import pytest
 from botocore.exceptions import ClientError
@@ -10,6 +10,7 @@ from chaosaws.cloudwatch.actions import (
     disable_rule,
     enable_rule,
     put_metric_data,
+    put_metric_data_incremental,
     put_rule,
     put_rule_targets,
     remove_rule_targets,
@@ -250,3 +251,44 @@ def test_put_metric_data_invalid_parameter(aws_client):
             ],
         )
     assert "An error occurred when calling PutMetricData" in str(x)
+
+
+@patch("chaosaws.cloudwatch.actions.aws_client", autospec=True)
+def test_put_metric_data_increment(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.put_metric_data.return_value = None
+
+    value = 1.0
+    increment = 1.0
+    duration = 2
+
+    put_metric_data_incremental(
+        namespace="AWS/ApplicationELB",
+        metric_name="HTTPCode_ELB_5XX_Count",
+        dimensions=[{"Name": "LoadBalancer", "Value": "app/test-elb/45d9752a6852125h"}],
+        metric_value=value,
+        metric_unit="Count",
+        duration=duration,
+        increment=increment,
+        storage_resolution=30,
+    )
+
+    calls = []
+    for i in range(0, duration):
+        metric_data = [
+            {
+                "MetricName": "HTTPCode_ELB_5XX_Count",
+                "Dimensions": [
+                    {"Name": "LoadBalancer", "Value": "app/test-elb/45d9752a6852125h"}
+                ],
+                "Value": float(value + float(i)),
+                "Unit": "Count",
+                "StorageResolution": 30,
+                "Timestamp": ANY,
+            }
+        ]
+        namespace = "AWS/ApplicationELB"
+
+        calls.append(call(Namespace=namespace, MetricData=metric_data))
+    client.put_metric_data.assert_has_calls(calls, any_order=True)
