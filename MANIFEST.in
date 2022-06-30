@@ -4,3 +4,4 @@ include requirements-dev.txt
 include LICENSE
 include CHANGELOG.md
 include pytest.ini
+include chaosaws/ec2_os/scripts/*
