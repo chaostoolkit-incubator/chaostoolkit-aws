@@ -2,7 +2,6 @@
 """chaostoolkit AWS builder and installer"""
 import os
 import sys
-import io
 
 import setuptools
 
@@ -16,28 +15,29 @@ def get_version_from_package() -> str:
     with open(path) as f:
         for line in f:
             if line.startswith("__version__"):
-                token, version = line.split(" = ", 1)
-                version = version.replace("'", "").strip()
+                _, version = line.split(" = ", 1)
+                version = version.replace("\"", "").strip()
                 return version
 
 
 name = 'chaostoolkit-aws'
 desc = 'Chaos Toolkit Extension for AWS'
 
-with io.open('README.md', encoding='utf-8') as strm:
+with open('README.md', encoding='utf-8') as strm:
     long_desc = strm.read()
 
 classifiers = [
-    'Development Status :: 2 - Pre-Alpha',  
+    'Development Status :: 5 - Production/Stable',  
     'Intended Audience :: Developers',
     'License :: Freely Distributable',
     'Operating System :: OS Independent',
     'License :: OSI Approved :: Apache Software License',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: Implementation',
     'Programming Language :: Python :: Implementation :: CPython'
 ]
@@ -45,30 +45,19 @@ author = 'chaostoolkit Team'
 author_email = 'contact@chaostoolkit.org'
 url = 'http://chaostoolkit.org'
 license = 'Apache License Version 2.0'
-packages = [
-    'chaosaws',
-    'chaosaws.ecs',
-    'chaosaws.ec2',
-    'chaosaws.ec2_os',
-    'chaosaws.eks',
-    'chaosaws.elasticache',
-    'chaosaws.iam',
-    'chaosaws.elbv2',
-    'chaosaws.asg',
-    'chaosaws.awslambda',
-    'chaosaws.cloudwatch',
-    'chaosaws.rds'
-]
 
-needs_pytest = set(['pytest', 'test']).intersection(sys.argv)
+packages = setuptools.find_packages(include=['chaosaws', 'chaosaws.*'])
+
+
+needs_pytest = {'pytest', 'test'}.intersection(sys.argv)
 
 install_require = []
-with io.open('requirements.txt') as f:
+with open('requirements.txt') as f:
     install_require = [l.strip() for l in f if not l.startswith('#')]
 pytest_runner = ['pytest_runner'] if needs_pytest else []
 
 test_require = []
-with io.open('requirements-dev.txt') as f:
+with open('requirements-dev.txt') as f:
     test_require = [l.strip() for l in f if not l.startswith('#')]
 
 setup_params = dict(
@@ -87,7 +76,7 @@ setup_params = dict(
     install_requires=install_require,
     tests_require=test_require,
     setup_requires=pytest_runner,
-    python_requires='>=3.5.*'
+    python_requires='>=3.6.*'
 )
 
 

@@ -1,0 +1,11 @@
+{
+  "MetricDataResults": [
+    {
+      "Id": "m1",
+      "Label": "HTTPCode_ELB_504_Count",
+      "Timestamps": [],
+      "Values": [],
+      "StatusCode": "Complete"
+    }
+  ]
+}

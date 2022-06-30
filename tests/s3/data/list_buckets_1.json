@@ -1,0 +1,13 @@
+{
+  "Buckets": [
+    {"Name": "Test-Bucket-1"},
+    {"Name": "Test-Bucket-2"},
+    {"Name": "Test-Bucket-3"},
+    {"Name": "Test-Bucket-4"},
+    {"Name": "Test-Bucket-5"},
+    {"Name": "Test-Bucket-6"},
+    {"Name": "Test-Bucket-7"},
+    {"Name": "Test-Bucket-8"},
+    {"Name": "Test-Bucket-9"}
+  ]
+}

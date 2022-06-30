@@ -1,7 +1,10 @@
+black
 coverage
-moto==1.3.4
-pycodestyle
-pytest>=2.8
+cryptography
+flake8
+isort
+moto
+pytest>=6.0
 pytest-cov
 pytest-sugar
 requests_mock

@@ -2,14 +2,103 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.19.0...HEAD
+
+## [0.19.0][] - 2021-12-02
+[0.19.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.18.0...0.19.0
+
+### Added
+- workflow to mark issues as `stale` and remove them after 7 days of being `stale`
+- added `chaosaws.elasticache.actions.test_failover` for testing automatic failover on specified shards 
+- adding `put_parameter` to ssm actions
+- updated `aws_region` configuration in Readme
+
+
+## [0.18.0][] - 2021-10-11
+[0.18.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.17.0...0.18.0
+
+### Added
+
+- added new variable for cloudwatch probes `get_metric_statistics` and `get_metric_data`
+called `dimensions` to allow for multiple dimension queries
+- Added `.github/workflows/check_pr.yaml` which checks if a PR has modified the
+CHANGELOG.md and if it changed/added tests
+- adding s3 probes `bucket_exists`, `object_exists`, & `versioning_status`
+- adding s3 actions `delete_object`, `toggle_versioning`
+- explicitly support python 3.9
+
+## [0.17.0][]
+[0.17.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.16.0...0.17.0
+
+### Added
+- adding list_event_source_mapping to awslambda probes
+- adding delete_event_source_mapping to awslambda actions
+- adding toggle_event_source_mapping_state to awslambda actions
+- adding put_metric_data to cloudwatch actions
+- added GitHub Actions Workflows for Build and Test, Build and Discover, and Releasing
+- added `Makefile` to abstract away common commands: `install`, `install-dev`, `lint`, `format`, `tests`
+- added `chaosaws.fis.actions.start_experiment` to start an AWS FIS experiment
+- added `chaosaws.fis.actions.stop_experiment` to stop an AWS FIS experiment
+- added `chaosaws.fis.probes.get_experiment` to retrieve an AWS FIS experiments details
+
+### Removed
+- Removed TravisCI related files
+- All `# -*- coding: utf-8 -*-` statements
+- Python 3.5 support
+
+### Changed
+- update return value of asg action detach_random_instances to include instance IDs
+- switch from `pycodestyle` to `black`, `flake8`, and `isort` for linting/formatting
+- applied `black`, `flake8`, and `isort` across the codebase
+- applied `pyupgrade --py36-plus`
+
+### Fixed
+- `chaosaws.route53.probes` now correctly exposes the `__all__` attribute
+
+## [0.16.0][]
+[0.16.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.15.1...0.16.0
+
+### Added
+- adding route53 probes & actions
+- adding ssm actions
+
+### Changed
+
+## [0.15.1][]
+[0.15.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.15.0...0.15.1
+
+### Changed
+
+- use setuptools auto discovery of all packages under `chaosaws` to not forget
+  them anylonger
+- turn `chaosaws.emr` into a proper Python package
+
+## [0.15.0][]
+[0.15.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.14.0...0.15.0
+
+
+### Added
+
+- adding probes to rds resource (instance_status, cluster_status, cluster_membership_count)
+- add Cloudwatch get_metric_data probe
+- adding new probes & actions for EMR
+- building for Python 3.8
+
+### Changed
+
+- fixing `describe_cache_cluster` argument calls ordering
+- adding actions to ecs resource ('tag_resource', 'untag_resource', 'set_service_placement_strategy', 'set_service_deployment_configuration', & 'update_container_instances_state')
 
 ## [0.14.0][]
+
+- added EMR probes 'describe_cluster', 'describe_instance_fleet', 'describe_instance_group', 'list_cluster_fleet_instances', 'list_cluster_group_instances'
+- added EMR actions 'modify_cluster', 'modify_instance_fleet', 'modify_instance_groups_instance_count', 'modify_instance_groups_shrink_policy'
 
 [0.14.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.13.0...0.14.0
 
 ### Added
 
+- adding elasticache probes `describe_cache_cluster`, `get_cache_node_count`, & `get_cache_node_status`
 - add EC2 actions to allow/revoke security group ingress
 
 ## [0.13.0][]

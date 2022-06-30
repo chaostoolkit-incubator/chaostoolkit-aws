@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
 
 from chaosaws.iam.probes import get_policy
 
 
-@patch('chaosaws.iam.probes.aws_client', autospec=True)
+@patch("chaosaws.iam.probes.aws_client", autospec=True)
 def test_get_role_policy(aws_client):
     client = MagicMock()
     aws_client.return_value = client

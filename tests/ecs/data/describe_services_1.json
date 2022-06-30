@@ -1,0 +1,62 @@
+{
+  "services": [
+    {
+      "serviceArn": "arn:aws:ecs:us-east-1:012345678910:service/MyTestEcsService",
+      "serviceName": "MyTestEcsService",
+      "clusterArn": "arn:aws:ecs:us-east-1:012345678910:cluster/MyTestEcsCluster",
+      "loadBalancers": [
+        {
+          "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:012345678910:targetgroup/targets/73e2d6bc24d8a067",
+          "loadBalancerName": "MyLoadBalancer",
+          "containerName": "MyContainer",
+          "containerPort": 8080
+        }
+      ],
+      "status": "ACTIVE",
+      "desiredCount": 6,
+      "runningCount": 6,
+      "pendingCount": 0,
+      "deploymentConfiguration": {
+        "maximumPercent": 200,
+        "minimumHealthyPercent": 100
+      },
+      "deployments": [
+        {
+          "id": "ecs-svc/296365152915126197",
+          "status": "PRIMARY",
+          "desiredCount": 6,
+          "pendingCount": 0,
+          "runningCount": 6,
+          "createdAt": "2020-09-08T14:49:26.827945-04:00",
+          "updatedAt": "2020-09-08T14:49:26.827963-04:00"
+        }
+      ],
+      "events": [],
+      "schedulingStrategy": "DAEMON",
+      "placementStrategy": [
+        {
+          "type": "spread",
+          "field": "attribute:ecs.availability-zone"
+        }
+      ],
+      "tags": [
+        {
+          "key": "Name",
+          "value": "MyTestEcsCluster"
+        },
+        {
+          "key": "Purpose",
+          "value": "TestingTag"
+        }
+      ]
+    }
+  ],
+  "failures": [],
+  "ResponseMetadata": {
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "server": "amazon.com"
+    },
+    "RetryAttempts": 0
+  }
+}

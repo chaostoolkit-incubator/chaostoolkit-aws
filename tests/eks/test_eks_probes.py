@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 from unittest.mock import MagicMock, patch
 
 from chaosaws.eks.probes import describe_cluster, list_clusters
 
 
-@patch('chaosaws.eks.probes.aws_client', autospec=True)
+@patch("chaosaws.eks.probes.aws_client", autospec=True)
 def test_describe_cluster(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -13,7 +12,7 @@ def test_describe_cluster(aws_client):
     client.describe_cluster.assert_called_with(name=cluster)
 
 
-@patch('chaosaws.eks.probes.aws_client', autospec=True)
+@patch("chaosaws.eks.probes.aws_client", autospec=True)
 def test_describe_missing_cluster(aws_client):
     client = MagicMock()
     aws_client.return_value = client
@@ -25,7 +24,7 @@ def test_describe_missing_cluster(aws_client):
     assert response is None
 
 
-@patch('chaosaws.eks.probes.aws_client', autospec=True)
+@patch("chaosaws.eks.probes.aws_client", autospec=True)
 def test_list_clusters(aws_client):
     client = MagicMock()
     aws_client.return_value = client

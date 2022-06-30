@@ -1,0 +1,55 @@
+{
+  "Name": "MyTestCluster",
+  "LogUri": "./",
+  "ReleaseLabel": "emr-5.18.0",
+  "Applications": [{"Name": "GenericApplication"}],
+  "Instances": {
+    "InstanceGroups": [
+      {
+        "Name": "MasterGroupNodes",
+        "Market": "ON_DEMAND",
+        "InstanceRole": "MASTER",
+        "InstanceType": "m1.xlarge",
+        "InstanceCount": 3
+      }
+    ],
+    "InstanceFleets": [
+      {
+        "Name": "PrimaryFleetNodes",
+        "InstanceFleetType": "MASTER",
+        "TargetOnDemandCapacity": 2,
+        "InstanceTypeConfigs": [{
+          "InstanceType": "m1.xlarge",
+          "EbsConfiguration": {
+            "EbsBlockDeviceConfigs": [
+              {
+                "VolumeSpecification": {
+                  "VolumeType": "gp2",
+                  "Iops": 100,
+                  "SizeInGB": 50
+                },
+                "VolumesPerInstance": 2
+              }
+            ]
+          }
+        }]
+      }
+    ],
+    "Ec2KeyName": "MyGenericKey",
+    "KeepJobFlowAliveWhenNoSteps": true,
+    "TerminationProtected": false,
+    "Ec2SubnetId": "sg-01234567"
+  },
+  "Steps": [
+    {
+      "Name": "DoSomeThings",
+      "ActionOnFailure": "CONTINUE",
+      "HadoopJarStep": {
+        "Jar": "generic_jar.jar",
+        "Args": ["test_arg"]
+      }
+    }
+  ],
+  "JobFlowRole": "EMR_EC2_GenericRole",
+  "ServiceRole": "EMR_GenericRole"
+}
