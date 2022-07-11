@@ -11,6 +11,7 @@
 
 - a control to upload the experiment's journal to a S3 bucket when the
   experiment finishes: `chaosaws.s3.controls.upload`
+- removed Python 3.6 support as Chaos Toolkit now requires 3.7
 
 ## [0.19.0][] - 2021-12-02
 [0.19.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.18.0...0.19.0
