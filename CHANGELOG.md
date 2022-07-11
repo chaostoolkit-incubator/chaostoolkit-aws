@@ -4,6 +4,11 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.19.0...HEAD
 
+### Added
+
+- a control to upload the experiment's journal to a S3 bucket when the
+  experiment finishes: `chaosaws.s3.controls.upload`
+
 ## [0.19.0][] - 2021-12-02
 [0.19.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.18.0...0.19.0
 

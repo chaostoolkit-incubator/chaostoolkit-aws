@@ -7,6 +7,7 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 from chaoslib.discovery.discover import (
     discover_actions,
+    discover_activities,
     discover_probes,
     initialize_discovery_result,
 )
@@ -257,4 +258,5 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.fis.actions"))
     activities.extend(discover_probes("chaosaws.s3.probes"))
     activities.extend(discover_actions("chaosaws.s3.actions"))
+    activities.extend(discover_activities("chaosaws.s3.controls.upload", "control"))
     return activities
