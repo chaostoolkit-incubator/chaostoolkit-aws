@@ -11,6 +11,7 @@
 
 - fixed `chaosaws.s3.controls.upload` so it uploads the journal as a file
 - fixed `chaosaws.s3.controls.upload` so the timestamp is generated
+- changed `chaosaws.s3.controls.upload`, use old style when dumping as YAML
 
 
 ## [0.20.0][] - 2022-07-11

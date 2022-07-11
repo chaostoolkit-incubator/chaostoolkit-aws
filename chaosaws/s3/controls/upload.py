@@ -58,7 +58,7 @@ def after_experiment_control(
     ext = "json"
     if as_yaml:
         ext = "yaml"
-        state = yaml.safe_dump(state, indent=False, default_flow_style=True)
+        state = yaml.safe_dump(state, indent=False, default_flow_style=False)
     else:
         state = json.dumps(state, indent=False)
 
