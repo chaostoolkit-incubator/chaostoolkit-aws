@@ -1,4 +1,6 @@
+import json
 from datetime import datetime, timezone
+from tempfile import NamedTemporaryFile
 
 import yaml
 from chaoslib.types import Configuration, Experiment, Journal, Secrets
@@ -56,14 +58,20 @@ def after_experiment_control(
     ext = "json"
     if as_yaml:
         ext = "yaml"
-        state = yaml.safe_dump(state)
-        context = yaml.safe_dump(context)
+        state = yaml.safe_dump(state, indent=False, default_flow_style=True)
+    else:
+        state = json.dumps(state, indent=False)
 
+    suffix = ""
     if suffix_with_timestamp:
         ts = datetime.utcnow().replace(timezone=timezone.utc).isoformat()
         suffix = f"-{ts}"
 
     path = f"{dirpath}/journal{suffix}.{ext}"
-    client.upload_fileobj(state, bucket_name, path)
+
+    with NamedTemporaryFile() as fd:
+        fd.write(state.encode("utf-8"))
+        fd.seek(0)
+        client.upload_file(fd.name, bucket_name, path)
 
     logger.debug(f"Results were uploaded to '{path}'")

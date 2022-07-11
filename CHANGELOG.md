@@ -4,6 +4,11 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.20.0...HEAD
 
+### Fixed
+
+- fixed `chaosaws.s3.controls.upload` so it uploads the journal as a file
+
+
 ## [0.20.0][] - 2022-07-11
 [0.20.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.19.0...0.20.0
 
