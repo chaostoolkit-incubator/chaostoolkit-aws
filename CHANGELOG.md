@@ -2,7 +2,10 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.20.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.20.1...HEAD
+
+## [0.20.1][] - 2022-07-11
+[0.20.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.20.0...0.20.1
 
 ### Fixed
 
