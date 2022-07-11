@@ -10,6 +10,7 @@
 ### Fixed
 
 - fixed `chaosaws.s3.controls.upload` so it uploads the journal as a file
+- fixed `chaosaws.s3.controls.upload` so the timestamp is generated
 
 
 ## [0.20.0][] - 2022-07-11

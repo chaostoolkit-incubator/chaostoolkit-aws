@@ -64,7 +64,7 @@ def after_experiment_control(
 
     suffix = ""
     if suffix_with_timestamp:
-        ts = datetime.utcnow().replace(timezone=timezone.utc).isoformat()
+        ts = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
         suffix = f"-{ts}"
 
     path = f"{dirpath}/journal{suffix}.{ext}"
