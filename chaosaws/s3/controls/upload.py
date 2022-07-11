@@ -8,6 +8,9 @@ from chaosaws import aws_client
 from chaosaws.s3.shared import validate_bucket_exists
 
 
+__all__ = ["after_experiment_control"]
+
+
 def after_experiment_control(
     bucket_name: str,
     dirpath: str,
