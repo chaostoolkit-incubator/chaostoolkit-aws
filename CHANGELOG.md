@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.0...HEAD
 
+### Fixed
+
+- fixed `chaosaws.s3.controls.upload` so the url is correctly added
+
 ## [0.21.0][] - 2022-07-12
 [0.21.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.20.1...0.21.0
 

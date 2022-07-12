@@ -58,9 +58,6 @@ def after_experiment_control(
     ext = "json"
     if as_yaml:
         ext = "yaml"
-        state = yaml.safe_dump(state, indent=False, default_flow_style=False)
-    else:
-        state = json.dumps(state, indent=False)
 
     suffix = ""
     if suffix_with_timestamp:
@@ -76,8 +73,13 @@ def after_experiment_control(
     extra_journal = extra.setdefault("journal", {})
     extra_journal["url"] = url
 
+    if as_yaml:
+        journal = yaml.safe_dump(state, indent=False, default_flow_style=False)
+    else:
+        journal = json.dumps(state, indent=False)
+
     with NamedTemporaryFile() as fd:
-        fd.write(state.encode("utf-8"))
+        fd.write(journal.encode("utf-8"))
         fd.seek(0)
         client.upload_file(fd.name, bucket_name, path)
 
