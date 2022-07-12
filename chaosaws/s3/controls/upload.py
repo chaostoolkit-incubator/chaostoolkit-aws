@@ -64,10 +64,11 @@ def after_experiment_control(
         ts = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
         suffix = f"-{ts}"
 
+    dirpath = dirpath.rstrip("/")
     path = f"{dirpath}/journal{suffix}.{ext}"
 
     # setting the absolute url of the uploaded journal into the journal itself
-    region = configuration.get("aws_region")
+    region = client.meta.region_name
     url = f"https://{bucket_name}.s3.{region}.amazonaws.com/{dirpath}/{path}"
     extra = state.setdefault("extra", {})
     extra_journal = extra.setdefault("journal", {})

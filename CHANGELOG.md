@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.1...HEAD
 
+### Fixed
+
+- fixed `chaosaws.s3.controls.upload` region for url
+
 ## [0.21.1][] - 2022-07-12
 [0.21.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.0...0.21.1
 
