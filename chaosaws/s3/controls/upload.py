@@ -69,6 +69,13 @@ def after_experiment_control(
 
     path = f"{dirpath}/journal{suffix}.{ext}"
 
+    # setting the absolute url of the uploaded journal into the journal itself
+    region = configuration.get("aws_region")
+    url = f"https://{bucket_name}.s3.{region}.amazonaws.com/{dirpath}/{path}"
+    extra = state.setdefault("extra", {})
+    extra_journal = extra.setdefault("journal", {})
+    extra_journal["url"] = url
+
     with NamedTemporaryFile() as fd:
         fd.write(state.encode("utf-8"))
         fd.seek(0)

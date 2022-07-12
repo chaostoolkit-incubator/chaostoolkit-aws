@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.20.1...HEAD
 
+### Changed
+
+- Setting the S3 URL into the journal when stored
+
 ## [0.20.1][] - 2022-07-11
 [0.20.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.20.0...0.20.1
 
