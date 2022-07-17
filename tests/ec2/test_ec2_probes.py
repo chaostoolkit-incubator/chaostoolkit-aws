@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from chaoslib.exceptions import FailedActivity
 
-from chaosaws.ec2.probes import count_instances, describe_instances, instance_state
+from chaosaws.ec2.probes import count_instances, describe_instances, instance_state, count_min_instances
 
 
 @patch("chaosaws.ec2.probes.aws_client", autospec=True)
@@ -83,3 +83,12 @@ def test_instance_state_filters(aws_client):
     results = instance_state(state="running", filters=filters)
     client.describe_instances.assert_called_with(Filters=filters)
     assert results
+
+
+@patch("chaosaws.ec2.probes.aws_client", autospec=True)
+def test_count_min_instances(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    filters = [{"Name": "availability-zone", "Values": ["us-west-1"]}]
+    count_min_instances(filters)
+    client.describe_instances.assert_called_with(Filters=filters)
