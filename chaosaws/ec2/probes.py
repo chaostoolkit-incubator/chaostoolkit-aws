@@ -6,7 +6,12 @@ from chaoslib.types import Configuration, Secrets
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["describe_instances", "count_instances", "instance_state"]
+__all__ = [
+    "describe_instances",
+    "count_instances",
+    "instance_state",
+    "count_min_instances",
+]
 
 
 def describe_instances(
@@ -74,3 +79,21 @@ def instance_state(
         if i["State"]["Name"] != state:
             return False
     return True
+
+
+def count_min_instances(
+    filters: List[Dict[str, Any]],
+    min_count: int = 0,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> bool:
+    """
+    Returns whether minimum number of instances
+    available matching the specified filters.
+
+    """
+
+    count = count_instances(
+        filters=filters, configuration=configuration, secrets=secrets
+    )
+    return count >= min_count
