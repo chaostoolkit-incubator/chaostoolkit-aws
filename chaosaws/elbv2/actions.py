@@ -15,6 +15,7 @@ __all__ = [
     "set_security_groups",
     "set_subnets",
     "delete_load_balancer",
+    "enable_access_log",
 ]
 
 
@@ -167,6 +168,36 @@ def delete_load_balancer(
             client.delete_load_balancer(LoadBalancerArn=load_balancer)
 
 
+def enable_access_log(
+    load_balancer_arn: str,
+    enable: bool = False,
+    bucket_name: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> bool:
+    """
+    Enable or Disable Access logs of ELB
+    """
+
+    if not load_balancer_arn:
+        raise FailedActivity("Load Balancer ARN is required")
+
+    if (enable) and (not bucket_name):
+        raise FailedActivity("bucket_name required to enable ELB")
+
+    client = aws_client("elbv2", configuration, secrets)
+    logger.debug(
+        "Changing ELB Access Enabled Attribute to: {0} for ELB: {1}".format(
+            enable, load_balancer_arn
+        )
+    )
+    access_enabled = modify_elb_attributes(
+        load_balancer_arn, client=client, enable=enable, bucket_name=bucket_name
+    )
+    logger.debug("Access Enabled attribute is now: {0}".format(access_enabled))
+    return access_enabled
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
@@ -289,3 +320,36 @@ def get_subnets(subnet_ids: List[str], client: boto3.client) -> List[str]:
     if missing_subnets:
         raise FailedActivity(f"Invalid subnet id(s): {missing_subnets}")
     return results
+
+
+def modify_elb_attributes(
+    load_balancer_arn: str,
+    client: boto3.client,
+    enable: bool,
+    bucket_name: str = None,
+) -> bool:
+    """
+    Return True if access log is enabled else False
+    """
+
+    if enable:
+        attrs = client.modify_load_balancer_attributes(
+            LoadBalancerArn=load_balancer_arn,
+            Attributes=[
+                {"Key": "access_logs.s3.enabled", "Value": "true"},
+                {"Key": "access_logs.s3.bucket", "Value": bucket_name},
+            ],
+        )
+    else:
+        attrs = client.modify_load_balancer_attributes(
+            LoadBalancerArn=load_balancer_arn,
+            Attributes=[{"Key": "access_logs.s3.enabled", "Value": "false"}],
+        )
+
+    access_enabled = "false"
+    attrs = attrs.get("Attributes")
+    for item in attrs:
+        if item["Key"] == "access_logs.s3.enabled":
+            access_enabled = item["Value"]
+            break
+    return access_enabled.strip().upper() == "TRUE"
