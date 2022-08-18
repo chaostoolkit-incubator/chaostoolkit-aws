@@ -6,6 +6,7 @@ from chaoslib.exceptions import FailedActivity
 from chaosaws.elbv2.actions import (
     delete_load_balancer,
     deregister_target,
+    enable_access_log,
     set_security_groups,
     set_subnets,
 )
@@ -369,3 +370,38 @@ def test_delete_load_balancr(aws_client):
 
     client.describe_load_balancers.assert_called_with(Names=alb_names)
     client.delete_load_balancer.assert_called_with(LoadBalancerArn=lb_arn)
+
+
+@patch("chaosaws.elbv2.actions.aws_client", autospec=True)
+def test_enable_access_log(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    lb_arn = (
+        "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer"
+        "/app/test-lb/1234567890abcdef"
+    )
+    client.modify_load_balancer_attributes.return_value = {
+        "Attributes": [
+            {"Key": "access_logs.s3.enabled", "Value": "true"},
+            {"Key": "access_logs.s3.bucket", "Value": "access-log-bucket"},
+        ]
+    }
+    response = enable_access_log(
+        load_balancer_arn=lb_arn, enable=True, bucket_name="access-log-bucket"
+    )
+    assert response is True
+
+
+@patch("chaosaws.elbv2.actions.aws_client", autospec=True)
+def test_disable_access_log(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    lb_arn = (
+        "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer"
+        "/app/test-lb/1234567890abcdef"
+    )
+    client.modify_load_balancer_attributes.return_value = {
+        "Attributes": [{"Key": "access_logs.s3.enabled", "Value": "false"}]
+    }
+    response = enable_access_log(load_balancer_arn=lb_arn)
+    assert response is False

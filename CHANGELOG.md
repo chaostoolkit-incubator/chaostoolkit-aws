@@ -7,6 +7,10 @@
 ### Changed
 - Added new EC2 probe to check whether minimum number of instances are running
 
+### Added
+- Added new probe to check whether Access Logging is enabled at ALB
+- Added new action to enable/disable access logging at ALB
+
 ## [0.21.2][] - 2022-07-12
 [0.21.2]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.1...0.21.2
 

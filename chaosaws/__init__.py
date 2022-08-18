@@ -21,7 +21,7 @@ __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
     """
-    Credentialss may be provided via the secrets object. When they aren't,
+    Credentials may be provided via the secrets object. When they aren't,
     they will be loaded from the process environment (for instance, read from
     `~/.aws/credentials`).
 
