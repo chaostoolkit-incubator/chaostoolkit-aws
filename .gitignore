@@ -110,3 +110,5 @@ junit-test-results.xml
 
 # vim
 *.swp
+
+.DS_Store
