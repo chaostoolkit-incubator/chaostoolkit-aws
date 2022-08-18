@@ -3,7 +3,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from chaoslib.exceptions import FailedActivity
 
-from chaosaws.elbv2.probes import all_targets_healthy, targets_health_count
+from chaosaws.elbv2.probes import (
+    all_targets_healthy,
+    is_access_log_enabled,
+    targets_health_count,
+)
 
 
 @patch("chaosaws.elbv2.probes.aws_client", autospec=True)
@@ -91,6 +95,43 @@ def test_all_targets_healthy_false(aws_client):
         {"TargetHealthDescriptions": [{"TargetHealth": {"State": "unhealthy"}}]},
     ]
     response = all_targets_healthy(tg_names=tg_names)
+    assert response is False
+
+
+@patch("chaosaws.elbv2.probes.aws_client", autospec=True)
+def test_is_access_log_enabled_true(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_load_balancer_attributes.return_value = {
+        "Attributes": [
+            {"Key": "access_logs.s3.enabled", "Value": "true"},
+            {"Key": "access_logs.s3.bucket", "Value": ""},
+        ]
+    }
+    lb_arn = (
+        "arn:aws:elasticloadbalancing:eu-west-1:111111111111:"
+        "loadbalancer/app/test-lb/1234567890abcdef"
+    )
+
+    response = is_access_log_enabled(load_balancer_arn=lb_arn)
+    assert response is True
+
+
+@patch("chaosaws.elbv2.probes.aws_client", autospec=True)
+def test_is_access_log_enabled_false(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+    client.describe_load_balancer_attributes.return_value = {
+        "Attributes": [
+            {"Key": "access_logs.s3.enabled", "Value": "false"},
+            {"Key": "access_logs.s3.bucket", "Value": ""},
+        ]
+    }
+    lb_arn = (
+        "arn:aws:elasticloadbalancing:eu-west-1:111111111111:loadbalancer"
+        "/app/test-lb/1234567890abcdef"
+    )
+    response = is_access_log_enabled(load_balancer_arn=lb_arn)
     assert response is False
 
 

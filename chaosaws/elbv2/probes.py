@@ -9,7 +9,10 @@ from logzero import logger
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["targets_health_count", "all_targets_healthy"]
+# from os import access
+# from xmlrpc.client import boolean
+
+__all__ = ["targets_health_count", "all_targets_healthy", "is_access_log_enabled"]
 
 
 def targets_health_count(
@@ -60,9 +63,28 @@ def all_targets_healthy(
     return result
 
 
+def is_access_log_enabled(
+    load_balancer_arn: str, configuration: Configuration = None, secrets: Secrets = None
+) -> AWSResponse:
+    """
+    Verify access logging enabled on load balancer
+    """
+
+    if not load_balancer_arn:
+        raise FailedActivity("Load Balancer ARN is required")
+
+    client = aws_client("elbv2", configuration, secrets)
+
+    access_enabled = get_access_log_for_elb(load_balancer_arn, client=client)
+    logger.debug("Access Enabled attribute is: {0}".format(access_enabled))
+    return access_enabled
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
+
+
 def get_target_group_arns(tg_names: List[str], client: boto3.client) -> Dict:
     """
     Return list of target group ARNs based on list of target group names
@@ -140,3 +162,21 @@ def get_targets_health_count(tg_names: List[str], client: boto3.client) -> Dict:
     logger.debug(f"Healthy targets by targetgroup: {str(tg_targets_health_count)}")
 
     return tg_targets_health_count
+
+
+def get_access_log_for_elb(load_balancer_arn: str, client: boto3.client) -> bool:
+    """
+    Return True if access log is enabled else False
+    """
+    logger.debug("Checking whether access log is enabled on ELB: " + load_balancer_arn)
+
+    attrs = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer_arn)
+
+    access_enabled = "false"
+    attrs = attrs.get("Attributes")
+    for item in attrs:
+        if item["Key"] == "access_logs.s3.enabled":
+            access_enabled = item["Value"]
+            break
+
+    return access_enabled == "true"
