@@ -262,7 +262,6 @@ def is_scaling_in_progress(
                 instance["LifecycleState"] != "InService"
                 or instance["HealthStatus"] != "Healthy"
             ):
-
                 logger.debug(f"Scaling activities in progress: {True}")
                 return True
 
