@@ -2,7 +2,14 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.2...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.3...HEAD
+
+## [0.21.3][] - 2023-02-26
+[0.21.3]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.2...0.21.3
+
+### Fixed
+
+- fixed format for python miniaml version as per https://github.com/pypa/packaging/issues/673
 
 ### Changed
 - Added new EC2 probe to check whether minimum number of instances are running
