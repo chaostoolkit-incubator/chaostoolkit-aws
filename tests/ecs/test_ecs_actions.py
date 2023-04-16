@@ -150,7 +150,7 @@ def test_stop_random_tasks_percent_no_service(aws_client):
     for i in task_calls:
         try:
             client.stop_task.assert_called_with(cluster=cluster, reason=reason, task=i)
-            return True
+            return None
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)
@@ -192,7 +192,7 @@ def test_stop_random_tasks_percent_yes_service(aws_client):
     for i in task_calls:
         try:
             client.stop_task.assert_called_with(cluster=cluster, reason=reason, task=i)
-            return True
+            return None
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)

@@ -326,7 +326,7 @@ def test_terminate_instances_count_pass(aws_client):
     for i in instance_calls:
         try:
             client.terminate_instances.assert_called_with(InstanceIds=sorted(i))
-            return True
+            return None
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)
@@ -373,7 +373,7 @@ def test_terminate_instances_percent_pass(aws_client):
     for i in instance_calls:
         try:
             client.terminate_instances.assert_called_with(InstanceIds=[i])
-            return True
+            return None
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)
@@ -527,7 +527,7 @@ def test_terminate_instances_tags(aws_client):
     for i in instance_calls:
         try:
             client.terminate_instances.assert_called_with(InstanceIds=sorted(i))
-            return True
+            return None
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)
@@ -644,7 +644,7 @@ def test_detach_instances_count(aws_client):
             assert result["DetachingInstances"] == [
                 {"AutoScalingGroupName": asg_names[0], "InstanceIds": instance_ids}
             ]
-            return True
+            return None
         except AssertionError as e:
             ex = str(e.args)
             if call_found:
@@ -697,7 +697,7 @@ def test_detach_instances_percent(aws_client):
                 InstanceIds=sorted(i),
                 ShouldDecrementDesiredCapacity=False,
             )
-            return True
+            return None
         except AssertionError as e:
             ex = str(e.args)
     raise AssertionError(ex)
@@ -761,7 +761,7 @@ def test_detach_instances_tags(aws_client):
                 InstanceIds=sorted(i),
                 ShouldDecrementDesiredCapacity=False,
             )
-            return True
+            return None
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)
@@ -1158,7 +1158,7 @@ def test_asg_stop_random_instance_name(aws_client):
     for i in instance_calls:
         try:
             client.stop_instances.assert_called_with(Force=False, InstanceIds=[i])
-            return True
+            return None
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)
@@ -1218,7 +1218,7 @@ def test_asg_stop_random_instance_tags(aws_client):
     for i in instance_calls:
         try:
             client.stop_instances.assert_called_with(Force=False, InstanceIds=sorted(i))
-            return True
+            return None
         except AssertionError as e:
             ex = e.args
     raise AssertionError(ex)
