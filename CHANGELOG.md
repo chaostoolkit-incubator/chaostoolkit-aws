@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.3...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.22.0...HEAD
+
+## [0.22.0][] - 2023-04-16
+
+[0.22.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.3...0.22.0
+
+### Added
+
+- Added new probes to retrieve distributed traces from XRay
 
 ## [0.21.3][] - 2023-02-26
 [0.21.3]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.2...0.21.3
