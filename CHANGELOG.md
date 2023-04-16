@@ -12,6 +12,10 @@
 
 - Added new probes to retrieve distributed traces from XRay
 
+### Fixed
+
+- Moved away from nosetest setup functions in emr tests
+
 ## [0.21.3][] - 2023-02-26
 [0.21.3]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.21.2...0.21.3
 

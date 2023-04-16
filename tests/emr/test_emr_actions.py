@@ -48,7 +48,7 @@ def start_cluster():
 @mock_emr
 @pytest.mark.usefixtures("start_cluster")
 class TestEmrActionsMoto:
-    def setup(self, *args, **kwargs):
+    def setup_method(self, *args, **kwargs):
         client = boto3.client("emr", region_name="us-east-1")
         clusters = client.list_clusters()["Clusters"]
         self.cluster_id = clusters[0]["Id"]
@@ -83,7 +83,7 @@ class TestEmrActionsMoto:
 
 
 class TestEmrActionsMock:
-    def setup(self):
+    def setup_method(self):
         self.fleet_id = "i-IJKLMNOPQ8912"
         self.cluster_id = "j-BC86D9AZOOHIA"
         self.group_id = "i-123456789EFGH"
