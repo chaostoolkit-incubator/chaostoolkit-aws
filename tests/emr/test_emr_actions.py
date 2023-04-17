@@ -33,6 +33,7 @@ def mock_client_error(*args, **kwargs):
         },
     )
 
+
 @mock_emr
 class TestEmrActionsMoto:
     def setup_method(self, *args, **kwargs):
