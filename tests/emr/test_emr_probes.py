@@ -7,7 +7,6 @@ import pytest
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from moto import mock_emr
-from moto.emr.models import emr_backends
 
 from chaosaws.emr.probes import (
     describe_cluster,
