@@ -33,23 +33,15 @@ def mock_client_error(*args, **kwargs):
         },
     )
 
-
-@pytest.fixture(scope="class")
 @mock_emr
-def start_cluster():
-    config = os.path.join(data_path, "cluster_properties.json")
-    with open(config) as fh:
-        config_data = loads(fh.read())
-
-    client = boto3.client("emr", region_name="us-east-1")
-    client.run_job_flow(**config_data)
-
-
-@mock_emr
-@pytest.mark.usefixtures("start_cluster")
 class TestEmrActionsMoto:
     def setup_method(self, *args, **kwargs):
+        config = os.path.join(data_path, "cluster_properties.json")
+        with open(config) as fh:
+            config_data = loads(fh.read())
+
         client = boto3.client("emr", region_name="us-east-1")
+        client.run_job_flow(**config_data)
         clusters = client.list_clusters()["Clusters"]
         self.cluster_id = clusters[0]["Id"]
         self.instance_groups = client.list_instance_groups(ClusterId=self.cluster_id)[
