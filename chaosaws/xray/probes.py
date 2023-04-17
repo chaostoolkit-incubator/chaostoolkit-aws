@@ -8,7 +8,7 @@ from logzero import logger
 
 from chaosaws import aws_client
 
-__all__ = ["get_traces", "get_traces_summaries"]
+__all__ = ["get_traces", "get_traces_summaries", "get_most_recent_trace"]
 
 
 def get_traces_summaries(

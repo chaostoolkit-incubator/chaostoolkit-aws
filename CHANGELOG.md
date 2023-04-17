@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.22.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.22.1...HEAD
+
+## [0.22.1][] - 2023-04-17
+
+[0.22.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.22.0...0.22.1
+
+### Changed
+
+- Export `get_most_recent_trace` from XRay probes
 
 ## [0.22.0][] - 2023-04-16
 
