@@ -186,8 +186,8 @@ def get_service_graph(
         response = client.get_service_graph(
             StartTime=start,
             EndTime=end,
-            GroupName=group_name or "",
-            GroupARN=group_arn or "",
+            GroupName=group_name or None,
+            GroupARN=group_arn or None,
         )
     except Exception as e:
         # catchall as boto3 exception management is so poorly documented
