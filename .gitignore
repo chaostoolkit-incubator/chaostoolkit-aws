@@ -112,3 +112,4 @@ junit-test-results.xml
 *.swp
 
 .DS_Store
+.pdm-python

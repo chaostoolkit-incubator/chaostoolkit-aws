@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.22.1...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.0...HEAD
+
+## [0.23.0][] - 2023-04-25
+
+[0.23.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.22.1...0.23.0
+
+### Added
+
+- The `get_service_graph` in the XRay package
 
 ## [0.22.1][] - 2023-04-17
 

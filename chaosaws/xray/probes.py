@@ -8,7 +8,12 @@ from logzero import logger
 
 from chaosaws import aws_client
 
-__all__ = ["get_traces", "get_traces_summaries", "get_most_recent_trace"]
+__all__ = [
+    "get_traces",
+    "get_traces_summaries",
+    "get_most_recent_trace",
+    "get_service_graph",
+]
 
 
 def get_traces_summaries(
@@ -157,6 +162,39 @@ def get_most_recent_trace(
     for s in trace["Traces"][0]["Segments"]:
         segments.append(json.loads(s["Document"]))
     return segments
+
+
+def get_service_graph(
+    start_time: Union[str, float] = "3 minutes",
+    end_time: Union[str, float] = "now",
+    group_name: Optional[str] = "Default",
+    group_arn: Optional[str] = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    """
+    Return a service graph for a given group at a given moment.
+
+    See more information:
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/xray/client/get_service_graph.html
+    """  # noqa: E501
+    client = aws_client("xray", configuration, secrets)
+    try:
+        end = time_to_datetime(end_time)
+        start = time_to_datetime(start_time, offset=end)
+        logger.debug(f"Requesting service graph between {start} and {end}")
+        response = client.get_service_graph(
+            StartTime=start,
+            EndTime=end,
+            GroupName=group_name or "",
+            GroupARN=group_arn or "",
+        )
+    except Exception as e:
+        # catchall as boto3 exception management is so poorly documented
+        logger.debug("Failed to call AWS XRay API", exc_info=True)
+        raise ActivityFailed(f"XRay service graph failed: {str(e)}")
+
+    return response
 
 
 ###############################################################################
