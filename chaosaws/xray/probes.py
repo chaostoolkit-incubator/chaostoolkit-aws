@@ -183,12 +183,12 @@ def get_service_graph(
         end = time_to_datetime(end_time)
         start = time_to_datetime(start_time, offset=end)
         logger.debug(f"Requesting service graph between {start} and {end}")
-        response = client.get_service_graph(
-            StartTime=start,
-            EndTime=end,
-            GroupName=group_name or None,
-            GroupARN=group_arn or None,
-        )
+        args = dict(StartTime=start, EndTime=end)
+        if group_name:
+            args["GroupName"] = group_name
+        if group_arn:
+            args["GroupARN"] = group_arn
+        response = client.get_service_graph(**args)
     except Exception as e:
         # catchall as boto3 exception management is so poorly documented
         logger.debug("Failed to call AWS XRay API", exc_info=True)

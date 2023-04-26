@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.1...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.2...HEAD
+
+## [0.23.2][] - 2023-04-26
+
+[0.23.2]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.1...0.23.2
+
+### Changed
+
+- Better handling of default arguments in `get_service_graph` probe
 
 ## [0.23.1][] - 2023-04-25
 
