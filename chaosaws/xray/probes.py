@@ -194,7 +194,7 @@ def get_service_graph(
         logger.debug("Failed to call AWS XRay API", exc_info=True)
         raise ActivityFailed(f"XRay service graph failed: {str(e)}")
 
-    return json.dumps(response, default=str, indent=2)
+    return response
 
 
 ###############################################################################

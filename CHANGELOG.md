@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.3...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.4...HEAD
+
+## [0.23.4][] - 2023-04-27
+
+[0.23.4]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.3...0.23.4
+
+### Changed
+
+- Let orjson serialize output properly
 
 ## [0.23.3][] - 2023-04-27
 
