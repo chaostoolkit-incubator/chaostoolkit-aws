@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.2...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.3...HEAD
+
+## [0.23.3][] - 2023-04-27
+
+[0.23.3]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.2...0.23.3
+
+### Changed
+
+- Dump response from `get_service_graph` into json as it contains Python objects
 
 ## [0.23.2][] - 2023-04-26
 
