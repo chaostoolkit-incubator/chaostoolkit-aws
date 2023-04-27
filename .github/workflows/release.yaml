@@ -9,6 +9,7 @@ on:
 jobs:
   release-to-pypi:
     runs-on: ubuntu-20.04
+    environment: release
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
