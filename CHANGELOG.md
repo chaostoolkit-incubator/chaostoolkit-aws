@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.4...HEAD
 
+### Changed
+
+- Update EC2 update_min_instances description
+
 ## [0.23.4][] - 2023-04-27
 
 [0.23.4]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.3...0.23.4
