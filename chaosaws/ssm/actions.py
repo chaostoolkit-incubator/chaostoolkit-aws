@@ -67,7 +67,8 @@ def send_command(
     """
     Runs commands on one or more managed instances.
 
-    An SSM document defines the actions that SSM performs on your managed.
+    An SSM document defines the actions that SSM performs on your managed
+    instances.
     For more information about SSM SendCommand:
     https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_SendCommand.html
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.send_command
@@ -105,7 +106,8 @@ def delete_document(
     """
     creates a Systems Manager (SSM) document.
 
-    An SSM document defines the actions that SSM performs on your managed.
+    An SSM document defines the actions that SSM performs on your managed
+    instances.
     For more information about SSM documents:
     https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-ssm-docs.html
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.create_document

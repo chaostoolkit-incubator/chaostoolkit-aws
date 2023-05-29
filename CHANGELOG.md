@@ -6,7 +6,7 @@
 
 ### Changed
 
-- Fix typo in SSM create_document description
+- Fix typo in SSM actions descriptions
 - Update EC2 update_min_instances description
 
 ## [0.23.4][] - 2023-04-27
