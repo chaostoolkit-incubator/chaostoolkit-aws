@@ -20,7 +20,7 @@ def create_document(
     secrets: Secrets = None,
 ) -> AWSResponse:
     """
-    creates a Systems Manager (SSM) document.
+    Creates a Systems Manager (SSM) document.
     An SSM document defines the actions that SSM performs on your managed
     instances.
     For more information about SSM documents:
@@ -104,7 +104,7 @@ def delete_document(
     secrets: Secrets = None,
 ) -> AWSResponse:
     """
-    creates a Systems Manager (SSM) document.
+    Deletes a Systems Manager (SSM) document.
 
     An SSM document defines the actions that SSM performs on your managed
     instances.
