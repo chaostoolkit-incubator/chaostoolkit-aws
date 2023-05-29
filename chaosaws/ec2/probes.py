@@ -88,8 +88,8 @@ def count_min_instances(
     secrets: Secrets = None,
 ) -> bool:
     """
-    Returns whether minimum number of instances
-    available matching the specified filters.
+    Returns whether the number of instances matching the filters is superior to
+    the min_count parameter
 
     """
 
