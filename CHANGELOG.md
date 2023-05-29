@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.4...HEAD
 
+### Changed
+
+- Fix typo in SSM create_document description
+
 ## [0.23.4][] - 2023-04-27
 
 [0.23.4]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.3...0.23.4
