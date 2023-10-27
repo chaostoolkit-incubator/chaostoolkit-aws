@@ -4,6 +4,10 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.24.0...HEAD
 
+### Changed
+
+- Handle falsey values in `cloudwatch.probes.get_metric_statistics`
+
 ## [0.24.0][] - 2023-10-27
 
 [0.24.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.23.4...0.24.0

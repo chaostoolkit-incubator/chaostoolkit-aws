@@ -79,16 +79,16 @@ def get_metric_statistics(
         "Period": duration,
     }
 
-    if dimensions is not None:
+    if dimensions:
         request_kwargs["Dimensions"] = dimensions
     else:
         request_kwargs["Dimensions"] = [
             {"Name": dimension_name, "Value": dimension_value}
         ]
 
-    if statistic is not None:
+    if statistic:
         request_kwargs["Statistics"] = [statistic]
-    if extended_statistic is not None:
+    if extended_statistic:
         request_kwargs["ExtendedStatistics"] = [extended_statistic]
     if unit:
         request_kwargs["Unit"] = unit
@@ -103,9 +103,9 @@ def get_metric_statistics(
     datapoint = datapoints[0]
     logger.debug(f"Response: {response}")
     try:
-        if statistic is not None:
+        if statistic:
             return datapoint[statistic]
-        elif extended_statistic is not None:
+        elif extended_statistic:
             return datapoint["ExtendedStatistics"][extended_statistic]
     except Exception as x:
         raise FailedActivity(f"Unable to parse response '{response}': '{str(x)}'")
