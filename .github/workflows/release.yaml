@@ -8,14 +8,14 @@ on:
 
 jobs:
   release-to-pypi:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     environment: release
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.6'
+        python-version: '3.7'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -34,7 +34,7 @@ jobs:
         path: dist/chaostoolkit_aws-*
 
   create-gh-release:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Create Release
         uses: actions/create-release@latest
@@ -47,7 +47,7 @@ jobs:
           prerelease: false
 
   upload-gh-release-assets:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs:
       - create-gh-release
       - release-to-pypi
