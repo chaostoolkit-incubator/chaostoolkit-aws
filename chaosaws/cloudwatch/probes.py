@@ -90,7 +90,7 @@ def get_metric_statistics(
         request_kwargs["Statistics"] = [statistic]
     if extended_statistic is not None:
         request_kwargs["ExtendedStatistics"] = [extended_statistic]
-    if unit is not None:
+    if unit:
         request_kwargs["Unit"] = unit
 
     logger.debug(f"Request arguments: {request_kwargs}")

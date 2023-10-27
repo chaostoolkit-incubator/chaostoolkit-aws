@@ -7,6 +7,7 @@
 ### Changed
 
 - Update EC2 update_min_instances description
+- Handle `unit=""` as `unit=None` in `cloudwatch.probes.get_metric_statistics`
 
 ## [0.23.4][] - 2023-04-27
 
