@@ -10,7 +10,7 @@ install-dev: install
 
 .PHONY: lint
 lint:
-	flake8 chaosaws/ tests/
+	ruff chaosaws/ tests/
 	isort --check-only --profile black chaosaws/ tests/
 	black --check --diff chaosaws/ tests/
 
@@ -18,6 +18,7 @@ lint:
 format:
 	isort --profile black chaosaws/ tests/
 	black chaosaws/ tests/
+	ruff --fix chaosaws/ tests/
 
 .PHONY: tests
 tests:
