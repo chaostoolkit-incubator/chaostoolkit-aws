@@ -1,12 +1,11 @@
 import json
-from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Union
 
 from chaoslib.exceptions import ActivityFailed
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, time_to_datetime
 
 __all__ = [
     "get_traces",
@@ -195,31 +194,3 @@ def get_service_graph(
         raise ActivityFailed(f"XRay service graph failed: {str(e)}")
 
     return response
-
-
-###############################################################################
-# Private functions
-###############################################################################
-def time_to_datetime(
-    ts: Union[str, float], offset: Optional[datetime] = None
-) -> datetime:
-    if isinstance(ts, float):
-        return datetime.fromtimestamp(ts, tz=timezone.utc)
-
-    if ts == "now":
-        return datetime.utcnow().replace(tzinfo=timezone.utc)
-
-    offset = offset or datetime.utcnow().replace(tzinfo=timezone.utc)
-    quantity, unit = ts.split(" ", 1)
-    duration = float(quantity)
-
-    if unit in ("second", "seconds"):
-        delta = 1
-    elif unit in ("minute", "minutes"):
-        delta = 60
-    elif unit in ("hour", "hours"):
-        delta = 60 * 60
-    elif unit in ("day", "days"):
-        delta = 60 * 60 * 24
-
-    return offset - timedelta(seconds=duration * delta)

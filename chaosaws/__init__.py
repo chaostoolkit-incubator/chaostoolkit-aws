@@ -1,5 +1,6 @@
 import os
-from typing import Any, Dict, List
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Union
 
 import boto3
 import requests
@@ -260,4 +261,30 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.s3.actions"))
     activities.extend(discover_activities("chaosaws.s3.controls.upload", "control"))
     activities.extend(discover_probes("chaosaws.xray.probes"))
+    activities.extend(discover_probes("chaosaws.incidents.probes"))
     return activities
+
+
+def time_to_datetime(
+    ts: Union[str, float], offset: Optional[datetime] = None
+) -> datetime:
+    if isinstance(ts, float):
+        return datetime.fromtimestamp(ts, tz=timezone.utc)
+
+    if ts == "now":
+        return datetime.now().astimezone(tz=timezone.utc)
+
+    offset = offset or datetime.now().astimezone(tz=timezone.utc)
+    quantity, unit = ts.split(" ", 1)
+    duration = float(quantity)
+
+    if unit in ("second", "seconds"):
+        delta = 1
+    elif unit in ("minute", "minutes"):
+        delta = 60
+    elif unit in ("hour", "hours"):
+        delta = 60 * 60
+    elif unit in ("day", "days"):
+        delta = 60 * 60 * 24
+
+    return offset - timedelta(seconds=duration * delta)
