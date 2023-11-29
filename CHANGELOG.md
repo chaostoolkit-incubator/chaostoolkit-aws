@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.26.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.27.0...HEAD
+
+## [0.27.0][] - 2023-11-29
+
+[0.27.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.26.0...0.27.0
+
+### Added
+
+- Action to stop FIS experiments by tags
 
 ## [0.26.0][] - 2023-11-20
 

@@ -3,7 +3,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from chaoslib.exceptions import FailedActivity
 
-from chaosaws.fis.actions import start_experiment, stop_experiment
+from chaosaws.fis.actions import (
+    start_experiment,
+    stop_experiment,
+    stop_experiments_by_tags,
+)
 
 
 def test_that_fis_action_modules___all___attribute_exposed_correctly():
@@ -127,3 +131,15 @@ def test_that_stop_experiment_returns_client_response(aws_client):
 
     actual_resp = stop_experiment(experiment_id="an-id")
     assert actual_resp == resp
+
+
+@patch("chaosaws.fis.actions.aws_client", autospec=True)
+def test_that_stop_experiment_by_tags(aws_client):
+    client = MagicMock()
+    aws_client.return_value = client
+
+    resp = {"experiments": [{"id": "an-id", "tags": {"test-tag": "a-value"}}]}
+    client.list_experiments.return_value = resp
+
+    stop_experiments_by_tags(tags={"test-tag": "a-value"})
+    client.stop_experiment.assert_called_once_with(id="an-id")

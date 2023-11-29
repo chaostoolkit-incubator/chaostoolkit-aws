@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
@@ -6,7 +6,7 @@ from chaoslib.types import Configuration, Secrets
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["start_experiment", "stop_experiment"]
+__all__ = ["start_experiment", "stop_experiment", "stop_experiments_by_tags"]
 
 
 def start_experiment(
@@ -107,3 +107,48 @@ def stop_experiment(
         return fis_client.stop_experiment(id=experiment_id)
     except Exception as ex:
         raise FailedActivity(f"Stop Experiment failed, reason was: {ex}")
+
+
+def stop_experiments_by_tags(
+    tags: Dict[str, str],
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> List[AWSResponse]:
+    """
+    Stops the experiments matching the given tags.
+
+    Useful in rollbacks when experiment id isn't known.
+
+    :param tags: Dict[str, str] representing tags to lookup experiments
+    :param configuration: Configuration object representing the CTK Configuration
+    :param secrets: Secret object representing the CTK Secrets
+    :returns: AWSResponse representing the response from FIS upon stopping the
+        experiment
+
+    Examples
+    --------
+    >>> stop_experiments_by_tags(tags={"mytarget": "123"})
+    [{'ResponseMetadata': {'RequestId': 'e5e9f9a9-f4d0-4d72-8704-1f26cc8b6ad6',
+    'HTTPStatusCode': 200, 'HTTPHeaders': {'date': 'Fri, 13 Aug 2021 09:12:17 GMT',
+    ...'experiment': {'id': 'EXPTUCK2dxepXgkR38',
+    'experimentTemplateId': 'EXT6oWVA1WrLNy4XS', ... }]
+    """
+    fis_client = aws_client(
+        resource_name="fis", configuration=configuration, secrets=secrets
+    )
+
+    try:
+        experiments = fis_client.list_experiments(maxResults=100)
+    except Exception as ex:
+        raise FailedActivity(f"Listing Experiments failed, reason was: {ex}")
+
+    stopped = []
+    for x in experiments["experiments"]:
+        try:
+            if x["tags"] == tags:
+                result = fis_client.stop_experiment(id=x["id"])
+                stopped.append(result)
+        except Exception as ex:
+            raise FailedActivity(f"Stop Experiment failed, reason was: {ex}")
+
+    return stopped
