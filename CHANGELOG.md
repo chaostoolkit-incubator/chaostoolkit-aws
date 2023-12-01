@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.27.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.28.0...HEAD
+
+## [0.28.0][] - 2023-12-01
+
+[0.28.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.27.0...0.28.0
+
+### Added
+
+- Actions to start AWS FIS scenarios: Pod delete and AZ Availability: Power Interruption
 
 ## [0.27.0][] - 2023-11-29
 
