@@ -501,13 +501,3 @@ def convert_tags(tags: Union[str, Dict[str, str]]) -> Dict[str, str]:
         result[k] = v
 
     return result
-
-
-az = "eu-central-1a"
-arn = "arn:aws:iam::912823331559:role/service-role/AWSFISIAMRole-1701433028358"
-
-experiment = start_availability_zone_power_interruption_scenario(
-    az, "myexp=sylvain", arn
-)
-
-print(experiment)
