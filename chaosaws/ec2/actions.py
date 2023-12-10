@@ -1,4 +1,5 @@
 import random
+import time
 from collections import defaultdict
 from copy import deepcopy
 from typing import Any, Dict, List, Union
@@ -9,7 +10,7 @@ from chaoslib.exceptions import ActivityFailed, FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, convert_tags
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -21,6 +22,7 @@ __all__ = [
     "restart_instances",
     "detach_random_volume",
     "attach_volume",
+    "stop_instances_by_incremental_steps",
 ]
 
 
@@ -423,9 +425,77 @@ def attach_volume(
     return results
 
 
+def stop_instances_by_incremental_steps(
+    volume: int,
+    step_quantity: int,
+    step_duration: int,
+    az: str = None,
+    tags: Union[str, Dict[str, Any]] = None,
+    force: bool = False,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> List[AWSResponse]:
+    """
+    Stop a volume of instances incrementally by steps.
+
+    The steps are using two dimensions, the duration between two iterations
+    and the number of instances to stop on each iteration.
+
+    The `tags` can be specified as a key=value pair dictionary or a comma
+    separated list of k=v pairs. They are good to be set when you want to
+    target only a certain subset of instances. Likewise for the
+    availability-zone.
+    """
+    client = aws_client("ec2", configuration, secrets)
+
+    filters = []
+
+    tags = convert_tags(tags) if tags else []
+
+    if tags:
+        filters.append(tags)
+
+    if az:
+        filters.append({"Name": "availability-zone", "Values": [az]})
+
+    instances = list_instances_by_type(filters, client)
+
+    if not instances:
+        raise FailedActivity(f"No instances in availability zone: {az}")
+
+    logger.debug(
+        "Picked EC2 instances '{}' from AZ '{}' to be stopped".format(
+            str(instances), az
+        )
+    )
+
+    total = len(instances)
+    count = round(total * volume / 100)
+    target_instances = random.sample(instances, count)
+
+    responses = []
+    while target_instances:
+        stop_these_instances_now = target_instances[:step_quantity]
+        target_instances = target_instances[step_quantity:]
+
+        responses.extend(
+            stop_instances_any_type(
+                instance_types=stop_these_instances_now, force=force, client=client
+            )
+        )
+
+        pause_for_a_while(step_duration)
+
+    return responses
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
+def pause_for_a_while(duration: int) -> None:
+    time.sleep(float(duration))
+
+
 def list_instances_by_type(
     filters: List[Dict[str, Any]], client: boto3.client
 ) -> Dict[str, Any]:

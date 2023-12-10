@@ -4,7 +4,7 @@ from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, convert_tags
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -157,7 +157,6 @@ def stop_experiments_by_tags(
 
     stopped = []
     for x in experiments["experiments"]:
-        print(x)
         try:
             if x["tags"] == tags:
                 status = x["state"]["status"]
@@ -483,21 +482,3 @@ def start_availability_zone_power_interruption_scenario(
         return fis_client.start_experiment(**params)
     except Exception as ex:
         raise FailedActivity(f"Start Experiment failed, reason was: {ex}")
-
-
-###############################################################################
-# Private functions
-###############################################################################
-def convert_tags(tags: Union[str, Dict[str, str]]) -> Dict[str, str]:
-    """
-    Convert a `k=v,x=y` string into a dictionary
-    """
-    if isinstance(tags, dict):
-        return tags
-
-    result = {}
-    for t in tags.split(","):
-        k, v = t.split("=", 1)
-        result[k] = v
-
-    return result

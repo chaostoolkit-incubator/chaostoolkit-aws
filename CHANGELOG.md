@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.28.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.29.0...HEAD
+
+## [0.29.0][] - 2023-12-10
+
+[0.29.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.28.0...0.29.0
+
+### Added
+
+- Action `stop_instances_by_incremental_steps` in the ec2 package
 
 ## [0.28.0][] - 2023-12-01
 
