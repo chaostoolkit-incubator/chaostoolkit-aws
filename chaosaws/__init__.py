@@ -294,6 +294,9 @@ def convert_tags(tags: Union[str, Dict[str, str]]) -> Dict[str, str]:
     """
     Convert a `k=v,x=y` string into a dictionary
     """
+    if tags is None:
+        return {}
+
     if isinstance(tags, dict):
         return tags
 

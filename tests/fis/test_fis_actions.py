@@ -138,7 +138,15 @@ def test_that_stop_experiment_by_tags(aws_client):
     client = MagicMock()
     aws_client.return_value = client
 
-    resp = {"experiments": [{"id": "an-id", "tags": {"test-tag": "a-value"}}]}
+    resp = {
+        "experiments": [
+            {
+                "id": "an-id",
+                "tags": {"test-tag": "a-value"},
+                "state": {"status": "running"},
+            }
+        ]
+    }
     client.list_experiments.return_value = resp
 
     stop_experiments_by_tags(tags={"test-tag": "a-value"})
