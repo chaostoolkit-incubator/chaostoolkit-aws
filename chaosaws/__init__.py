@@ -16,7 +16,7 @@ from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import Configuration, DiscoveredActivities, Discovery, Secrets
 from logzero import logger
 
-__version__ = "0.29.0"
+__version__ = "0.29.1"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
@@ -286,6 +286,13 @@ def time_to_datetime(
         delta = 60 * 60
     elif unit in ("day", "days"):
         delta = 60 * 60 * 24
+    elif unit in ("month", "months"):
+        delta = 60 * 60 * 24 * 30
+    elif unit in ("year", "years"):
+        delta = 60 * 60 * 24 * 365
+    else:
+        # let's default to the last 5mn
+        delta = 300
 
     return offset - timedelta(seconds=duration * delta)
 

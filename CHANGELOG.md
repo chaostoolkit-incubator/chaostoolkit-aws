@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.29.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.29.1...HEAD
+
+## [0.29.1][] - 2024-01-18
+
+[0.29.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.29.0...0.29.1
+
+### Added
+
+- Offset supported to months and years
 
 ## [0.29.0][] - 2023-12-10
 
