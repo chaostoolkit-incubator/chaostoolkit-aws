@@ -2,7 +2,51 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.30.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.31.0...HEAD
+
+## [0.31.0][] - 2024-01-21
+
+[0.31.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.30.0...0.31.0
+
+### Added
+
+- `restore_availability_zone_power_after_interruption` action to rollback
+  `start_availability_zone_power_interruption_scenario`
+
+  ```json
+  {
+    "version": "1.0.0",
+    "title": "Run the 'AZ Availability - Power Interruption' scenario",
+    "description": "n/a",
+    "method": [
+      {
+        "name": "start-availability-zone-power-interruption-scenario",
+        "type": "action",
+        "provider": {
+          "func": "start_availability_zone_power_interruption_scenario",
+          "type": "python",
+          "module": "chaosaws.fis.actions",
+          "arguments": {
+            "az": "eu-central-1a",
+            "tags": "chaoseengineering=true",
+            "duration": "PT30M"
+          }
+        }
+      }
+    ],
+    "rollbacks": [
+      {
+        "name": "stop-experiments-by-tags",
+        "type": "action",
+        "provider": {
+          "func": "restore_availability_zone_power_after_interruption",
+          "type": "python",
+          "module": "chaosaws.fis.actions"
+        }
+      }
+    ]
+  }
+  ```
 
 ## [0.30.0][] - 2024-01-20
 

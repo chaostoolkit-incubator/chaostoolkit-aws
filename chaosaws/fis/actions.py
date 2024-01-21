@@ -1,6 +1,6 @@
 import json
+import threading
 import time
-from secrets import token_hex
 from typing import Dict, List, Optional, Union
 
 from chaoslib.exceptions import FailedActivity
@@ -16,6 +16,7 @@ __all__ = [
     "stop_experiments_by_tags",
     "start_stress_pod_delete_scenario",
     "start_availability_zone_power_interruption_scenario",
+    "restore_availability_zone_power_after_interruption",
 ]
 
 
@@ -158,16 +159,34 @@ def stop_experiments_by_tags(
     except Exception as ex:
         raise FailedActivity(f"Listing Experiments failed, reason was: {ex}")
 
+    logger.debug(f"Trying to stop experiments which are supersets of {tags}")
     stopped = []
+    template_ids = []
     for x in experiments["experiments"]:
         try:
-            if x["tags"] == tags:
+            if tags.items() <= x["tags"].items():
                 status = x["state"]["status"]
                 if status in ("pending", "initiating", "running", "completed"):
                     result = fis_client.stop_experiment(id=x["id"])
                     stopped.append(result)
+                    template_ids.append(x["experimentTemplateId"])
         except Exception as ex:
             raise FailedActivity(f"Stop Experiment failed, reason was: {ex}")
+
+    logger.debug(f"Stopped experiments {stopped}")
+
+    if delete_templates:
+        logger.debug(f"Deleting experiments templates {template_ids}")
+
+        for template_id in template_ids:
+            try:
+                fis_client.delete_experiment_template(id=template_id)
+                logger.debug(f"Experiment template {template_id} deleted")
+            except Exception as ex:
+                raise FailedActivity(
+                    f"Delete Experiment template {template_id} failed, "
+                    f"reason was: {ex}"
+                )
 
     return stopped
 
@@ -315,7 +334,7 @@ def start_availability_zone_power_interruption_scenario(
     )
     account_id = sts_client.get_caller_identity().get("Account")
 
-    suffix = token_hex(4)
+    suffix = f"{threading.get_ident()}"
 
     tags = convert_tags(tags)
 
@@ -481,7 +500,7 @@ def start_availability_zone_power_interruption_scenario(
             resource_name="iam", configuration=configuration, secrets=secrets
         )
 
-        role_name = f"ChaosToolkit-AWSFISIAMRole-{suffix}"
+        role_name = f"ChaosToolkit-FIS-{suffix}"
 
         assume_role_policy = json.dumps(
             {
@@ -785,3 +804,96 @@ def start_availability_zone_power_interruption_scenario(
         return fis_client.start_experiment(**params)
     except Exception as ex:
         raise FailedActivity(f"Start Experiment failed, reason was: {ex}")
+
+
+def restore_availability_zone_power_after_interruption(
+    tags: Union[str, Dict[str, str], None] = None,
+    delete_roles_and_policies: bool = True,
+    delete_templates: bool = True,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> List[AWSResponse]:
+    """
+    Restore Availability-Zone and clean any resources created for the experiment
+
+    :param tags: str | Dict[str, str] | None representing tags to lookup
+        experiments. When left empty, using a special tag key that was set
+        on all resources during the start of the experiment
+    :param delete_roles_and_policies: boolean, true means any created resources
+        such as roles and policies will be deleted too
+    :param delete_templates: boolean delete the template for the experiment
+    :param configuration: Configuration object representing the CTK Configuration
+    :param secrets: Secret object representing the CTK Secrets
+    :returns: AWSResponse representing the response from FIS upon stopping the
+        experiment
+    """
+    suffix = f"{threading.get_ident()}"
+
+    if not tags:
+        tags = {"chaostoolkit-experiment-key": suffix}
+
+    logger.debug("Deleting experiment and restoring AZ")
+
+    payload = stop_experiments_by_tags(
+        tags=tags,
+        delete_templates=delete_templates,
+        configuration=configuration,
+        secrets=secrets,
+    )
+
+    if delete_roles_and_policies:
+        iam_client = aws_client(
+            resource_name="iam", configuration=configuration, secrets=secrets
+        )
+
+        role_name = f"ChaosToolkit-FIS-{suffix}"
+        logger.info(f"Deleting role {role_name}")
+
+        try:
+            response = iam_client.list_attached_role_policies(RoleName=role_name)
+        except iam_client.exceptions.NoSuchEntityException:
+            logger.debug("Failed to list attached role policies")
+
+            try:
+                response = iam_client.delete_role(RoleName=role_name)
+            except iam_client.exceptions.NoSuchEntityException:
+                logger.debug(f"Failed to delete role {role_name}")
+
+            return payload
+
+        logger.debug(f"Detaching policies {response}")
+
+        policies = list(response["AttachedPolicies"])
+
+        for policy in policies:
+            logger.debug(f"Detaching policy {policy['PolicyName']}")
+            try:
+                iam_client.detach_role_policy(
+                    RoleName=role_name, PolicyArn=policy["PolicyArn"]
+                )
+            except iam_client.exceptions.NoSuchEntityException:
+                logger.debug(f"Failed to detach policy {policy['PolicyArn']}")
+                continue
+
+        try:
+            response = iam_client.delete_role(RoleName=role_name)
+        except iam_client.exceptions.NoSuchEntityException:
+            logger.debug(f"Failed to delete role {role_name}")
+            return payload
+
+        for policy in policies:
+            policy_name = policy["PolicyName"]
+            # don't delete managed policies
+            if policy_name in ["AWSFaultInjectionSimulatorRDSAccess"]:
+                continue
+
+            logger.debug(f"Deleting policy {policy_name}")
+            try:
+                iam_client.delete_role_policy(
+                    RoleName=role_name, PolicyName=policy_name
+                )
+            except iam_client.exceptions.NoSuchEntityException:
+                logger.debug(f"Failed to delete policy {policy_name}")
+                continue
+
+    return payload
