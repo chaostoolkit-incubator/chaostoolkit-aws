@@ -1,10 +1,13 @@
+import json
+import threading
+import time
 from typing import Dict, List, Optional, Union
 
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 from logzero import logger
 
-from chaosaws import aws_client, convert_tags
+from chaosaws import aws_client, convert_tags, tags_as_key_value_pairs
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -13,6 +16,7 @@ __all__ = [
     "stop_experiments_by_tags",
     "start_stress_pod_delete_scenario",
     "start_availability_zone_power_interruption_scenario",
+    "restore_availability_zone_power_after_interruption",
 ]
 
 
@@ -155,16 +159,34 @@ def stop_experiments_by_tags(
     except Exception as ex:
         raise FailedActivity(f"Listing Experiments failed, reason was: {ex}")
 
+    logger.debug(f"Trying to stop experiments which are supersets of {tags}")
     stopped = []
+    template_ids = []
     for x in experiments["experiments"]:
         try:
-            if x["tags"] == tags:
+            if tags.items() <= x["tags"].items():
                 status = x["state"]["status"]
                 if status in ("pending", "initiating", "running", "completed"):
                     result = fis_client.stop_experiment(id=x["id"])
                     stopped.append(result)
+                    template_ids.append(x["experimentTemplateId"])
         except Exception as ex:
             raise FailedActivity(f"Stop Experiment failed, reason was: {ex}")
+
+    logger.debug(f"Stopped experiments {stopped}")
+
+    if delete_templates:
+        logger.debug(f"Deleting experiments templates {template_ids}")
+
+        for template_id in template_ids:
+            try:
+                fis_client.delete_experiment_template(id=template_id)
+                logger.debug(f"Experiment template {template_id} deleted")
+            except Exception as ex:
+                raise FailedActivity(
+                    f"Delete Experiment template {template_id} failed, "
+                    f"reason was: {ex}"
+                )
 
     return stopped
 
@@ -262,7 +284,8 @@ def start_stress_pod_delete_scenario(
 def start_availability_zone_power_interruption_scenario(
     az: str,
     tags: Union[str, Dict[str, str]],
-    role_arn: str,
+    role_arn: Optional[str] = "",
+    autocreate_necessary_role: bool = True,
     duration: str = "PT30M",
     target_iam_roles: bool = False,
     iam_roles: Optional[List[str]] = None,
@@ -286,7 +309,8 @@ def start_availability_zone_power_interruption_scenario(
     :param az: availability zone to disrupt
     :param tags: str | Dict[str, str] representing tags to lookup experiments
     :param duration: disruption duration
-    :param role_arn: role ARN
+    :param role_arn: role ARN, when provided `autocreate_necessary_role` is set to False
+    :param autocreate_necessary_role: boolean that indicate the necessary role is automatically created if not passed as `role_arn`
     :param target_iam_roles: bool whether or not the experiment must target IAM roles. `iam_roles` must then be provided
     :param iam_roles: List[str] list of roles ARN to target
     :param target_subnet: bool whether or not the experiment must target subnets
@@ -305,17 +329,39 @@ def start_availability_zone_power_interruption_scenario(
     :returns: AWSResponse representing the response from FIS upon starting the
         experiment
     """
+    sts_client = aws_client(
+        resource_name="sts", configuration=configuration, secrets=secrets
+    )
+    account_id = sts_client.get_caller_identity().get("Account")
+
+    suffix = f"{threading.get_ident()}"
+
     tags = convert_tags(tags)
 
     fis_client = aws_client(
         resource_name="fis", configuration=configuration, secrets=secrets
     )
 
-    scenario_tags = {"chaosengineering": "true", "chaostoolkit": "true"}
+    scenario_tags = {
+        "chaosengineering": "true",
+        "chaostoolkit": "true",
+        "chaostoolkit-experiment-key": suffix,
+    }
     scenario_tags.update(tags)
+    tags_as_kv = tags_as_key_value_pairs(scenario_tags)
+    logger.debug(f"FIS experiment tags {scenario_tags}")
 
     targets = {}
     actions = {}
+
+    create_console_ebsvolume_policy = False
+    create_console_ec2_policy = False
+    enable_rds_policy = False
+    create_console_elasticache_policy = False
+    create_console_network_policy = False
+
+    if role_arn:
+        autocreate_necessary_role = False
 
     if target_iam_roles and iam_roles:
         targets["IAM-role"] = {
@@ -334,6 +380,7 @@ def start_availability_zone_power_interruption_scenario(
         }
 
     if target_ebs_volumes:
+        create_console_ebsvolume_policy = True
         targets["EBS-Volumes"] = {
             "resourceType": "aws:ec2:ebs-volume",
             "resourceTags": {"AzImpairmentPower": "ApiPauseVolume"},
@@ -351,6 +398,7 @@ def start_availability_zone_power_interruption_scenario(
         }
 
     if target_ec2_instances:
+        create_console_ec2_policy = True
         targets["EC2-Instances"] = {
             "resourceType": "aws:ec2:instance",
             "resourceTags": {"AzImpairmentPower": "StopInstances"},
@@ -405,6 +453,7 @@ def start_availability_zone_power_interruption_scenario(
         }
 
     if target_rds_cluster:
+        enable_rds_policy = True
         targets["RDS-Cluster"] = {
             "resourceType": "aws:rds:cluster",
             "resourceTags": {"AzImpairmentPower": "DisruptRds"},
@@ -418,6 +467,7 @@ def start_availability_zone_power_interruption_scenario(
         }
 
     if target_easticache_cluster:
+        create_console_elasticache_policy = True
         targets["ElastiCache-Cluster"] = {
             "resourceType": "aws:elasticache:redis-replicationgroup",
             "resourceTags": {"AzImpairmentPower": "DisruptElasticache"},
@@ -431,6 +481,7 @@ def start_availability_zone_power_interruption_scenario(
         }
 
     if target_subnet:
+        create_console_network_policy = True
         targets["Subnet"] = {
             "resourceType": "aws:ec2:subnet",
             "resourceTags": {"AzImpairmentPower": "DisruptSubnet"},
@@ -443,6 +494,274 @@ def start_availability_zone_power_interruption_scenario(
             "parameters": {"duration": "PT2M", "scope": "all"},
             "targets": {"Subnets": "Subnet"},
         }
+
+    if autocreate_necessary_role:
+        iam_client = aws_client(
+            resource_name="iam", configuration=configuration, secrets=secrets
+        )
+
+        role_name = f"ChaosToolkit-FIS-{suffix}"
+
+        assume_role_policy = json.dumps(
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {"Service": "fis.amazonaws.com"},
+                        "Action": "sts:AssumeRole",
+                    }
+                ],
+            }
+        )
+
+        response = iam_client.create_role(
+            Path="/service-role/",
+            RoleName=role_name,
+            AssumeRolePolicyDocument=assume_role_policy,
+            Description="Chaos Toolkit generated role for AWS FIS experiments",
+            MaxSessionDuration=3 * 3600,  # 3 hours
+            Tags=tags_as_kv,
+        )
+
+        role_arn = response["Role"]["Arn"]
+        logger.debug(f"FIS Role created: {role_arn}")
+
+        target_region, _ = az.rsplit("-", 1)
+
+        if create_console_ebsvolume_policy:
+            response = iam_client.create_policy(
+                PolicyName=f"FIS-Console-EBSPauseVolumeIO-{suffix}",
+                PolicyDocument=json.dumps(
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": ["ec2:DescribeVolumes"],
+                                "Resource": "*",
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": ["ec2:PauseVolumeIO"],
+                                "Resource": f"arn:aws:ec2:{target_region}:{account_id}:volume/*",
+                            },
+                        ],
+                    }
+                ),
+                Tags=tags_as_kv,
+            )
+
+            policy_arn = response["Policy"]["Arn"]
+            logger.debug(f"Role policy created: {policy_arn}")
+
+            response = iam_client.attach_role_policy(
+                RoleName=role_name, PolicyArn=policy_arn
+            )
+
+        if create_console_ec2_policy:
+            response = iam_client.create_policy(
+                PolicyName=f"FIS-Console-EC2-{suffix}",
+                PolicyDocument=json.dumps(
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Sid": "AllowFISExperimentRoleEC2Actions",
+                                "Effect": "Allow",
+                                "Action": [
+                                    "ec2:RebootInstances",
+                                    "ec2:StopInstances",
+                                    "ec2:StartInstances",
+                                    "ec2:TerminateInstances",
+                                ],
+                                "Resource": f"arn:aws:ec2:{target_region}:{account_id}:instance/*",
+                            },
+                            {
+                                "Sid": "AllowFISExperimentRoleSpotInstanceActions",
+                                "Effect": "Allow",
+                                "Action": ["ec2:SendSpotInstanceInterruptions"],
+                                "Resource": f"arn:aws:ec2:{target_region}:{account_id}:instance/*",
+                            },
+                        ],
+                    }
+                ),
+                Tags=tags_as_kv,
+            )
+
+            policy_arn = response["Policy"]["Arn"]
+            logger.debug(f"Role policy created: {policy_arn}")
+
+            response = iam_client.attach_role_policy(
+                RoleName=role_name, PolicyArn=policy_arn
+            )
+
+            response = iam_client.create_policy(
+                PolicyName=f"FIS-Console-ICE-{suffix}",
+                PolicyDocument=json.dumps(
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Sid": "AllowInjectAPI",
+                                "Effect": "Allow",
+                                "Action": ["ec2:InjectApiError"],
+                                "Resource": ["*"],
+                                "Condition": {
+                                    "ForAnyValue:StringEquals": {
+                                        "ec2:FisActionId": [
+                                            "aws:ec2:api-insufficient-instance-capacity-error",
+                                            "aws:ec2:asg-insufficient-instance-capacity-error",
+                                        ]
+                                    }
+                                },
+                            },
+                            {
+                                "Sid": "DescribeAsg",
+                                "Effect": "Allow",
+                                "Action": ["autoscaling:DescribeAutoScalingGroups"],
+                                "Resource": ["*"],
+                            },
+                        ],
+                    }
+                ),
+                Tags=tags_as_kv,
+            )
+
+            policy_arn = response["Policy"]["Arn"]
+            logger.debug(f"Role policy created: {policy_arn}")
+
+            response = iam_client.attach_role_policy(
+                RoleName=role_name, PolicyArn=policy_arn
+            )
+
+        if create_console_elasticache_policy:
+            response = iam_client.create_policy(
+                PolicyName=f"FIS-Console-ElastiCache-{suffix}",
+                PolicyDocument=json.dumps(
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Sid": "AllowElastiCacheActions",
+                                "Effect": "Allow",
+                                "Action": [
+                                    "elasticache:DescribeReplicationGroups",
+                                    "elasticache:InterruptClusterAzPower",
+                                ],
+                                "Resource": [
+                                    f"arn:aws:elasticache:{target_region}:{account_id}:replicationgroup:*"
+                                ],
+                            },
+                            {
+                                "Sid": "TargetResolutionByTags",
+                                "Effect": "Allow",
+                                "Action": ["tag:GetResources"],
+                                "Resource": "*",
+                            },
+                        ],
+                    }
+                ),
+                Tags=tags_as_kv,
+            )
+
+            policy_arn = response["Policy"]["Arn"]
+            logger.debug(f"Role policy created: {policy_arn}")
+
+            response = iam_client.attach_role_policy(
+                RoleName=role_name, PolicyArn=policy_arn
+            )
+
+        if create_console_network_policy:
+            response = iam_client.create_policy(
+                PolicyName=f"FIS-Console-Network-{suffix}",
+                PolicyDocument=json.dumps(
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": "ec2:CreateTags",
+                                "Resource": "arn:aws:ec2:*:*:network-acl/*",
+                                "Condition": {
+                                    "StringEquals": {
+                                        "ec2:CreateAction": "CreateNetworkAcl",
+                                        "aws:RequestTag/managedByFIS": "true",
+                                    }
+                                },
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": "ec2:CreateNetworkAcl",
+                                "Resource": "arn:aws:ec2:*:*:network-acl/*",
+                                "Condition": {
+                                    "StringEquals": {
+                                        "aws:RequestTag/managedByFIS": "true"
+                                    }
+                                },
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "ec2:CreateNetworkAclEntry",
+                                    "ec2:DeleteNetworkAcl",
+                                ],
+                                "Resource": [
+                                    "arn:aws:ec2:*:*:network-acl/*",
+                                    "arn:aws:ec2:*:*:vpc/*",
+                                ],
+                                "Condition": {
+                                    "StringEquals": {
+                                        "ec2:ResourceTag/managedByFIS": "true"
+                                    }
+                                },
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": "ec2:CreateNetworkAcl",
+                                "Resource": "arn:aws:ec2:*:*:vpc/*",
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "ec2:DescribeVpcs",
+                                    "ec2:DescribeManagedPrefixLists",
+                                    "ec2:DescribeSubnets",
+                                    "ec2:DescribeNetworkAcls",
+                                ],
+                                "Resource": "*",
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": "ec2:ReplaceNetworkAclAssociation",
+                                "Resource": [
+                                    "arn:aws:ec2:*:*:subnet/*",
+                                    "arn:aws:ec2:*:*:network-acl/*",
+                                ],
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": "ec2:GetManagedPrefixListEntries",
+                                "Resource": "arn:aws:ec2:*:*:prefix-list/*",
+                            },
+                        ],
+                    }
+                ),
+                Tags=tags_as_kv,
+            )
+
+            policy_arn = response["Policy"]["Arn"]
+            logger.debug(f"Role policy created: {policy_arn}")
+
+            response = iam_client.attach_role_policy(
+                RoleName=role_name, PolicyArn=policy_arn
+            )
+
+        if enable_rds_policy:
+            response = iam_client.attach_role_policy(
+                RoleName=role_name,
+                PolicyArn="arn:aws:iam::aws:policy/service-role/AWSFaultInjectionSimulatorRDSAccess",
+            )
 
     params = {
         "targets": targets,
@@ -472,6 +791,9 @@ def start_availability_zone_power_interruption_scenario(
 
     logger.debug(f"FIS Template {experiment_template_id} created")
 
+    logger.debug("Waiting 5 seconds before starting it (eventual consistency)")
+    time.sleep(5)
+
     params = {"experimentTemplateId": experiment_template_id}
     if client_token:
         params["clientToken"] = client_token
@@ -482,3 +804,96 @@ def start_availability_zone_power_interruption_scenario(
         return fis_client.start_experiment(**params)
     except Exception as ex:
         raise FailedActivity(f"Start Experiment failed, reason was: {ex}")
+
+
+def restore_availability_zone_power_after_interruption(
+    tags: Union[str, Dict[str, str], None] = None,
+    delete_roles_and_policies: bool = True,
+    delete_templates: bool = True,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> List[AWSResponse]:
+    """
+    Restore Availability-Zone and clean any resources created for the experiment
+
+    :param tags: str | Dict[str, str] | None representing tags to lookup
+        experiments. When left empty, using a special tag key that was set
+        on all resources during the start of the experiment
+    :param delete_roles_and_policies: boolean, true means any created resources
+        such as roles and policies will be deleted too
+    :param delete_templates: boolean delete the template for the experiment
+    :param configuration: Configuration object representing the CTK Configuration
+    :param secrets: Secret object representing the CTK Secrets
+    :returns: AWSResponse representing the response from FIS upon stopping the
+        experiment
+    """
+    suffix = f"{threading.get_ident()}"
+
+    if not tags:
+        tags = {"chaostoolkit-experiment-key": suffix}
+
+    logger.debug("Deleting experiment and restoring AZ")
+
+    payload = stop_experiments_by_tags(
+        tags=tags,
+        delete_templates=delete_templates,
+        configuration=configuration,
+        secrets=secrets,
+    )
+
+    if delete_roles_and_policies:
+        iam_client = aws_client(
+            resource_name="iam", configuration=configuration, secrets=secrets
+        )
+
+        role_name = f"ChaosToolkit-FIS-{suffix}"
+        logger.info(f"Deleting role {role_name}")
+
+        try:
+            response = iam_client.list_attached_role_policies(RoleName=role_name)
+        except iam_client.exceptions.NoSuchEntityException:
+            logger.debug("Failed to list attached role policies")
+
+            try:
+                response = iam_client.delete_role(RoleName=role_name)
+            except iam_client.exceptions.NoSuchEntityException:
+                logger.debug(f"Failed to delete role {role_name}")
+
+            return payload
+
+        logger.debug(f"Detaching policies {response}")
+
+        policies = list(response["AttachedPolicies"])
+
+        for policy in policies:
+            logger.debug(f"Detaching policy {policy['PolicyName']}")
+            try:
+                iam_client.detach_role_policy(
+                    RoleName=role_name, PolicyArn=policy["PolicyArn"]
+                )
+            except iam_client.exceptions.NoSuchEntityException:
+                logger.debug(f"Failed to detach policy {policy['PolicyArn']}")
+                continue
+
+        try:
+            response = iam_client.delete_role(RoleName=role_name)
+        except iam_client.exceptions.NoSuchEntityException:
+            logger.debug(f"Failed to delete role {role_name}")
+            return payload
+
+        for policy in policies:
+            policy_name = policy["PolicyName"]
+            # don't delete managed policies
+            if policy_name in ["AWSFaultInjectionSimulatorRDSAccess"]:
+                continue
+
+            logger.debug(f"Deleting policy {policy_name}")
+            try:
+                iam_client.delete_role_policy(
+                    RoleName=role_name, PolicyName=policy_name
+                )
+            except iam_client.exceptions.NoSuchEntityException:
+                logger.debug(f"Failed to delete policy {policy_name}")
+                continue
+
+    return payload
