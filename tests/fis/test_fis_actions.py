@@ -142,6 +142,7 @@ def test_that_stop_experiment_by_tags(aws_client):
         "experiments": [
             {
                 "id": "an-id",
+                "experimentTemplateId": "template-id",
                 "tags": {"test-tag": "a-value"},
                 "state": {"status": "running"},
             }
