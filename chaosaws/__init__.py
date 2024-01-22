@@ -16,7 +16,7 @@ from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import Configuration, DiscoveredActivities, Discovery, Secrets
 from logzero import logger
 
-__version__ = "0.31.0"
+__version__ = "0.31.1"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
 
 
@@ -297,11 +297,11 @@ def time_to_datetime(
     return offset - timedelta(seconds=duration * delta)
 
 
-def convert_tags(tags: Union[str, Dict[str, str]]) -> Dict[str, str]:
+def convert_tags(tags: Union[str, Dict[str, str], None]) -> Dict[str, str]:
     """
     Convert a `k=v,x=y` string into a dictionary
     """
-    if tags is None:
+    if not tags:
         return {}
 
     if isinstance(tags, dict):

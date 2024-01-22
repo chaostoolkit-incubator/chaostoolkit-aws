@@ -283,7 +283,7 @@ def start_stress_pod_delete_scenario(
 
 def start_availability_zone_power_interruption_scenario(
     az: str,
-    tags: Union[str, Dict[str, str]],
+    tags: Union[str, Dict[str, str], None] = "",
     role_arn: Optional[str] = "",
     autocreate_necessary_role: bool = True,
     duration: str = "PT30M",
@@ -307,7 +307,7 @@ def start_availability_zone_power_interruption_scenario(
     it now
 
     :param az: availability zone to disrupt
-    :param tags: str | Dict[str, str] representing tags to lookup experiments
+    :param tags: str | Dict[str, str] | None representing tags to lookup experiments
     :param duration: disruption duration
     :param role_arn: role ARN, when provided `autocreate_necessary_role` is set to False
     :param autocreate_necessary_role: boolean that indicate the necessary role is automatically created if not passed as `role_arn`
