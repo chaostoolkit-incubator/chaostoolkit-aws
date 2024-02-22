@@ -6,7 +6,7 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
-from moto import mock_emr
+from moto import mock_aws
 
 from chaosaws.emr.probes import (
     describe_cluster,
@@ -35,7 +35,7 @@ def mock_client_error(*args, **kwargs):
     )
 
 
-@mock_emr
+@mock_aws
 class TestEmrProbesMoto:
     def setup_method(self, *args, **kwargs):
         config = os.path.join(data_path, "cluster_properties.json")

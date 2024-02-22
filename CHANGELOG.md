@@ -10,6 +10,7 @@
   `AWSFaultInjectionSimulatorEC2Access` instead of creating new ones
 - Drop `logzero`
 - Drop support for Python 3.7 which has been EOL since June 2023
+- Fixed EMR test to use the appropriate `moto`
 
 ## [0.31.1][] - 2024-01-22
 
