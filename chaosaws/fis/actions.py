@@ -527,7 +527,10 @@ def start_availability_zone_power_interruption_scenario(
         role_arn = response["Role"]["Arn"]
         logger.debug(f"FIS Role created: {role_arn}")
 
-        target_region, _ = az.rsplit("-", 1)
+        a, b, c = az.split("-", 2)
+        target_region = f"{a}-{b}-{c[0]}"
+        logger.debug(f"Target AZ {az}")
+        logger.debug(f"Target region {target_region}")
 
         if create_console_ebsvolume_policy:
             response = iam_client.create_policy(
@@ -560,40 +563,9 @@ def start_availability_zone_power_interruption_scenario(
             )
 
         if create_console_ec2_policy:
-            response = iam_client.create_policy(
-                PolicyName=f"FIS-Console-EC2-{suffix}",
-                PolicyDocument=json.dumps(
-                    {
-                        "Version": "2012-10-17",
-                        "Statement": [
-                            {
-                                "Sid": "AllowFISExperimentRoleEC2Actions",
-                                "Effect": "Allow",
-                                "Action": [
-                                    "ec2:RebootInstances",
-                                    "ec2:StopInstances",
-                                    "ec2:StartInstances",
-                                    "ec2:TerminateInstances",
-                                ],
-                                "Resource": f"arn:aws:ec2:{target_region}:{account_id}:instance/*",
-                            },
-                            {
-                                "Sid": "AllowFISExperimentRoleSpotInstanceActions",
-                                "Effect": "Allow",
-                                "Action": ["ec2:SendSpotInstanceInterruptions"],
-                                "Resource": f"arn:aws:ec2:{target_region}:{account_id}:instance/*",
-                            },
-                        ],
-                    }
-                ),
-                Tags=tags_as_kv,
-            )
-
-            policy_arn = response["Policy"]["Arn"]
-            logger.debug(f"Role policy created: {policy_arn}")
-
             response = iam_client.attach_role_policy(
-                RoleName=role_name, PolicyArn=policy_arn
+                RoleName=role_name,
+                PolicyArn="arn:aws:iam::aws:policy/service-role/AWSFaultInjectionSimulatorEC2Access",
             )
 
             response = iam_client.create_policy(
@@ -673,88 +645,9 @@ def start_availability_zone_power_interruption_scenario(
             )
 
         if create_console_network_policy:
-            response = iam_client.create_policy(
-                PolicyName=f"FIS-Console-Network-{suffix}",
-                PolicyDocument=json.dumps(
-                    {
-                        "Version": "2012-10-17",
-                        "Statement": [
-                            {
-                                "Effect": "Allow",
-                                "Action": "ec2:CreateTags",
-                                "Resource": "arn:aws:ec2:*:*:network-acl/*",
-                                "Condition": {
-                                    "StringEquals": {
-                                        "ec2:CreateAction": "CreateNetworkAcl",
-                                        "aws:RequestTag/managedByFIS": "true",
-                                    }
-                                },
-                            },
-                            {
-                                "Effect": "Allow",
-                                "Action": "ec2:CreateNetworkAcl",
-                                "Resource": "arn:aws:ec2:*:*:network-acl/*",
-                                "Condition": {
-                                    "StringEquals": {
-                                        "aws:RequestTag/managedByFIS": "true"
-                                    }
-                                },
-                            },
-                            {
-                                "Effect": "Allow",
-                                "Action": [
-                                    "ec2:CreateNetworkAclEntry",
-                                    "ec2:DeleteNetworkAcl",
-                                ],
-                                "Resource": [
-                                    "arn:aws:ec2:*:*:network-acl/*",
-                                    "arn:aws:ec2:*:*:vpc/*",
-                                ],
-                                "Condition": {
-                                    "StringEquals": {
-                                        "ec2:ResourceTag/managedByFIS": "true"
-                                    }
-                                },
-                            },
-                            {
-                                "Effect": "Allow",
-                                "Action": "ec2:CreateNetworkAcl",
-                                "Resource": "arn:aws:ec2:*:*:vpc/*",
-                            },
-                            {
-                                "Effect": "Allow",
-                                "Action": [
-                                    "ec2:DescribeVpcs",
-                                    "ec2:DescribeManagedPrefixLists",
-                                    "ec2:DescribeSubnets",
-                                    "ec2:DescribeNetworkAcls",
-                                ],
-                                "Resource": "*",
-                            },
-                            {
-                                "Effect": "Allow",
-                                "Action": "ec2:ReplaceNetworkAclAssociation",
-                                "Resource": [
-                                    "arn:aws:ec2:*:*:subnet/*",
-                                    "arn:aws:ec2:*:*:network-acl/*",
-                                ],
-                            },
-                            {
-                                "Effect": "Allow",
-                                "Action": "ec2:GetManagedPrefixListEntries",
-                                "Resource": "arn:aws:ec2:*:*:prefix-list/*",
-                            },
-                        ],
-                    }
-                ),
-                Tags=tags_as_kv,
-            )
-
-            policy_arn = response["Policy"]["Arn"]
-            logger.debug(f"Role policy created: {policy_arn}")
-
             response = iam_client.attach_role_policy(
-                RoleName=role_name, PolicyArn=policy_arn
+                RoleName=role_name,
+                PolicyArn="arn:aws:iam::aws:policy/service-role/AWSFaultInjectionSimulatorNetworkAccess",
             )
 
         if enable_rds_policy:
@@ -884,7 +777,11 @@ def restore_availability_zone_power_after_interruption(
         for policy in policies:
             policy_name = policy["PolicyName"]
             # don't delete managed policies
-            if policy_name in ["AWSFaultInjectionSimulatorRDSAccess"]:
+            if policy_name in [
+                "AWSFaultInjectionSimulatorRDSAccess",
+                "AWSFaultInjectionSimulatorNetworkAccess",
+                "AWSFaultInjectionSimulatorEC2Access",
+            ]:
                 continue
 
             logger.debug(f"Deleting policy {policy_name}")

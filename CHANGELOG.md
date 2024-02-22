@@ -12,6 +12,11 @@
 
 Allow no tags in `start_availability_zone_power_interruption_scenario`
 
+### Changed
+
+- Use existing AWS FIS policies `AWSFaultInjectionSimulatorNetworkAccess`,
+  `AWSFaultInjectionSimulatorEC2Access` instead of creating new ones
+
 ## [0.31.0][] - 2024-01-21
 
 [0.31.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.30.0...0.31.0
