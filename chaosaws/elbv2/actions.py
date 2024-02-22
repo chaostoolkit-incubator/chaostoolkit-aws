@@ -5,9 +5,8 @@ import boto3
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -17,6 +16,8 @@ __all__ = [
     "delete_load_balancer",
     "enable_access_log",
 ]
+
+logger = get_logger()
 
 
 def deregister_target(

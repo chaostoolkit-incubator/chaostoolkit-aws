@@ -6,9 +6,8 @@ from typing import Any, Dict, List, Union
 import boto3
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 from chaosaws.utils import breakup_iterable
 
@@ -24,6 +23,8 @@ __all__ = [
     "instance_count_by_health",
     "wait_desired_not_equals_healthy_tags",
 ]
+
+logger = get_logger()
 
 
 def describe_auto_scaling_groups(

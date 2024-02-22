@@ -8,9 +8,8 @@ import boto3
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import ActivityFailed, FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client, convert_tags
+from chaosaws import aws_client, convert_tags, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -24,6 +23,8 @@ __all__ = [
     "attach_volume",
     "stop_instances_by_incremental_steps",
 ]
+
+logger = get_logger()
 
 
 def stop_instance(

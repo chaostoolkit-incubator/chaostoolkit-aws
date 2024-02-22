@@ -1,11 +1,14 @@
+import logging
 import os
 from datetime import datetime, timedelta, timezone
+from importlib.metadata import version
 from typing import Any, Dict, List, Optional, Union
 
 import boto3
 import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
+from chaoslib import __version__ as ctklib_version
 from chaoslib.discovery.discover import (
     discover_actions,
     discover_activities,
@@ -14,10 +17,36 @@ from chaoslib.discovery.discover import (
 )
 from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import Configuration, DiscoveredActivities, Discovery, Secrets
-from logzero import logger
 
 __version__ = "0.31.1"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
+
+
+def get_logger() -> logging.Logger:
+    """
+    Return the right logger based on which version of the Chaos Toolkit
+    is our runtime. Starting from Chaos Toookit 1.19, the logger is named
+    `"chaostoolkit"` as we dropped logzero. Before that version, we assume
+    logzero still.
+    """
+    logger_name = "logzero_default"
+
+    try:
+        ctk_version = version("chaostoolkit")
+        major, minor, _ = ctk_version.split(".", 2)
+        if int(major) >= 1 and int(minor) >= 19:
+            logger_name = "chaostoolkit"
+        else:
+            major, minor, _ = ctklib_version.split(".", 2)
+            if int(major) >= 1 and int(minor) >= 42:
+                logger_name = "chaostoolkit"
+    except Exception:
+        pass
+
+    return logging.getLogger(logger_name)
+
+
+logger = get_logger()
 
 
 def get_credentials(secrets: Secrets = None) -> Dict[str, str]:

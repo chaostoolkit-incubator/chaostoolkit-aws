@@ -4,12 +4,13 @@ from tempfile import NamedTemporaryFile
 
 import yaml
 from chaoslib.types import Configuration, Experiment, Journal, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.s3.shared import validate_bucket_exists
 
 __all__ = ["after_experiment_control"]
+
+logger = get_logger()
 
 
 def after_experiment_control(

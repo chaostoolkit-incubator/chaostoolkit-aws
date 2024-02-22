@@ -4,11 +4,12 @@ from typing import Dict, List
 
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 
 __all__ = ["get_alarm_state_value", "get_metric_statistics", "get_metric_data"]
+
+logger = get_logger()
 
 
 def get_alarm_state_value(

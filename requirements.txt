@@ -1,4 +1,4 @@
 aws-requests-auth
 boto3
-chaostoolkit-lib>=0.13.0
+chaostoolkit-lib>=1.42
 requests

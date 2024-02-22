@@ -5,9 +5,8 @@ from typing import Dict, List, Optional, Union
 
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client, convert_tags, tags_as_key_value_pairs
+from chaosaws import aws_client, convert_tags, get_logger, tags_as_key_value_pairs
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -18,6 +17,8 @@ __all__ = [
     "start_availability_zone_power_interruption_scenario",
     "restore_availability_zone_power_after_interruption",
 ]
+
+logger = get_logger()
 
 
 def start_experiment(

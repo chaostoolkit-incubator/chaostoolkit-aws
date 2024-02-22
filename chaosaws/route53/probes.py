@@ -1,13 +1,14 @@
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.route53.shared import hosted_zone_by_id
 from chaosaws.types import AWSResponse
 
 __all__ = ["get_hosted_zone", "get_health_check_status", "get_dns_answer"]
+
+logger = get_logger()
 
 
 def get_hosted_zone(

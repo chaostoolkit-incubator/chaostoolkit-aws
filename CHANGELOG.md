@@ -8,6 +8,7 @@
 
 - Use existing AWS FIS policies `AWSFaultInjectionSimulatorNetworkAccess`,
   `AWSFaultInjectionSimulatorEC2Access` instead of creating new ones
+- Drop `logzero`
 
 ## [0.31.1][] - 2024-01-22
 

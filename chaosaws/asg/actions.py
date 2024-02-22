@@ -5,9 +5,8 @@ import boto3
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -20,6 +19,8 @@ __all__ = [
     "detach_random_volume",
     "attach_volume",
 ]
+
+logger = get_logger()
 
 
 def terminate_random_instances(

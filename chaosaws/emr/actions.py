@@ -3,9 +3,8 @@ from typing import List
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.emr.shared import get_instance_fleet, get_instance_group
 from chaosaws.types import AWSResponse
 
@@ -15,6 +14,8 @@ __all__ = [
     "modify_instance_groups_instance_count",
     "modify_instance_groups_shrink_policy",
 ]
+
+logger = get_logger()
 
 
 def modify_cluster(

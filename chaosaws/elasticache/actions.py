@@ -3,9 +3,8 @@ from typing import Any, Dict, List
 import boto3
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -14,6 +13,8 @@ __all__ = [
     "delete_replication_groups",
     "test_failover",
 ]
+
+logger = get_logger()
 
 
 def reboot_cache_clusters(

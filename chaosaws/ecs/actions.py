@@ -6,9 +6,8 @@ import boto3
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -24,6 +23,8 @@ __all__ = [
     "set_service_deployment_configuration",
     "update_container_instances_state",
 ]
+
+logger = get_logger()
 
 
 def stop_random_tasks(

@@ -4,9 +4,8 @@ import boto3
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -18,6 +17,8 @@ __all__ = [
     "put_rule_targets",
     "remove_rule_targets",
 ]
+
+logger = get_logger()
 
 
 def put_rule(

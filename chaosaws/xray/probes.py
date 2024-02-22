@@ -3,9 +3,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from chaoslib.exceptions import ActivityFailed
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client, time_to_datetime
+from chaosaws import aws_client, get_logger, time_to_datetime
 
 __all__ = [
     "get_traces",
@@ -13,6 +12,8 @@ __all__ = [
     "get_most_recent_trace",
     "get_service_graph",
 ]
+
+logger = get_logger()
 
 
 def get_traces_summaries(

@@ -1,10 +1,11 @@
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = ["describe_cluster", "list_clusters"]
+
+logger = get_logger()
 
 
 def describe_cluster(

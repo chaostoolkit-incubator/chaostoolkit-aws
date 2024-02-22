@@ -3,9 +3,11 @@ from typing import List
 import boto3
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
-from logzero import logger
 
+from chaosaws import get_logger
 from chaosaws.types import AWSResponse
+
+logger = get_logger()
 
 
 def describe_emr_cluster(client: boto3.client, cluster_id: str) -> AWSResponse:

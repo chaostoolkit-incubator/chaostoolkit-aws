@@ -4,15 +4,16 @@ from typing import Dict, List
 import boto3
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 # from os import access
 # from xmlrpc.client import boolean
 
 __all__ = ["targets_health_count", "all_targets_healthy", "is_access_log_enabled"]
+
+logger = get_logger()
 
 
 def targets_health_count(

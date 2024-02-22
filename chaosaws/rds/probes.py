@@ -3,12 +3,13 @@ from typing import Any, Dict, List, Union
 import boto3
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = ["instance_status", "cluster_status", "cluster_membership_count"]
+
+logger = get_logger()
 
 
 def instance_status(

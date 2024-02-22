@@ -1,12 +1,13 @@
 from typing import Any, Dict
 
 from chaoslib.types import Configuration, Secrets
-from logzero import logger
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = ["create_cluster", "delete_cluster"]
+
+logger = get_logger()
 
 
 def create_cluster(
