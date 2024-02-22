@@ -9,6 +9,7 @@
 - Use existing AWS FIS policies `AWSFaultInjectionSimulatorNetworkAccess`,
   `AWSFaultInjectionSimulatorEC2Access` instead of creating new ones
 - Drop `logzero`
+- Drop support for Python 3.7 which has been EOL since June 2023
 
 ## [0.31.1][] - 2024-01-22
 
