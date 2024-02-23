@@ -1,14 +1,34 @@
-# [Chaos Toolkit Extension for AWS](https://docs.chaostoolkit.org/drivers/aws/)
+<h2 align="center">
+  <br>
+  <p align="center"><img src="https://avatars.githubusercontent.com/u/32068152?s=200&v=4"></p>
+</h2>
 
-[![Build Status](https://github.com/chaostoolkit-incubator/chaostoolkit-aws/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/chaostoolkit-incubator/chaostoolkit-aws/actions/workflows/build-and-test.yaml)
-[![Python versions](https://img.shields.io/pypi/pyversions/chaostoolkit-aws.svg)](https://www.python.org/)
+<h4 align="center">AWS extension for the Chaos Toolkit</h4>
 
-This project is a collection of [actions][] and [probes][], gathered as an
-extension to the [Chaos Toolkit][chaostoolkit].
+<p align="center">
+   <a href="https://pypi.org/project/chaostoolkit-aws/">
+   <img alt="Release" src="https://img.shields.io/pypi/v/chaostoolkit-aws.svg">
+   <a href="#">
+   <img alt="Build" src="https://github.com/chaostoolkit-incubator/chaostoolkit-aws/actions/workflows/build-and-test.yaml/badge.svg">
+   <a href="https://github.com/chaostoolkit-incubator/chaostoolkit-aws/issues">
+   <img alt="GitHub issues" src="https://img.shields.io/github/issues/chaostoolkit-incubator/chaostoolkit-aws?style=flat-square&logo=github&logoColor=white">
+   <a href="https://github.com/chaostoolkit-incubator/chaostoolkit-aws/blob/master/LICENSE.md">
+   <img alt="License" src="https://img.shields.io/github/license/chaostoolkit-incubator/chaostoolkit-aws">
+   <a href="#">
+   <img alt="Python version" src="https://img.shields.io/pypi/pyversions/chaostoolkit-aws.svg">
+   <a href="https://pkg.go.dev/github.com/chaostoolkit-incubator/chaostoolkit-aws">
+</p>
 
-[actions]: http://chaostoolkit.org/reference/api/experiment/#action
-[probes]: http://chaostoolkit.org/reference/api/experiment/#probe
-[chaostoolkit]: http://chaostoolkit.org
+<p align="center">
+  <a href="https://join.slack.com/t/chaostoolkit/shared_invite/zt-22c5isqi9-3YjYzucVTNFFVIG~Kzns8g">Community</a> •
+  <a href="https://github.com/chaostoolkit-incubator/chaostoolkit-aws/blob/master/CHANGELOG.md">ChangeLog</a>
+</p>
+
+---
+
+Welcome to the Amazon Web Services -(WS) extension for Chaos Toolkit. The
+package aggregates activities to target your AWS infrastructure and explore
+your resilience via Chaos Engineering experiments.
 
 ## Install
 
