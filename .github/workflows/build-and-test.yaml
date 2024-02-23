@@ -1,42 +1,42 @@
-name: Build, Test, and Lint
+name: Build
 
 on:
-  pull_request:
-    branches:
-      - master
   push:
-    branches:
-      - master
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
-  build-and-lint:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.8
-      - name: Install dependencies
-        run: |
-          make install-dev
-      - name: Run linting
-        run: |
-          make lint
-  build-and-test:
-    runs-on: ubuntu-22.04
+  build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        os: ["ubuntu-latest", "macos-latest"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: true
+          prerelease: true
+
+      - name: Ensure lock file is up to date
+        run: |
+          pdm lock --check
+
       - name: Install dependencies
         run: |
-          make install-dev
-      - name: Run tests
+          pdm sync -d
+
+      - name: Run Lint
         run: |
-          make tests
+          pdm run lint
+
+      - name: Run Tests
+        run: |
+          pdm run pytest
