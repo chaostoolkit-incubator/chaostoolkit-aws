@@ -25,7 +25,11 @@ def test_stop_instance(aws_client):
     inst_id = "i-1234567890abcdef0"
     client.describe_instances.return_value = {
         "Reservations": [
-            {"Instances": [{"InstanceId": inst_id, "InstanceLifecycle": "normal"}]}
+            {
+                "Instances": [
+                    {"InstanceId": inst_id, "InstanceLifecycle": "normal"}
+                ]
+            }
         ]
     }
     stop_instance(inst_id)
@@ -65,7 +69,11 @@ def test_stop_instance_can_be_forced(aws_client):
     inst_id = "i-1234567890abcdef0"
     client.describe_instances.return_value = {
         "Reservations": [
-            {"Instances": [{"InstanceId": inst_id, "InstanceLifecycle": "normal"}]}
+            {
+                "Instances": [
+                    {"InstanceId": inst_id, "InstanceLifecycle": "normal"}
+                ]
+            }
         ]
     }
     stop_instance(inst_id, force=True)
@@ -119,7 +127,9 @@ def test_stop_instances(aws_client):
         ]
     }
     stop_instances(inst_ids)
-    client.stop_instances.assert_called_with(InstanceIds=[inst_ids[0]], Force=False)
+    client.stop_instances.assert_called_with(
+        InstanceIds=[inst_ids[0]], Force=False
+    )
     client.cancel_spot_instance_requests.assert_called_with(
         SpotInstanceRequestIds=[spot_request_id]
     )
@@ -134,7 +144,11 @@ def test_stop_random_instance_in_az(aws_client):
     inst_id = "i-987654321fedcba"
     client.describe_instances.return_value = {
         "Reservations": [
-            {"Instances": [{"InstanceId": inst_id, "InstanceLifecycle": "normal"}]}
+            {
+                "Instances": [
+                    {"InstanceId": inst_id, "InstanceLifecycle": "normal"}
+                ]
+            }
         ]
     }
 
@@ -147,7 +161,8 @@ def test_stop_random_needs_instance_id_or_az():
         stop_instance()
     assert (
         "stop an EC2 instance, you must specify either the instance id,"
-        " an AZ to pick a random instance from, or a set of filters." in str(x.value)
+        " an AZ to pick a random instance from, or a set of filters."
+        in str(x.value)
     )
 
 
@@ -174,7 +189,9 @@ def test_stop_all_instances_in_az(aws_client):
     }
 
     stop_instances(az="us-west-1")
-    client.stop_instances.assert_called_with(InstanceIds=[inst_1_id], Force=False)
+    client.stop_instances.assert_called_with(
+        InstanceIds=[inst_1_id], Force=False
+    )
     client.cancel_spot_instance_requests.assert_called_with(
         SpotInstanceRequestIds=[spot_request_id]
     )
@@ -186,7 +203,8 @@ def test_stop_all_instances_needs_instance_id_or_az():
         stop_instances()
     assert (
         "To stop EC2 instances, you must specify either the instance ids,"
-        " an AZ to pick random instances from, or a set of filters." in str(x.value)
+        " an AZ to pick random instances from, or a set of filters."
+        in str(x.value)
     )
 
 
@@ -194,7 +212,9 @@ def test_stop_all_instances_needs_instance_id_or_az():
 def test_stop_all_instances_may_not_have_any_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    client.describe_instances.return_value = {"Reservations": [{"Instances": []}]}
+    client.describe_instances.return_value = {
+        "Reservations": [{"Instances": []}]
+    }
 
     with pytest.raises(FailedActivity) as x:
         stop_instances(az="us-west-1")
@@ -208,7 +228,11 @@ def test_stop_instance_by_specific_filters(aws_client):
     inst_1_id = "i-987654321fedcba"
     client.describe_instances.return_value = {
         "Reservations": [
-            {"Instances": [{"InstanceId": inst_1_id, "InstanceLifecycle": "normal"}]}
+            {
+                "Instances": [
+                    {"InstanceId": inst_1_id, "InstanceLifecycle": "normal"}
+                ]
+            }
         ]
     }
 
@@ -217,7 +241,10 @@ def test_stop_instance_by_specific_filters(aws_client):
             "Name": "instance-state-name",
             "Values": ["running"],
         },
-        {"Name": "tag-key", "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"]},
+        {
+            "Name": "tag-key",
+            "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"],
+        },
         {"Name": "tag-value", "Values": ["chaos-cluster"]},
         {"Name": "tag-key", "Values": ["kubernetes.io/cluster/chaos-cluster"]},
         {"Name": "tag-value", "Values": ["owned"]},
@@ -226,9 +253,13 @@ def test_stop_instance_by_specific_filters(aws_client):
     stop_instances(filters=filters, az="us-west-2")
 
     called_filters = deepcopy(filters)
-    called_filters.append({"Name": "availability-zone", "Values": ["us-west-2"]})
+    called_filters.append(
+        {"Name": "availability-zone", "Values": ["us-west-2"]}
+    )
     client.describe_instances.assert_called_with(Filters=called_filters)
-    client.stop_instances.assert_called_with(InstanceIds=[inst_1_id], Force=False)
+    client.stop_instances.assert_called_with(
+        InstanceIds=[inst_1_id], Force=False
+    )
 
 
 @patch("chaosaws.ec2.actions.aws_client", autospec=True)
@@ -250,7 +281,11 @@ def test_stop_normal_instance(aws_client):
     inst_id = "i-1234567890abcdef0"
     client.describe_instances.return_value = {
         "Reservations": [
-            {"Instances": [{"InstanceId": inst_id, "InstanceLifecycle": "normal"}]}
+            {
+                "Instances": [
+                    {"InstanceId": inst_id, "InstanceLifecycle": "normal"}
+                ]
+            }
         ]
     }
     stop_instance(inst_id)
@@ -274,7 +309,9 @@ def test_terminate_instance_az_no_instances(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     az = "us-west-2"
-    client.describe_instances.return_value = {"Reservations": [{"Instances": []}]}
+    client.describe_instances.return_value = {
+        "Reservations": [{"Instances": []}]
+    }
     filters = [{"Name": "availability-zone", "Values": ["us-west-2"]}]
     with pytest.raises(FailedActivity) as x:
         terminate_instance(az=az)
@@ -288,7 +325,11 @@ def test_terminate_normal_instance(aws_client):
     inst_id = "i-1234567890abcdef0"
     client.describe_instances.return_value = {
         "Reservations": [
-            {"Instances": [{"InstanceId": inst_id, "InstanceLifecycle": "normal"}]}
+            {
+                "Instances": [
+                    {"InstanceId": inst_id, "InstanceLifecycle": "normal"}
+                ]
+            }
         ]
     }
     terminate_instance(inst_id)
@@ -328,7 +369,11 @@ def test_terminate_random_az_instance(aws_client):
     inst_id = "i-987654321fedcba"
     client.describe_instances.return_value = {
         "Reservations": [
-            {"Instances": [{"InstanceId": inst_id, "InstanceLifecycle": "normal"}]}
+            {
+                "Instances": [
+                    {"InstanceId": inst_id, "InstanceLifecycle": "normal"}
+                ]
+            }
         ]
     }
 
@@ -343,7 +388,11 @@ def test_terminate_instance_by_filters(aws_client):
     inst_1_id = "i-987654321fedcba"
     client.describe_instances.return_value = {
         "Reservations": [
-            {"Instances": [{"InstanceId": inst_1_id, "InstanceLifecycle": "normal"}]}
+            {
+                "Instances": [
+                    {"InstanceId": inst_1_id, "InstanceLifecycle": "normal"}
+                ]
+            }
         ]
     }
 
@@ -352,12 +401,17 @@ def test_terminate_instance_by_filters(aws_client):
         {"Name": "tag-value", "Values": ["chaos-cluster"]},
         {"Name": "tag-key", "Values": ["kubernetes.io/cluster/chaos-cluster"]},
         {"Name": "tag-value", "Values": ["owned"]},
-        {"Name": "tag-key", "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"]},
+        {
+            "Name": "tag-key",
+            "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"],
+        },
     ]
     terminate_instance(filters=filters, az="us-west-2")
 
     called_filters = deepcopy(filters)
-    called_filters.append({"Name": "availability-zone", "Values": ["us-west-2"]})
+    called_filters.append(
+        {"Name": "availability-zone", "Values": ["us-west-2"]}
+    )
     client.describe_instances.assert_called_with(Filters=called_filters)
     client.terminate_instances.assert_called_with(InstanceIds=[inst_1_id])
 
@@ -380,7 +434,9 @@ def test_terminate_instances_az_no_instances(aws_client):
     aws_client.return_value = client
     az = "us-west-2"
     filters = [{"Name": "availability-zone", "Values": ["us-west-2"]}]
-    client.describe_instances.return_value = {"Reservations": [{"Instances": []}]}
+    client.describe_instances.return_value = {
+        "Reservations": [{"Instances": []}]
+    }
 
     with pytest.raises(FailedActivity) as x:
         terminate_instances(az=az)
@@ -396,8 +452,14 @@ def test_terminate_normal_instances(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -446,8 +508,14 @@ def test_terminate_random_az_instances(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -466,8 +534,14 @@ def test_terminate_instances_by_filters(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -478,12 +552,17 @@ def test_terminate_instances_by_filters(aws_client):
         {"Name": "tag-value", "Values": ["chaos-cluster"]},
         {"Name": "tag-key", "Values": ["kubernetes.io/cluster/chaos-cluster"]},
         {"Name": "tag-value", "Values": ["owned"]},
-        {"Name": "tag-key", "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"]},
+        {
+            "Name": "tag-key",
+            "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"],
+        },
     ]
     terminate_instances(filters=filters, az="us-west-2")
 
     called_filters = deepcopy(filters)
-    called_filters.append({"Name": "availability-zone", "Values": ["us-west-2"]})
+    called_filters.append(
+        {"Name": "availability-zone", "Values": ["us-west-2"]}
+    )
     client.describe_instances.assert_called_with(Filters=called_filters)
     client.terminate_instances.assert_called_with(InstanceIds=instance_ids)
 
@@ -497,8 +576,14 @@ def test_start_instances_by_id(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -517,8 +602,14 @@ def test_start_instances_by_filter(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -529,12 +620,17 @@ def test_start_instances_by_filter(aws_client):
         {"Name": "tag-value", "Values": ["chaos-cluster"]},
         {"Name": "tag-key", "Values": ["kubernetes.io/cluster/chaos-cluster"]},
         {"Name": "tag-value", "Values": ["owned"]},
-        {"Name": "tag-key", "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"]},
+        {
+            "Name": "tag-key",
+            "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"],
+        },
     ]
     start_instances(filters=filters, az="us-west-2")
 
     called_filters = deepcopy(filters)
-    called_filters.append({"Name": "availability-zone", "Values": ["us-west-2"]})
+    called_filters.append(
+        {"Name": "availability-zone", "Values": ["us-west-2"]}
+    )
     client.describe_instances.assert_called_with(Filters=called_filters)
     client.start_instances.assert_called_with(InstanceIds=instance_ids)
 
@@ -548,8 +644,14 @@ def test_start_instances_by_az(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -570,8 +672,14 @@ def test_restart_instances_by_id(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -590,8 +698,14 @@ def test_restart_instances_by_filter(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -602,12 +716,17 @@ def test_restart_instances_by_filter(aws_client):
         {"Name": "tag-value", "Values": ["chaos-cluster"]},
         {"Name": "tag-key", "Values": ["kubernetes.io/cluster/chaos-cluster"]},
         {"Name": "tag-value", "Values": ["owned"]},
-        {"Name": "tag-key", "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"]},
+        {
+            "Name": "tag-key",
+            "Values": ["eksctl.cluster.k8s.io/v1alpha1/cluster-name"],
+        },
     ]
     restart_instances(filters=filters, az="us-west-2")
 
     called_filters = deepcopy(filters)
-    called_filters.append({"Name": "availability-zone", "Values": ["us-west-2"]})
+    called_filters.append(
+        {"Name": "availability-zone", "Values": ["us-west-2"]}
+    )
     client.describe_instances.assert_called_with(Filters=called_filters)
     client.reboot_instances.assert_called_with(InstanceIds=instance_ids)
 
@@ -621,8 +740,14 @@ def test_restart_instances_by_az(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "InstanceLifecycle": "normal"},
-                    {"InstanceId": instance_ids[1], "InstanceLifecycle": "normal"},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "InstanceLifecycle": "normal",
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "InstanceLifecycle": "normal",
+                    },
                 ]
             }
         ]
@@ -669,7 +794,9 @@ def test_detach_random_volume_ec2_id(aws_client):
 
     results = detach_random_volume(instance_ids=instance_ids)
 
-    client.describe_instances.assert_called_with(InstanceIds=["i-987654321fedcba"])
+    client.describe_instances.assert_called_with(
+        InstanceIds=["i-987654321fedcba"]
+    )
     client.detach_volume.assert_called_with(
         Device="/dev/sdc",
         Force=True,
@@ -683,7 +810,9 @@ def test_detach_random_volume_ec2_id(aws_client):
 def test_detach_random_volume_ec2_filter(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    filters = [{"Name": "block-device-mapping.device-name", "Values": ["/dev/sdb"]}]
+    filters = [
+        {"Name": "block-device-mapping.device-name", "Values": ["/dev/sdb"]}
+    ]
     client.describe_instances.return_value = {
         "Reservations": [
             {
@@ -733,16 +862,18 @@ def test_detach_random_volume_ec2_invalid_id(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         detach_random_volume(instance_ids=instance_ids)
-    assert "no instances found matching: {'InstanceIds': %s}" % (instance_ids) in str(
-        x.value
-    )
+    assert "no instances found matching: {'InstanceIds': %s}" % (
+        instance_ids
+    ) in str(x.value)
 
 
 @patch("chaosaws.ec2.actions.aws_client", autospec=True)
 def test_detach_random_volume_ec2_invalid_filters(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    filters = [{"Name": "block-device-mapping.device-name", "Values": ["/dev/sdb"]}]
+    filters = [
+        {"Name": "block-device-mapping.device-name", "Values": ["/dev/sdb"]}
+    ]
     client.describe_instances.return_value = {"Reservations": []}
 
     with pytest.raises(FailedActivity) as x:
@@ -872,7 +1003,9 @@ def test_attach_volume_ec2_filter(aws_client):
 
 
 @patch("chaosaws.ec2.actions.aws_client", autospec=True)
-def test_authorize_security_group_ingress_with_ingress_security_group(aws_client):
+def test_authorize_security_group_ingress_with_ingress_security_group(
+    aws_client,
+):
     # arrange
     client = MagicMock()
     aws_client.return_value = client

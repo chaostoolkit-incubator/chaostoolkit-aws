@@ -12,7 +12,9 @@ __all__ = ["bucket_exists", "object_exists"]
 
 
 def bucket_exists(
-    bucket_name: str, configuration: Configuration = None, secrets: Secrets = None
+    bucket_name: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> bool:
     """Validate that a bucket exists
 
@@ -63,7 +65,9 @@ def versioning_status(
     :return: boolean
     """
     if status not in ("Enabled", "Suspended"):
-        raise FailedActivity('Parameter "status" not one of "Enabled" or "Suspended"')
+        raise FailedActivity(
+            'Parameter "status" not one of "Enabled" or "Suspended"'
+        )
 
     client = aws_client("s3", configuration, secrets)
     if not validate_bucket_exists(client, bucket_name):

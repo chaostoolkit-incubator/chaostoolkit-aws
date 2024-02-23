@@ -6,7 +6,10 @@ import pytest
 from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 
-from chaosaws.route53.actions import associate_vpc_with_zone, disassociate_vpc_from_zone
+from chaosaws.route53.actions import (
+    associate_vpc_with_zone,
+    disassociate_vpc_from_zone,
+)
 
 module_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -20,7 +23,9 @@ def read_in_data(filename):
 def mocked_client_error(op: str):
     return ClientError(
         operation_name=op,
-        error_response={"Error": {"Message": "Test Error", "Code": "Test Error"}},
+        error_response={
+            "Error": {"Message": "Test Error", "Code": "Test Error"}
+        },
     )
 
 
@@ -57,7 +62,9 @@ def test_associate_vpc_with_zone_exception(m_client):
 
     with pytest.raises(FailedActivity) as e:
         associate_vpc_with_zone(
-            zone_id="1234567890123", vpc_id="vpc-00000000", vpc_region="us-east-1"
+            zone_id="1234567890123",
+            vpc_id="vpc-00000000",
+            vpc_region="us-east-1",
         )
     assert "Test Error" in str(e)
 
@@ -95,6 +102,8 @@ def test_disassociate_vpc_with_zone_exception(m_client):
 
     with pytest.raises(FailedActivity) as e:
         disassociate_vpc_from_zone(
-            zone_id="1234567890123", vpc_id="vpc-00000000", vpc_region="us-east-1"
+            zone_id="1234567890123",
+            vpc_id="vpc-00000000",
+            vpc_region="us-east-1",
         )
     assert "Test Error" in str(e)

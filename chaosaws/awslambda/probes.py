@@ -15,7 +15,9 @@ __all__ = [
 
 
 def get_function_concurrency(
-    function_name: str, configuration: Configuration = None, secrets: Secrets = None
+    function_name: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> bool:
     """
     Get configuration information of lambda by its function name

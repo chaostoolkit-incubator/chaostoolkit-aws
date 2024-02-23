@@ -113,3 +113,10 @@ junit-test-results.xml
 
 .DS_Store
 .pdm-python
+
+# pdm
+.pdm-build/
+.pdm-python
+
+# ruff
+.ruff_cache/

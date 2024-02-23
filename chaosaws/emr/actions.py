@@ -63,7 +63,8 @@ def modify_instance_fleet(
     """
     if not any([on_demand_capacity, spot_capacity]):
         raise FailedActivity(
-            "Must provide at least one of " '["on_demand_capacity", "spot_capacity"]'
+            "Must provide at least one of "
+            '["on_demand_capacity", "spot_capacity"]'
         )
 
     client = aws_client("emr", configuration, secrets)
@@ -157,9 +158,15 @@ def modify_instance_groups_shrink_policy(
 
     resize_policy = {
         **(
-            {"InstancesToTerminate": terminate_instances} if terminate_instances else {}
+            {"InstancesToTerminate": terminate_instances}
+            if terminate_instances
+            else {}
         ),
-        **({"InstancesToProtect": protect_instances} if protect_instances else {}),
+        **(
+            {"InstancesToProtect": protect_instances}
+            if protect_instances
+            else {}
+        ),
         **(
             {"InstanceTerminationTimeout": termination_timeout}
             if termination_timeout
@@ -179,7 +186,9 @@ def modify_instance_groups_shrink_policy(
                         else {}
                     ),
                     **(
-                        {"InstanceResizePolicy": resize_policy} if resize_policy else {}
+                        {"InstanceResizePolicy": resize_policy}
+                        if resize_policy
+                        else {}
                     ),
                 },
             }

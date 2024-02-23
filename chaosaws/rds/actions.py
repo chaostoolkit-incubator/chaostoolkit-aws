@@ -56,7 +56,8 @@ def reboot_db_instance(
         raise FailedActivity("you must specify the db instance identifier")
     try:
         return client.reboot_db_instance(
-            DBInstanceIdentifier=db_instance_identifier, ForceFailover=force_failover
+            DBInstanceIdentifier=db_instance_identifier,
+            ForceFailover=force_failover,
         )
     except Exception as x:
         raise FailedActivity(
@@ -175,7 +176,8 @@ def delete_db_cluster(
     client = aws_client("rds", configuration, secrets)
 
     params = dict(
-        DBClusterIdentifier=db_cluster_identifier, SkipFinalSnapshot=skip_final_snapshot
+        DBClusterIdentifier=db_cluster_identifier,
+        SkipFinalSnapshot=skip_final_snapshot,
     )
 
     if not skip_final_snapshot:

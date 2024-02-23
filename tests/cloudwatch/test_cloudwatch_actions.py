@@ -58,7 +58,8 @@ def test_cloudwatch_put_rule_targets(aws_client):
     targets = [
         {
             "Id": "1234",
-            "Arn": "arn:aws:lambda:eu-central-1:" "101010101010:function:MyFunction",
+            "Arn": "arn:aws:lambda:eu-central-1:"
+            "101010101010:function:MyFunction",
         }
     ]
     put_rule_targets(rule_name, targets)
@@ -146,7 +147,9 @@ def test_put_metric_data_valid_single_datapoint(aws_client):
         metric_data=[
             {
                 "MetricName": "MemoryUtilization",
-                "Dimensions": [{"Name": "InstanceId", "Value": "i-000000000000"}],
+                "Dimensions": [
+                    {"Name": "InstanceId", "Value": "i-000000000000"}
+                ],
                 "Timestamp": time_stamp_1,
                 "Value": 85.568945236,
                 "Unit": "Percent",
@@ -154,7 +157,9 @@ def test_put_metric_data_valid_single_datapoint(aws_client):
             },
             {
                 "MetricName": "MemoryUtilization",
-                "Dimensions": [{"Name": "InstanceId", "Value": "i-000000000000"}],
+                "Dimensions": [
+                    {"Name": "InstanceId", "Value": "i-000000000000"}
+                ],
                 "Timestamp": time_stamp_2,
                 "Value": 89.6854,
                 "Unit": "Percent",
@@ -168,7 +173,9 @@ def test_put_metric_data_valid_single_datapoint(aws_client):
         MetricData=[
             {
                 "MetricName": "MemoryUtilization",
-                "Dimensions": [{"Name": "InstanceId", "Value": "i-000000000000"}],
+                "Dimensions": [
+                    {"Name": "InstanceId", "Value": "i-000000000000"}
+                ],
                 "Timestamp": time_stamp_1,
                 "Value": 85.568945236,
                 "Unit": "Percent",
@@ -176,7 +183,9 @@ def test_put_metric_data_valid_single_datapoint(aws_client):
             },
             {
                 "MetricName": "MemoryUtilization",
-                "Dimensions": [{"Name": "InstanceId", "Value": "i-000000000000"}],
+                "Dimensions": [
+                    {"Name": "InstanceId", "Value": "i-000000000000"}
+                ],
                 "Timestamp": time_stamp_2,
                 "Value": 89.6854,
                 "Unit": "Percent",
@@ -198,7 +207,9 @@ def test_put_metric_data_valid_multi_datapoints(aws_client):
         metric_data=[
             {
                 "MetricName": "MemoryUtilization",
-                "Dimensions": [{"Name": "InstanceId", "Value": "i-000000000000"}],
+                "Dimensions": [
+                    {"Name": "InstanceId", "Value": "i-000000000000"}
+                ],
                 "Timestamp": time_stamp,
                 "Values": [5.5, 10.2, 6.5],
                 "Counts": [1, 3, 2.6],
@@ -213,7 +224,9 @@ def test_put_metric_data_valid_multi_datapoints(aws_client):
         MetricData=[
             {
                 "MetricName": "MemoryUtilization",
-                "Dimensions": [{"Name": "InstanceId", "Value": "i-000000000000"}],
+                "Dimensions": [
+                    {"Name": "InstanceId", "Value": "i-000000000000"}
+                ],
                 "Timestamp": time_stamp,
                 "Values": [5.5, 10.2, 6.5],
                 "Counts": [1, 3, 2.6],
@@ -241,7 +254,9 @@ def test_put_metric_data_invalid_parameter(aws_client):
             metric_data=[
                 {
                     "MetricName": "MemoryUtilization",
-                    "Dimensions": [{"Name": "InstanceId", "Value": "i-000000000000"}],
+                    "Dimensions": [
+                        {"Name": "InstanceId", "Value": "i-000000000000"}
+                    ],
                     "Timestamp": time_stamp,
                     "Value": 85.568945236,
                     "Unit": "InvalidUnit",

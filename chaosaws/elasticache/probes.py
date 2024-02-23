@@ -48,7 +48,9 @@ def describe_cache_cluster(
     Full list of possible paths can be found:
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/elasticache.html#ElastiCache.Client.describe_cache_clusters
     """
-    params = dict(CacheClusterId=cluster_id, ShowCacheNodeInfo=show_node_info or False)
+    params = dict(
+        CacheClusterId=cluster_id, ShowCacheNodeInfo=show_node_info or False
+    )
     client = aws_client("elasticache", configuration, secrets)
 
     try:
@@ -67,7 +69,9 @@ def describe_cache_cluster(
 
 
 def get_cache_node_count(
-    cluster_id: str, configuration: Configuration = None, secrets: Secrets = None
+    cluster_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> int:
     """Returns the number of cache nodes associated to the cluster
 
@@ -97,7 +101,9 @@ def get_cache_node_count(
 
 
 def get_cache_node_status(
-    cluster_id: str, configuration: Configuration = None, secrets: Secrets = None
+    cluster_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> str:
     """Returns the status of the given cache cluster
 
@@ -157,7 +163,9 @@ def count_cache_clusters_from_replication_group(
             }
         }
     """
-    client = aws_client("elasticache", configuration=configuration, secrets=secrets)
+    client = aws_client(
+        "elasticache", configuration=configuration, secrets=secrets
+    )
 
     response = client.describe_replication_groups(
         ReplicationGroupId=replication_group_id
@@ -166,7 +174,9 @@ def count_cache_clusters_from_replication_group(
     rep_groups = response.get("ReplicationGroups", [])
     if not rep_groups:
         raise FailedActivity(
-            "Error retrieving ReplicationGroups for " "{}".format(replication_group_id)
+            "Error retrieving ReplicationGroups for " "{}".format(
+                replication_group_id
+            )
         )
 
     return len(rep_groups[0].get("MemberClusters", []))

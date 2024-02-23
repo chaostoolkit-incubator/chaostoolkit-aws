@@ -13,7 +13,9 @@ logger = get_logger()
 
 
 def get_alarm_state_value(
-    alarm_name: str, configuration: Configuration = None, secrets: Secrets = None
+    alarm_name: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> str:
     """
     Return the state value of an alarm.
@@ -67,7 +69,11 @@ def get_metric_statistics(
             "You must supply argument for statistic or extended_statistic"
         )
 
-    if dimensions is None and dimension_name is None and dimension_value is None:
+    if (
+        dimensions is None
+        and dimension_name is None
+        and dimension_value is None
+    ):
         raise FailedActivity("You must supply argument for dimensions")
 
     end_time = datetime.utcnow() - timedelta(seconds=offset)
@@ -109,7 +115,9 @@ def get_metric_statistics(
         elif extended_statistic:
             return datapoint["ExtendedStatistics"][extended_statistic]
     except Exception as x:
-        raise FailedActivity(f"Unable to parse response '{response}': '{str(x)}'")
+        raise FailedActivity(
+            f"Unable to parse response '{response}': '{str(x)}'"
+        )
 
 
 def get_metric_data(
@@ -147,7 +155,11 @@ def get_metric_data(
     start_time = datetime.utcnow() - timedelta(seconds=duration)
     end_time = datetime.utcnow() - timedelta(seconds=offset)
 
-    if dimensions is None and dimension_name is None and dimension_value is None:
+    if (
+        dimensions is None
+        and dimension_name is None
+        and dimension_value is None
+    ):
         raise FailedActivity("You must supply argument for dimensions")
 
     args = {
@@ -170,7 +182,9 @@ def get_metric_data(
     }
 
     if dimensions:
-        args["MetricDataQueries"][0]["MetricStat"]["Metric"]["Dimensions"] = dimensions
+        args["MetricDataQueries"][0]["MetricStat"]["Metric"][
+            "Dimensions"
+        ] = dimensions
     elif dimension_name and dimension_value:
         args["MetricDataQueries"][0]["MetricStat"]["Metric"]["Dimensions"] = [
             {"Name": dimension_name, "Value": dimension_value}

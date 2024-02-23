@@ -135,7 +135,9 @@ def delete_service(
 
         # should we filter the number of services to take into account?
         if service_pattern:
-            services = filter_services(services=services, pattern=service_pattern)
+            services = filter_services(
+                services=services, pattern=service_pattern
+            )
             if not services:
                 raise FailedActivity(
                     f"No ECS services matching pattern: {service_pattern}"
@@ -149,7 +151,10 @@ def delete_service(
         cluster=cluster,
         service=service,
         desiredCount=0,
-        deploymentConfiguration={"maximumPercent": 100, "minimumHealthyPercent": 0},
+        deploymentConfiguration={
+            "maximumPercent": 100,
+            "minimumHealthyPercent": 0,
+        },
     )
 
     logger.debug(f"Deleting ECS service: {service}")
@@ -276,7 +281,9 @@ def set_service_deployment_configuration(
     if not validate_cluster(cluster, client):
         raise FailedActivity("unable to locate cluster: %s" % cluster)
     if not validate_service(cluster, service, client):
-        raise FailedActivity(f"unable to locate service: {service} on {cluster}")
+        raise FailedActivity(
+            f"unable to locate service: {service} on {cluster}"
+        )
 
     params = {
         "cluster": cluster,
@@ -432,7 +439,9 @@ def update_container_instances_state(
 
     try:
         return client.update_container_instance_state(
-            cluster=cluster, containerInstances=container_instances, status=status
+            cluster=cluster,
+            containerInstances=container_instances,
+            status=status,
         )
     except ClientError as e:
         logger.exception(e.response["Error"]["Message"])
@@ -450,9 +459,9 @@ def validate(client: boto3.client, cluster: str = None, service: str = None):
             raise FailedActivity("unable to locate cluster: %s" % cluster)
 
     if service:
-        response = client.describe_services(cluster=cluster, services=[service])[
-            "services"
-        ]
+        response = client.describe_services(
+            cluster=cluster, services=[service]
+        )["services"]
         if not response:
             raise FailedActivity(
                 f"unable to locate service: {service} on cluster: {cluster}"
@@ -471,7 +480,9 @@ def validate_service(
     cluster: str, service: str, client: boto3.client
 ) -> Union[str, None]:
     """Validates the provided service exists in the cluster"""
-    service = client.describe_services(cluster=cluster, services=[service])["services"]
+    service = client.describe_services(cluster=cluster, services=[service])[
+        "services"
+    ]
     if not service:
         return
     return service[0]["serviceArn"]

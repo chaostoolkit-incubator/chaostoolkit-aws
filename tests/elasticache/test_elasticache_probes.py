@@ -75,7 +75,9 @@ def test_describe_cache_cluster(aws_client):
     client.describe_cache_clusters.assert_called_with(
         CacheClusterId="MyTestCacheCluster", ShowCacheNodeInfo=False
     )
-    assert response["CacheClusters"][0]["CacheClusterId"] == "MyTestCacheCluster"
+    assert (
+        response["CacheClusters"][0]["CacheClusterId"] == "MyTestCacheCluster"
+    )
 
 
 @patch("chaosaws.elasticache.probes.aws_client", autospec=True)
@@ -93,7 +95,8 @@ def test_describe_cache_cluster_show_node_info(aws_client):
         CacheClusterId="MyTestCacheCluster", ShowCacheNodeInfo=True
     )
     assert (
-        response["CacheClusters"][0]["CacheNodes"][0]["CacheNodeStatus"] == "available"
+        response["CacheClusters"][0]["CacheNodes"][0]["CacheNodeStatus"]
+        == "available"
     )
 
 

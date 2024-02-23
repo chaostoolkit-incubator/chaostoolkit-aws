@@ -45,9 +45,9 @@ class TestEmrActionsMoto:
         client.run_job_flow(**config_data)
         clusters = client.list_clusters()["Clusters"]
         self.cluster_id = clusters[0]["Id"]
-        self.instance_groups = client.list_instance_groups(ClusterId=self.cluster_id)[
-            "InstanceGroups"
-        ]
+        self.instance_groups = client.list_instance_groups(
+            ClusterId=self.cluster_id
+        )["InstanceGroups"]
         self.group_id0 = self.instance_groups[0]["Id"]
 
     def test_modify_instance_groups_instance_count(self):
@@ -231,7 +231,9 @@ class TestEmrActionsMock:
 
     def test_modify_instance_fleet_no_args(self):
         with pytest.raises(FailedActivity) as e:
-            modify_instance_fleet(cluster_id=self.cluster_id, fleet_id=self.fleet_id)
+            modify_instance_fleet(
+                cluster_id=self.cluster_id, fleet_id=self.fleet_id
+            )
         assert "Must provide at least one of" in str(e)
 
     @patch("chaosaws.emr.actions.aws_client", autospec=True)

@@ -51,7 +51,9 @@ def cluster_status(
         raise FailedActivity("cluster_id or filters are required")
 
     client = aws_client("rds", configuration, secrets)
-    results = describe_db_cluster(client=client, cluster_id=cluster_id, filters=filters)
+    results = describe_db_cluster(
+        client=client, cluster_id=cluster_id, filters=filters
+    )
     if not results:
         if cluster_id:
             raise FailedActivity("no cluster found matching %s" % cluster_id)
@@ -69,7 +71,9 @@ def cluster_status(
 
 
 def cluster_membership_count(
-    cluster_id: str, configuration: Configuration = None, secrets: Secrets = None
+    cluster_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> int:
     client = aws_client("rds", configuration, secrets)
     results = describe_db_cluster(client=client, cluster_id=cluster_id)
@@ -82,7 +86,9 @@ def cluster_membership_count(
 # Private functions
 ###############################################################################
 def describe_db_instances(
-    client: boto3.client, instance_id: str = None, filters: List[Dict[str, Any]] = None
+    client: boto3.client,
+    instance_id: str = None,
+    filters: List[Dict[str, Any]] = None,
 ) -> AWSResponse:
     paginator = client.get_paginator("describe_db_instances")
     params = dict()
@@ -100,7 +106,9 @@ def describe_db_instances(
 
 
 def describe_db_cluster(
-    client: boto3.client, cluster_id: str = None, filters: List[Dict[str, Any]] = None
+    client: boto3.client,
+    cluster_id: str = None,
+    filters: List[Dict[str, Any]] = None,
 ) -> AWSResponse:
     paginator = client.get_paginator("describe_db_clusters")
     params = dict()

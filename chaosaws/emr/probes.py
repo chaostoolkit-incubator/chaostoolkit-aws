@@ -21,7 +21,9 @@ __all__ = [
 
 
 def describe_cluster(
-    cluster_id: str, configuration: Configuration = None, secrets: Secrets = None
+    cluster_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> AWSResponse:
     """Describe a single EMR cluster
 

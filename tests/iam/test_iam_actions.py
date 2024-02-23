@@ -1,7 +1,11 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from chaosaws.iam.actions import attach_role_policy, create_policy, detach_role_policy
+from chaosaws.iam.actions import (
+    attach_role_policy,
+    create_policy,
+    detach_role_policy,
+)
 
 
 @patch("chaosaws.iam.actions.aws_client", autospec=True)

@@ -73,13 +73,17 @@ def terminate_random_instances(
     results = []
     for a in asgs["AutoScalingGroups"]:
         # Filter out all instances not currently 'InService'
-        instances = [e for e in a["Instances"] if e["LifecycleState"] == "InService"]
+        instances = [
+            e for e in a["Instances"] if e["LifecycleState"] == "InService"
+        ]
 
         if az:
             instances = [e for e in instances if e["AvailabilityZone"] == az]
 
             if not instances:
-                raise FailedActivity(f"No instances found in Availability Zone: {az}")
+                raise FailedActivity(
+                    f"No instances found in Availability Zone: {az}"
+                )
         else:
             if instance_percent:
                 instance_count = int(
@@ -90,7 +94,9 @@ def terminate_random_instances(
                 raise FailedActivity(
                     "Not enough healthy instances in {} to satisfy "
                     "termination count {} ({})".format(
-                        a["AutoScalingGroupName"], instance_count, len(instances)
+                        a["AutoScalingGroupName"],
+                        instance_count,
+                        len(instances),
                     )
                 )
 
@@ -165,13 +171,17 @@ def stop_random_instances(
     results = []
     for a in asgs["AutoScalingGroups"]:
         # Filter out all instances not currently 'InService'
-        instances = [e for e in a["Instances"] if e["LifecycleState"] == "InService"]
+        instances = [
+            e for e in a["Instances"] if e["LifecycleState"] == "InService"
+        ]
 
         if az:
             instances = [e for e in instances if e["AvailabilityZone"] == az]
 
             if not instances:
-                raise FailedActivity(f"No instances found in Availability Zone: {az}")
+                raise FailedActivity(
+                    f"No instances found in Availability Zone: {az}"
+                )
         else:
             if instance_percent:
                 instance_count = int(
@@ -182,7 +192,11 @@ def stop_random_instances(
                 raise FailedActivity(
                     "Not enough healthy instances in %s to satisfy "
                     "stop count %s (%s)"
-                    % (a["AutoScalingGroupName"], instance_count, len(instances))
+                    % (
+                        a["AutoScalingGroupName"],
+                        instance_count,
+                        len(instances),
+                    )
                 )
 
             instances = random.sample(instances, instance_count)
@@ -190,7 +204,8 @@ def stop_random_instances(
         client = aws_client("ec2", configuration, secrets)
         try:
             response = client.stop_instances(
-                InstanceIds=sorted(e["InstanceId"] for e in instances), Force=force
+                InstanceIds=sorted(e["InstanceId"] for e in instances),
+                Force=force,
             )
             results.append(
                 {
@@ -248,7 +263,9 @@ def suspend_processes(
         if process_names:
             params["ScalingProcesses"] = process_names
 
-        logger.debug("Suspending process(es) on {}".format(a["AutoScalingGroupName"]))
+        logger.debug(
+            "Suspending process(es) on {}".format(a["AutoScalingGroupName"])
+        )
         client.suspend_processes(**params)
 
     return get_asg_by_name(
@@ -368,7 +385,9 @@ def detach_random_instances(
         ]
 
         if instance_percent:
-            instance_count = int(float(len(instances) * float(instance_percent)) / 100)
+            instance_count = int(
+                float(len(instances) * float(instance_percent)) / 100
+            )
 
         if instance_count > len(instances):
             raise FailedActivity(
@@ -478,7 +497,9 @@ def detach_random_volume(
 
         for v in volumes:
             results.append(
-                detach_instance_volume(ec2_client, force, a["AutoScalingGroupName"], v)
+                detach_instance_volume(
+                    ec2_client, force, a["AutoScalingGroupName"], v
+                )
             )
     return results
 
@@ -545,7 +566,9 @@ def attach_volume(
 ###############################################################################
 # Private functions
 ###############################################################################
-def validate_asgs(asg_names: List[str] = None, tags: List[Dict[str, str]] = None):
+def validate_asgs(
+    asg_names: List[str] = None, tags: List[Dict[str, str]] = None
+):
     if not any([asg_names, tags]):
         raise FailedActivity(
             "one of the following arguments are required: asg_names or tags"
@@ -572,7 +595,9 @@ def get_asg_by_name(asg_names: List[str], client: boto3.client) -> AWSResponse:
     return asgs
 
 
-def get_asg_by_tags(tags: List[Dict[str, str]], client: boto3.client) -> AWSResponse:
+def get_asg_by_tags(
+    tags: List[Dict[str, str]], client: boto3.client
+) -> AWSResponse:
     params = []
     for t in tags:
         params.extend(
@@ -599,7 +624,9 @@ def get_random_instance_volume(
 ) -> List[Dict[str, str]]:
     results = {}
     try:
-        response = client.describe_instances(InstanceIds=instance_ids)["Reservations"]
+        response = client.describe_instances(InstanceIds=instance_ids)[
+            "Reservations"
+        ]
         for r in response:
             for e in r.get("Instances", []):
                 instance_id = e["InstanceId"]
@@ -617,11 +644,14 @@ def get_random_instance_volume(
             # select 1 volume at random
             volume = random.sample(results[r], 1)[0]
             for k, v in volume.items():
-                volumes.append({"InstanceId": r, "DeviceName": k, "VolumeId": v})
+                volumes.append(
+                    {"InstanceId": r, "DeviceName": k, "VolumeId": v}
+                )
         return volumes
     except ClientError as e:
         raise FailedActivity(
-            "Unable to describe asg instances: %s" % (e.response["Error"]["Message"])
+            "Unable to describe asg instances: %s"
+            % (e.response["Error"]["Message"])
         )
 
 
@@ -647,7 +677,10 @@ def validate_processes(process_names: List[str]):
 
 
 def detach_instance_volume(
-    client: boto3.client, force: bool, asg_name: str, volume_data: Dict[str, str]
+    client: boto3.client,
+    force: bool,
+    asg_name: str,
+    volume_data: Dict[str, str],
 ) -> AWSResponse:
     try:
         response = client.detach_volume(
@@ -664,7 +697,11 @@ def detach_instance_volume(
                 {
                     "Key": "ChaosToolkitDetached",
                     "Value": "DeviceName=%s;InstanceId=%s;ASG=%s"
-                    % (volume_data["DeviceName"], volume_data["InstanceId"], asg_name),
+                    % (
+                        volume_data["DeviceName"],
+                        volume_data["InstanceId"],
+                        asg_name,
+                    ),
                 }
             ],
         )
@@ -681,10 +718,14 @@ def detach_instance_volume(
 
 
 def get_detached_volumes(
-    client: boto3.client, next_token: str = None, results: List[Dict[str, Any]] = None
+    client: boto3.client,
+    next_token: str = None,
+    results: List[Dict[str, Any]] = None,
 ):
     results = results or []
-    params = dict(Filters=[{"Name": "tag-key", "Values": ["ChaosToolkitDetached"]}])
+    params = dict(
+        Filters=[{"Name": "tag-key", "Values": ["ChaosToolkitDetached"]}]
+    )
     if next_token:
         params["NextToken"] = next_token
     response = client.describe_volumes(**params)

@@ -6,7 +6,12 @@ from typing import Dict, List, Optional, Union
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
-from chaosaws import aws_client, convert_tags, get_logger, tags_as_key_value_pairs
+from chaosaws import (
+    aws_client,
+    convert_tags,
+    get_logger,
+    tags_as_key_value_pairs,
+)
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -592,7 +597,9 @@ def start_availability_zone_power_interruption_scenario(
                             {
                                 "Sid": "DescribeAsg",
                                 "Effect": "Allow",
-                                "Action": ["autoscaling:DescribeAutoScalingGroups"],
+                                "Action": [
+                                    "autoscaling:DescribeAutoScalingGroups"
+                                ],
                                 "Resource": ["*"],
                             },
                         ],
@@ -744,7 +751,9 @@ def restore_availability_zone_power_after_interruption(
         logger.info(f"Deleting role {role_name}")
 
         try:
-            response = iam_client.list_attached_role_policies(RoleName=role_name)
+            response = iam_client.list_attached_role_policies(
+                RoleName=role_name
+            )
         except iam_client.exceptions.NoSuchEntityException:
             logger.debug("Failed to list attached role policies")
 

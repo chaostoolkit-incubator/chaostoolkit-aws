@@ -26,9 +26,9 @@ class TestRDSProbes(TestCase):
         instance_id = "MyTestInstanceRDS"
         client = MagicMock()
         aws_client.return_value = client
-        client.get_paginator.return_value.paginate.return_value = self.test_data[
-            "instances"
-        ]["single"]
+        client.get_paginator.return_value.paginate.return_value = (
+            self.test_data["instances"]["single"]
+        )
 
         response = instance_status(instance_id=instance_id)
         client.get_paginator.return_value.paginate.assert_called_with(
@@ -40,13 +40,15 @@ class TestRDSProbes(TestCase):
     def test_get_instance_status_filters(self, aws_client):
         client = MagicMock()
         aws_client.return_value = client
-        client.get_paginator.return_value.paginate.return_value = self.test_data[
-            "instances"
-        ]["multiple"]
+        client.get_paginator.return_value.paginate.return_value = (
+            self.test_data["instances"]["multiple"]
+        )
 
         filters = [{"Name": "engine", "Values": ["mysql"]}]
         response = instance_status(filters=filters)
-        client.get_paginator.return_value.paginate.assert_called_with(Filters=filters)
+        client.get_paginator.return_value.paginate.assert_called_with(
+            Filters=filters
+        )
         self.assertEqual(response, "available")
 
     def test_get_instance_status_no_parameters(self):
@@ -59,9 +61,9 @@ class TestRDSProbes(TestCase):
         cluster_id = "MyTestClusterRDS"
         client = MagicMock()
         aws_client.return_value = client
-        client.get_paginator.return_value.paginate.return_value = self.test_data[
-            "clusters"
-        ]["single"]
+        client.get_paginator.return_value.paginate.return_value = (
+            self.test_data["clusters"]["single"]
+        )
 
         response = cluster_status(cluster_id=cluster_id)
         client.get_paginator.return_value.paginate.assert_called_with(
@@ -73,13 +75,15 @@ class TestRDSProbes(TestCase):
     def test_get_cluster_status_filters(self, aws_client):
         client = MagicMock()
         aws_client.return_value = client
-        client.get_paginator.return_value.paginate.return_value = self.test_data[
-            "clusters"
-        ]["multiple"]
+        client.get_paginator.return_value.paginate.return_value = (
+            self.test_data["clusters"]["multiple"]
+        )
 
         filters = [{"Name": "engine", "Values": ["mysql"]}]
         response = cluster_status(filters=filters)
-        client.get_paginator.return_value.paginate.assert_called_with(Filters=filters)
+        client.get_paginator.return_value.paginate.assert_called_with(
+            Filters=filters
+        )
         self.assertEqual(response, "available")
 
     @patch("chaosaws.rds.probes.aws_client", autospec=True)
@@ -87,9 +91,9 @@ class TestRDSProbes(TestCase):
         cluster_id = "MyTestClusterRDS"
         client = MagicMock()
         aws_client.return_value = client
-        client.get_paginator.return_value.paginate.return_value = self.test_data[
-            "clusters"
-        ]["single"]
+        client.get_paginator.return_value.paginate.return_value = (
+            self.test_data["clusters"]["single"]
+        )
 
         response = cluster_membership_count(cluster_id=cluster_id)
         client.get_paginator.return_value.paginate.assert_called_with(

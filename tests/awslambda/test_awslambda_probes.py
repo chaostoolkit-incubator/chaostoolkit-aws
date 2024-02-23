@@ -75,7 +75,9 @@ def test_aws_lambda_list_event_source_mappings(aws_client):
     function_name = "GenericLambdaFunction"
     response = list_event_source_mapping(function_name=function_name)
     assert response["EventSourceMappings"]
-    client.list_event_source_mappings.assert_called_with(FunctionName=function_name)
+    client.list_event_source_mappings.assert_called_with(
+        FunctionName=function_name
+    )
 
 
 def test_aws_lambda_list_event_source_mappings_no_parameter():

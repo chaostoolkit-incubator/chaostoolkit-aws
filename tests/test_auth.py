@@ -16,7 +16,10 @@ CONFIGURATION = {
     "aws_endpoint_scheme": "http",
 }
 
-CONFIG_WITH_PROFILE = {"aws_region": "us-east-1", "aws_profile_name": "myprofile"}
+CONFIG_WITH_PROFILE = {
+    "aws_region": "us-east-1",
+    "aws_profile_name": "myprofile",
+}
 
 CONFIG_WITH_ARN = {"aws_region": "us-east-1", "aws_assume_role_arn": "myarn"}
 
@@ -210,7 +213,9 @@ def test_region_can_be_set_as_AWS_REGION(logger: logging.Logger, boto3: object):
 
 @patch("chaosaws.boto3", autospec=True)
 @patch("chaosaws.logger", autospec=True)
-def test_region_can_be_set_as_AWS_DEFAULT_REGION(logger: logging.Logger, boto3: object):
+def test_region_can_be_set_as_AWS_DEFAULT_REGION(
+    logger: logging.Logger, boto3: object
+):
     boto3.DEFAULT_SESSION = None
 
     try:

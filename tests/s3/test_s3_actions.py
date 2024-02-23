@@ -35,7 +35,9 @@ def test_delete_object_true(test_client: aws_client):
     client.get_object.return_value = read_configs("get_object_1.json")
     client.delete_object.return_value = {}
 
-    delete_object(bucket_name="Test-Bucket-1", object_key="path/to/some/file.json")
+    delete_object(
+        bucket_name="Test-Bucket-1", object_key="path/to/some/file.json"
+    )
 
     client.delete_object.assert_called_with(
         Bucket="Test-Bucket-1", Key="path/to/some/file.json"
@@ -51,7 +53,9 @@ def test_delete_object_false_invalid_bucket(test_client: aws_client):
     client.delete_object.return_value = {}
 
     with pytest.raises(FailedActivity) as x:
-        delete_object(bucket_name="Test-Bucket-99", object_key="path/to/some/file.json")
+        delete_object(
+            bucket_name="Test-Bucket-99", object_key="path/to/some/file.json"
+        )
 
     assert 'Bucket "Test-Bucket-99" does not exist!' in str(x)
 

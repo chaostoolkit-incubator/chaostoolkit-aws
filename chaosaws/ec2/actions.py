@@ -70,7 +70,9 @@ def stop_instance(
     else:
         instance_types = get_instance_type_by_id([instance_id], client)
 
-    logger.debug(f"Picked EC2 instance '{instance_types}' from AZ '{az}' to be stopped")
+    logger.debug(
+        f"Picked EC2 instance '{instance_types}' from AZ '{az}' to be stopped"
+    )
 
     return stop_instances_any_type(
         instance_types=instance_types, force=force, client=client
@@ -417,7 +419,9 @@ def attach_volume(
             device_name = attach_data[0].split("=")[-1]
             instance_id = attach_data[1].split("=")[-1]
 
-            if not instances or instance_id in [e["InstanceId"] for e in instances]:
+            if not instances or instance_id in [
+                e["InstanceId"] for e in instances
+            ]:
                 results.append(
                     attach_instance_volume(
                         client, instance_id, volume["VolumeId"], device_name
@@ -481,7 +485,9 @@ def stop_instances_by_incremental_steps(
 
         responses.extend(
             stop_instances_any_type(
-                instance_types=stop_these_instances_now, force=force, client=client
+                instance_types=stop_these_instances_now,
+                force=force,
+                client=client,
             )
         )
 
@@ -637,7 +643,9 @@ def get_spot_request_ids_from_response(response: Dict) -> List[str]:
     return spot_request_ids
 
 
-def get_instance_type_by_id(instance_ids: List[str], client: boto3.client) -> Dict:
+def get_instance_type_by_id(
+    instance_ids: List[str], client: boto3.client
+) -> Dict:
     """
     Return dict object with instance ids grouped by instance types
     """
@@ -647,7 +655,9 @@ def get_instance_type_by_id(instance_ids: List[str], client: boto3.client) -> Di
 
 
 def stop_instances_any_type(
-    instance_types: dict = None, force: bool = False, client: boto3.client = None
+    instance_types: dict = None,
+    force: bool = False,
+    client: boto3.client = None,
 ) -> List[AWSResponse]:
     """
     Stop instances regardless of the instance type (on demand, spot)
@@ -658,7 +668,9 @@ def stop_instances_any_type(
         logger.debug("Stopping instances: {}".format(instance_types["normal"]))
 
         response.append(
-            client.stop_instances(InstanceIds=instance_types["normal"], Force=force)
+            client.stop_instances(
+                InstanceIds=instance_types["normal"], Force=force
+            )
         )
 
     if "spot" in instance_types:
@@ -671,10 +683,16 @@ def stop_instances_any_type(
         )
 
         logger.debug(f"Canceling spot requests: {spot_request_ids}")
-        client.cancel_spot_instance_requests(SpotInstanceRequestIds=spot_request_ids)
-        logger.debug("Terminating spot instances: {}".format(instance_types["spot"]))
+        client.cancel_spot_instance_requests(
+            SpotInstanceRequestIds=spot_request_ids
+        )
+        logger.debug(
+            "Terminating spot instances: {}".format(instance_types["spot"])
+        )
 
-        response.append(client.terminate_instances(InstanceIds=instance_types["spot"]))
+        response.append(
+            client.terminate_instances(InstanceIds=instance_types["spot"])
+        )
 
     if "scheduled" in instance_types:
         # TODO: add support for scheduled instances
@@ -698,7 +716,9 @@ def terminate_instances_any_type(
                 client.describe_instances(InstanceIds=v)
             )
             # Cancel spot request prior to termination
-            client.cancel_spot_instance_requests(SpotInstanceRequestIds=instances)
+            client.cancel_spot_instance_requests(
+                SpotInstanceRequestIds=instances
+            )
             response.append(client.terminate_instances(InstanceIds=v))
             continue
         response.append(client.terminate_instances(InstanceIds=v))
@@ -759,7 +779,11 @@ def detach_instance_volume(
     except ClientError as e:
         raise FailedActivity(
             "unable to detach volume %s from %s: %s"
-            % (volume["VolumeId"], volume["InstanceId"], e.response["Error"]["Message"])
+            % (
+                volume["VolumeId"],
+                volume["InstanceId"],
+                e.response["Error"]["Message"],
+            )
         )
 
 
@@ -826,7 +850,9 @@ def authorize_security_group_ingress(
         return response
     except ClientError as e:
         raise ActivityFailed(
-            "Failed to add ingress rule: {}".format(e.response["Error"]["Message"])
+            "Failed to add ingress rule: {}".format(
+                e.response["Error"]["Message"]
+            )
         )
 
 
@@ -865,7 +891,9 @@ def revoke_security_group_ingress(
         return response
     except ClientError as e:
         raise ActivityFailed(
-            "Failed to remove ingress rule: {}".format(e.response["Error"]["Message"])
+            "Failed to remove ingress rule: {}".format(
+                e.response["Error"]["Message"]
+            )
         )
 
 

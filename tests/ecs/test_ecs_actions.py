@@ -76,8 +76,9 @@ def test_stop_random_tasks_count_too_high(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         stop_random_tasks(cluster=cluster, task_count=task_count, reason=reason)
-    assert "Not enough running tasks in ecs-cluster to satisfy stop count 3 (2)" in str(
-        x.value
+    assert (
+        "Not enough running tasks in ecs-cluster to satisfy stop count 3 (2)"
+        in str(x.value)
     )
 
 
@@ -149,7 +150,9 @@ def test_stop_random_tasks_percent_no_service(aws_client):
     ex = None
     for i in task_calls:
         try:
-            client.stop_task.assert_called_with(cluster=cluster, reason=reason, task=i)
+            client.stop_task.assert_called_with(
+                cluster=cluster, reason=reason, task=i
+            )
             return None
         except AssertionError as e:
             ex = e.args
@@ -179,7 +182,10 @@ def test_stop_random_tasks_percent_yes_service(aws_client):
         },
     ]
     stop_random_tasks(
-        cluster=cluster, service=service, task_percent=task_percent, reason=reason
+        cluster=cluster,
+        service=service,
+        task_percent=task_percent,
+        reason=reason,
     )
 
     assert client.stop_task.call_count == 1
@@ -191,7 +197,9 @@ def test_stop_random_tasks_percent_yes_service(aws_client):
     ex = None
     for i in task_calls:
         try:
-            client.stop_task.assert_called_with(cluster=cluster, reason=reason, task=i)
+            client.stop_task.assert_called_with(
+                cluster=cluster, reason=reason, task=i
+            )
             return None
         except AssertionError as e:
             ex = e.args
@@ -245,7 +253,9 @@ def test_stop_task(aws_client):
     task_id = "16fd2706-8baf-433b-82eb-8c7fada847da"
     reason = "unit test"
     stop_task(cluster=cluster, task_id=task_id, reason=reason)
-    client.stop_task.assert_called_with(cluster=cluster, task=task_id, reason=reason)
+    client.stop_task.assert_called_with(
+        cluster=cluster, task=task_id, reason=reason
+    )
 
 
 @patch("chaosaws.ecs.actions.aws_client", autospec=True)
@@ -290,7 +300,10 @@ def test_delete_service(aws_client):
         cluster=cluster,
         service=svc1,
         desiredCount=0,
-        deploymentConfiguration={"maximumPercent": 100, "minimumHealthyPercent": 0},
+        deploymentConfiguration={
+            "maximumPercent": 100,
+            "minimumHealthyPercent": 0,
+        },
     )
     client.delete_service.assert_called_with(cluster=cluster, service=svc1)
 
@@ -314,7 +327,10 @@ def test_delete_services(aws_client):
         cluster=cluster,
         service=ANY,
         desiredCount=0,
-        deploymentConfiguration={"maximumPercent": 100, "minimumHealthyPercent": 0},
+        deploymentConfiguration={
+            "maximumPercent": 100,
+            "minimumHealthyPercent": 0,
+        },
     )
     args, kwargs = client.update_service.call_args
     assert kwargs["service"] in ("my-http-service", "my-db-service")
@@ -343,10 +359,15 @@ def test_delete_filtered_service(aws_client):
         cluster=cluster,
         service="my-db-service",
         desiredCount=0,
-        deploymentConfiguration={"maximumPercent": 100, "minimumHealthyPercent": 0},
+        deploymentConfiguration={
+            "maximumPercent": 100,
+            "minimumHealthyPercent": 0,
+        },
     )
 
-    client.delete_service.assert_called_with(cluster=cluster, service="my-db-service")
+    client.delete_service.assert_called_with(
+        cluster=cluster, service="my-db-service"
+    )
 
 
 @patch("chaosaws.ecs.actions.aws_client", autospec=True)
@@ -443,8 +464,12 @@ def test_update_desired_service_count(aws_client):
 def test_set_service_placement_strategy(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    client.describe_clusters.return_value = read_configs("describe_clusters_1.json")
-    client.describe_services.return_value = read_configs("describe_services_1.json")
+    client.describe_clusters.return_value = read_configs(
+        "describe_clusters_1.json"
+    )
+    client.describe_services.return_value = read_configs(
+        "describe_services_1.json"
+    )
     client.update_service.return_value = read_configs("update_service_1.json")
 
     params = {
@@ -480,7 +505,9 @@ def test_set_service_placement_strategy_invalid_cluster(aws_client):
 def test_set_service_placement_strategy_invalid_service(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    client.describe_clusters.return_value = read_configs("describe_clusters_1.json")
+    client.describe_clusters.return_value = read_configs(
+        "describe_clusters_1.json"
+    )
     client.describe_services.return_value = {"services": []}
 
     params = {
@@ -508,8 +535,12 @@ def test_set_service_placement_strategy_invalid_param_1():
 def test_set_service_placement_strategy_invalid_param_2(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    client.describe_clusters.return_value = read_configs("describe_clusters_1.json")
-    client.describe_services.return_value = read_configs("describe_services_1.json")
+    client.describe_clusters.return_value = read_configs(
+        "describe_clusters_1.json"
+    )
+    client.describe_services.return_value = read_configs(
+        "describe_services_1.json"
+    )
 
     params = {
         "op": "UpdateService",
@@ -532,8 +563,12 @@ def test_set_service_placement_strategy_invalid_param_2(aws_client):
 def test_set_service_deployment_configuration(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    client.describe_clusters.return_value = read_configs("describe_clusters_1.json")
-    client.describe_services.return_value = read_configs("describe_services_1.json")
+    client.describe_clusters.return_value = read_configs(
+        "describe_clusters_1.json"
+    )
+    client.describe_services.return_value = read_configs(
+        "describe_services_1.json"
+    )
     client.update_service.return_value = read_configs("update_service_2.json")
 
     params = {
@@ -546,7 +581,10 @@ def test_set_service_deployment_configuration(aws_client):
     client.update_service.assert_called_with(
         cluster="MyTestEcsCluster",
         service="MyTestEcsService",
-        deploymentConfiguration={"maximumPercent": 300, "minimumHealthyPercent": 50},
+        deploymentConfiguration={
+            "maximumPercent": 300,
+            "minimumHealthyPercent": 50,
+        },
     )
 
 
@@ -570,7 +608,9 @@ def test_set_service_deployment_configuration_invalid_cluster(aws_client):
 def test_set_service_deployment_configuration_invalid_service(aws_client):
     client = MagicMock()
     aws_client.return_value = client
-    client.describe_clusters.return_value = read_configs("describe_clusters_1.json")
+    client.describe_clusters.return_value = read_configs(
+        "describe_clusters_1.json"
+    )
     client.describe_services.return_value = {"services": []}
 
     params = {
@@ -695,7 +735,9 @@ def test_update_container_instance_state_invalid_status(aws_client):
     with pytest.raises(FailedActivity) as e:
         update_container_instances_state(
             cluster="MyTestEcsCluster",
-            container_instances=["arn:aws:ecs:us-east-1:x:container-instance/z"],
+            container_instances=[
+                "arn:aws:ecs:us-east-1:x:container-instance/z"
+            ],
             status="INVALID",
         )
     assert "ACTIVE,DRAINING" in str(e)

@@ -121,7 +121,9 @@ def test_set_security_groups_invalid_alb_type(aws_client):
     }
     with pytest.raises(FailedActivity) as x:
         set_security_groups(alb_names, security_group_ids)
-    assert "Cannot change security groups of network load balancers." in str(x.value)
+    assert "Cannot change security groups of network load balancers." in str(
+        x.value
+    )
 
 
 @patch("chaosaws.elbv2.actions.aws_client", autospec=True)
@@ -151,7 +153,9 @@ def test_set_security_group_invalid_alb_name(aws_client):
     }
     with pytest.raises(FailedActivity) as x:
         set_security_groups(alb_names, security_group_ids)
-    assert f"Unable to locate load balancer(s): {[alb_names[1]]}" in str(x.value)
+    assert f"Unable to locate load balancer(s): {[alb_names[1]]}" in str(
+        x.value
+    )
 
 
 @patch("chaosaws.elbv2.actions.aws_client", autospec=True)
@@ -167,7 +171,9 @@ def test_set_security_groups_invalid_group(aws_client):
 
     with pytest.raises(FailedActivity) as x:
         set_security_groups(alb_names, security_group_ids)
-    assert f"Invalid security group id(s): {[security_group_ids[1]]}" in str(x.value)
+    assert f"Invalid security group id(s): {[security_group_ids[1]]}" in str(
+        x.value
+    )
 
 
 def test_set_security_group_no_subnets():
@@ -197,7 +203,10 @@ def test_set_subnets(aws_client):
     subnet_ids = ["subnet-012345678", "subnet-abcdefg0"]
 
     client.describe_subnets.return_value = {
-        "Subnets": [{"SubnetId": "subnet-012345678"}, {"SubnetId": "subnet-abcdefg0"}]
+        "Subnets": [
+            {"SubnetId": "subnet-012345678"},
+            {"SubnetId": "subnet-abcdefg0"},
+        ]
     }
     client.describe_load_balancers.return_value = {
         "LoadBalancers": [
@@ -246,7 +255,10 @@ def test_set_subnets_invalid_alb_type(aws_client):
     subnet_ids = ["subnet-012345678", "subnet-abcdefg0"]
 
     client.describe_subnets.return_value = {
-        "Subnets": [{"SubnetId": "subnet-012345678"}, {"SubnetId": "subnet-abcdefg0"}]
+        "Subnets": [
+            {"SubnetId": "subnet-012345678"},
+            {"SubnetId": "subnet-abcdefg0"},
+        ]
     }
     client.describe_load_balancers.return_value = {
         "LoadBalancers": [
@@ -281,7 +293,10 @@ def test_set_subnets_invalid_alb_name(aws_client):
     subnet_ids = ["subnet-012345678", "subnet-abcdefg0"]
 
     client.describe_subnets.return_value = {
-        "Subnets": [{"SubnetId": "subnet-012345678"}, {"SubnetId": "subnet-abcdefg0"}]
+        "Subnets": [
+            {"SubnetId": "subnet-012345678"},
+            {"SubnetId": "subnet-abcdefg0"},
+        ]
     }
     client.describe_load_balancers.return_value = {
         "LoadBalancers": [
@@ -297,7 +312,9 @@ def test_set_subnets_invalid_alb_name(aws_client):
     }
     with pytest.raises(FailedActivity) as x:
         set_subnets(alb_names, subnet_ids)
-    assert f"Unable to locate load balancer(s): {[alb_names[1]]}" in str(x.value)
+    assert f"Unable to locate load balancer(s): {[alb_names[1]]}" in str(
+        x.value
+    )
 
 
 @patch("chaosaws.elbv2.actions.aws_client", autospec=True)

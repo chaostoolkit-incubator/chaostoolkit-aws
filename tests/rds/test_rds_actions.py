@@ -21,7 +21,8 @@ def test_failover_db_cluster(aws_client):
     db_cluster_identifier = "my-db-cluster-identifier"
     failover_db_cluster(db_cluster_identifier)
     client.failover_db_cluster.assert_called_with(
-        DBClusterIdentifier=db_cluster_identifier, TargetDBInstanceIdentifier=None
+        DBClusterIdentifier=db_cluster_identifier,
+        TargetDBInstanceIdentifier=None,
     )
 
 
@@ -184,7 +185,9 @@ def test_delete_db_instance_no_snapshot(aws_client):
     delete_db_instance(db_instance_identifier=db_id)
 
     client.delete_db_instance.assert_called_with(
-        DBInstanceIdentifier=db_id, SkipFinalSnapshot=True, DeleteAutomatedBackups=True
+        DBInstanceIdentifier=db_id,
+        SkipFinalSnapshot=True,
+        DeleteAutomatedBackups=True,
     )
 
 
@@ -230,7 +233,9 @@ def test_delete_db_cluster_no_snapshot(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     cluster_id = "some-aurora-identifier"
-    delete_db_cluster(db_cluster_identifier=cluster_id, skip_final_snapshot=True)
+    delete_db_cluster(
+        db_cluster_identifier=cluster_id, skip_final_snapshot=True
+    )
 
     client.delete_db_cluster.assert_called_with(
         DBClusterIdentifier=cluster_id, SkipFinalSnapshot=True

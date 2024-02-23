@@ -11,13 +11,19 @@ from chaosaws.types import AWSResponse
 # from os import access
 # from xmlrpc.client import boolean
 
-__all__ = ["targets_health_count", "all_targets_healthy", "is_access_log_enabled"]
+__all__ = [
+    "targets_health_count",
+    "all_targets_healthy",
+    "is_access_log_enabled",
+]
 
 logger = get_logger()
 
 
 def targets_health_count(
-    tg_names: List[str], configuration: Configuration = None, secrets: Secrets = None
+    tg_names: List[str],
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> AWSResponse:
     """
     Count of healthy/unhealthy targets per targetgroup
@@ -32,7 +38,9 @@ def targets_health_count(
 
 
 def all_targets_healthy(
-    tg_names: List[str], configuration: Configuration = None, secrets: Secrets = None
+    tg_names: List[str],
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> AWSResponse:
     """
     Return true/false based on if all targets for listed
@@ -43,7 +51,9 @@ def all_targets_healthy(
         raise FailedActivity("Non-empty list of target groups is required")
 
     client = aws_client("elbv2", configuration, secrets)
-    logger.debug(f"Checking if all targets are healthy for targets: {str(tg_names)}")
+    logger.debug(
+        f"Checking if all targets are healthy for targets: {str(tg_names)}"
+    )
     tg_arns = get_target_group_arns(tg_names=tg_names, client=client)
     tg_health = get_targets_health_description(tg_arns=tg_arns, client=client)
     result = True
@@ -65,7 +75,9 @@ def all_targets_healthy(
 
 
 def is_access_log_enabled(
-    load_balancer_arn: str, configuration: Configuration = None, secrets: Secrets = None
+    load_balancer_arn: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> AWSResponse:
     """
     Verify access logging enabled on load balancer
@@ -119,16 +131,22 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
         ....
     }
     """
-    logger.debug(f"Target group ARN: {str(tg_arns)} Getting health descriptions")
+    logger.debug(
+        f"Target group ARN: {str(tg_arns)} Getting health descriptions"
+    )
     tg_health_descr = {}
 
     for tg in tg_arns:
         tg_health_descr[tg] = {}
         tg_health_descr[tg]["TargetGroupArn"] = tg_arns[tg]
-        tg_health_descr[tg]["TargetHealthDescriptions"] = client.describe_target_health(
-            TargetGroupArn=tg_arns[tg]
-        )["TargetHealthDescriptions"]
-    logger.debug(f"Health descriptions for target group(s) are: {str(tg_health_descr)}")
+        tg_health_descr[tg][
+            "TargetHealthDescriptions"
+        ] = client.describe_target_health(TargetGroupArn=tg_arns[tg])[
+            "TargetHealthDescriptions"
+        ]
+    logger.debug(
+        f"Health descriptions for target group(s) are: {str(tg_health_descr)}"
+    )
 
     return tg_health_descr
 
@@ -160,18 +178,26 @@ def get_targets_health_count(tg_names: List[str], client: boto3.client) -> Dict:
         for health_descr in tg_health[tg]["TargetHealthDescriptions"]:
             cnt[health_descr["TargetHealth"]["State"]] += 1
         tg_targets_health_count[tg] = dict(cnt)
-    logger.debug(f"Healthy targets by targetgroup: {str(tg_targets_health_count)}")
+    logger.debug(
+        f"Healthy targets by targetgroup: {str(tg_targets_health_count)}"
+    )
 
     return tg_targets_health_count
 
 
-def get_access_log_for_elb(load_balancer_arn: str, client: boto3.client) -> bool:
+def get_access_log_for_elb(
+    load_balancer_arn: str, client: boto3.client
+) -> bool:
     """
     Return True if access log is enabled else False
     """
-    logger.debug("Checking whether access log is enabled on ELB: " + load_balancer_arn)
+    logger.debug(
+        "Checking whether access log is enabled on ELB: " + load_balancer_arn
+    )
 
-    attrs = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer_arn)
+    attrs = client.describe_load_balancer_attributes(
+        LoadBalancerArn=load_balancer_arn
+    )
 
     access_enabled = "false"
     attrs = attrs.get("Attributes")

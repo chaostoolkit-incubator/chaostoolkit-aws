@@ -56,8 +56,14 @@ def test_instance_state(aws_client):
         "Reservations": [
             {
                 "Instances": [
-                    {"InstanceId": instance_ids[0], "State": {"Name": "running"}},
-                    {"InstanceId": instance_ids[1], "State": {"Name": "running"}},
+                    {
+                        "InstanceId": instance_ids[0],
+                        "State": {"Name": "running"},
+                    },
+                    {
+                        "InstanceId": instance_ids[1],
+                        "State": {"Name": "running"},
+                    },
                 ]
             }
         ]

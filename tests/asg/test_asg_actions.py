@@ -18,8 +18,9 @@ from chaosaws.asg.actions import (
 def test_suspend_process_no_name_or_tag():
     with pytest.raises(FailedActivity) as x:
         suspend_processes()
-    assert "one of the following arguments are required: " "asg_names or tags" in str(
-        x.value
+    assert (
+        "one of the following arguments are required: "
+        "asg_names or tags" in str(x.value)
     )
 
 
@@ -29,14 +30,17 @@ def test_suspend_process_both_name_and_tag_one():
             asg_names=["AutoScalingGroup-A"],
             tags=[{"Key": "TagKey", "Values": ["TagValues"]}],
         )
-    assert "only one of the following arguments are allowed: " "asg_names/tags" in str(
-        x.value
+    assert (
+        "only one of the following arguments are allowed: "
+        "asg_names/tags" in str(x.value)
     )
 
 
 def test_suspend_process_invalid_process():
     with pytest.raises(FailedActivity) as x:
-        suspend_processes(asg_names=["AutoScalingGroup-A"], process_names=["Lunch"])
+        suspend_processes(
+            asg_names=["AutoScalingGroup-A"], process_names=["Lunch"]
+        )
     assert "invalid process(es): ['Lunch'] not in" in str(x.value)
 
 
@@ -58,7 +62,9 @@ def test_suspend_process_asg_names(aws_client):
         ]
     }
     suspend_processes(asg_names=asg_names)
-    client.suspend_processes.assert_called_with(AutoScalingGroupName=asg_names[0])
+    client.suspend_processes.assert_called_with(
+        AutoScalingGroupName=asg_names[0]
+    )
 
 
 @patch("chaosaws.asg.actions.aws_client", autospec=True)
@@ -92,7 +98,9 @@ def test_suspend_process_asg_tags(aws_client):
         ]
     }
     suspend_processes(tags=[{"Key": "TargetKey", "Value": "TargetValue"}])
-    client.suspend_processes.assert_called_with(AutoScalingGroupName=asg_names[0])
+    client.suspend_processes.assert_called_with(
+        AutoScalingGroupName=asg_names[0]
+    )
 
 
 @patch("chaosaws.asg.actions.aws_client", autospec=True)
@@ -142,8 +150,9 @@ def test_suspend_process_asg_invalid_tags(aws_client):
 def test_resume_process_no_name_or_tag():
     with pytest.raises(FailedActivity) as x:
         resume_processes()
-    assert "one of the following arguments are required: " "asg_names or tags" in str(
-        x.value
+    assert (
+        "one of the following arguments are required: "
+        "asg_names or tags" in str(x.value)
     )
 
 
@@ -153,14 +162,17 @@ def test_resume_process_both_name_and_tag():
             asg_names=["AutoScalingGroup-A"],
             tags=[{"Key": "TagKey", "Values": ["TagValues"]}],
         )
-    assert "only one of the following arguments are allowed: " "asg_names/tags" in str(
-        x.value
+    assert (
+        "only one of the following arguments are allowed: "
+        "asg_names/tags" in str(x.value)
     )
 
 
 def test_resume_process_invalid_process():
     with pytest.raises(FailedActivity) as x:
-        resume_processes(asg_names=["AutoScalingGroup-A"], process_names=["Lunch"])
+        resume_processes(
+            asg_names=["AutoScalingGroup-A"], process_names=["Lunch"]
+        )
     assert "invalid process(es): ['Lunch'] not in" in str(x.value)
 
 
@@ -271,8 +283,9 @@ def test_resume_process_asg_invalid_name(aws_client):
 def test_terminate_instances_no_asgs():
     with pytest.raises(FailedActivity) as x:
         terminate_random_instances(instance_count=10)
-    assert "one of the following arguments are required: " "asg_names or tags" in str(
-        x.value
+    assert (
+        "one of the following arguments are required: "
+        "asg_names or tags" in str(x.value)
     )
 
 
@@ -280,8 +293,9 @@ def test_terminate_instances_no_numbers():
     asg_names = ["AutoScalingGroup-A", "AutoScalingGroup-B"]
     with pytest.raises(FailedActivity) as x:
         terminate_random_instances(asg_names)
-    assert 'Must specify one of "instance_count", ' '"instance_percent", "az"' in str(
-        x.value
+    assert (
+        'Must specify one of "instance_count", '
+        '"instance_percent", "az"' in str(x.value)
     )
 
 
@@ -409,7 +423,9 @@ def test_terminate_instances_valid_az(aws_client):
         ]
     }
     terminate_random_instances(asg_names=asg_names, az="us-east-1a")
-    client.terminate_instances.assert_called_with(InstanceIds=["i-00000000000000001"])
+    client.terminate_instances.assert_called_with(
+        InstanceIds=["i-00000000000000001"]
+    )
 
 
 @patch("chaosaws.asg.actions.aws_client", autospec=True)
@@ -469,7 +485,8 @@ def test_terminate_instances_invalid_count(aws_client):
         terminate_random_instances(asg_names=asg_names, instance_count=2)
     assert (
         "Not enough healthy instances in {} to satisfy "
-        "termination count {} ({})".format(asg_names[0], 2, 1) in str(x.value)
+        "termination count {} ({})".format(asg_names[0], 2, 1)
+        in str(x.value)
     )
 
 
@@ -536,8 +553,9 @@ def test_terminate_instances_tags(aws_client):
 def test_detach_instance_no_name_or_tag():
     with pytest.raises(FailedActivity) as x:
         detach_random_instances()
-    assert "one of the following arguments are required: " "asg_names or tags" in str(
-        x.value
+    assert (
+        "one of the following arguments are required: "
+        "asg_names or tags" in str(x.value)
     )
 
 
@@ -547,16 +565,18 @@ def test_detach_instance_both_name_and_tag_one():
             asg_names=["AutoScalingGroup-A"],
             tags=[{"Key": "TagKey", "Values": ["TagValues"]}],
         )
-    assert "only one of the following arguments are allowed: " "asg_names/tags" in str(
-        x.value
+    assert (
+        "only one of the following arguments are allowed: "
+        "asg_names/tags" in str(x.value)
     )
 
 
 def test_detach_instance_no_count():
     with pytest.raises(FailedActivity) as x:
         detach_random_instances(asg_names=["AutoScalingGroup-A"])
-    assert 'You must specify either "instance_count" or ' '"instance_percent"' in str(
-        x.value
+    assert (
+        'You must specify either "instance_count" or '
+        '"instance_percent"' in str(x.value)
     )
 
 
@@ -642,7 +662,10 @@ def test_detach_instances_count(aws_client):
             )
             call_found = True
             assert result["DetachingInstances"] == [
-                {"AutoScalingGroupName": asg_names[0], "InstanceIds": instance_ids}
+                {
+                    "AutoScalingGroupName": asg_names[0],
+                    "InstanceIds": instance_ids,
+                }
             ]
             return None
         except AssertionError as e:
@@ -772,7 +795,9 @@ def test_change_subnets_valid_names(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     asg_names = ["AutoScalingGroup-A"]
-    params = dict(asg_names=asg_names, subnets=["subnet-123456789", "subnet-23456789a"])
+    params = dict(
+        asg_names=asg_names, subnets=["subnet-123456789", "subnet-23456789a"]
+    )
     client.describe_auto_scaling_groups.return_value = {
         "AutoScalingGroups": [
             {
@@ -875,7 +900,9 @@ def test_detach_random_volume_asg_name(aws_client):
     client.describe_auto_scaling_groups.assert_called_with(
         AutoScalingGroupNames=asg_names
     )
-    client.describe_instances.assert_called_with(InstanceIds=["i-00000000000000001"])
+    client.describe_instances.assert_called_with(
+        InstanceIds=["i-00000000000000001"]
+    )
     client.detach_volume.assert_called_with(
         Device="/dev/sdc",
         Force=True,
@@ -945,7 +972,9 @@ def test_detach_random_volume_asg_tags(aws_client):
     client.describe_auto_scaling_groups.assert_called_with(
         AutoScalingGroupNames=asg_names
     )
-    client.describe_instances.assert_called_with(InstanceIds=["i-00000000000000001"])
+    client.describe_instances.assert_called_with(
+        InstanceIds=["i-00000000000000001"]
+    )
     client.detach_volume.assert_called_with(
         Device="/dev/sdb",
         Force=True,
@@ -1010,7 +1039,8 @@ def test_attach_volume_asg_name(aws_client):
                 "Tags": [
                     {
                         "Key": "ChaosToolkitDetached",
-                        "Value": "DeviceName=/dev/sdb;InstanceId=" "i-987654321fefghi",
+                        "Value": "DeviceName=/dev/sdb;InstanceId="
+                        "i-987654321fefghi",
                     }
                 ],
             },
@@ -1033,7 +1063,9 @@ def test_attach_volume_asg_name(aws_client):
         Filters=[{"Name": "tag-key", "Values": ["ChaosToolkitDetached"]}]
     )
     client.attach_volume.assert_called_with(
-        Device="/dev/sdc", InstanceId="i-987654321fabcde", VolumeId="vol-00000001"
+        Device="/dev/sdc",
+        InstanceId="i-987654321fabcde",
+        VolumeId="vol-00000001",
     )
     assert results[0]["DeviceName"] == "/dev/sdc"
 
@@ -1083,7 +1115,8 @@ def test_attach_volume_asg_tags(aws_client):
                 "Tags": [
                     {
                         "Key": "ChaosToolkitDetached",
-                        "Value": "DeviceName=/dev/sdb;InstanceId=" "i-987654321fghij",
+                        "Value": "DeviceName=/dev/sdb;InstanceId="
+                        "i-987654321fghij",
                     }
                 ],
             },
@@ -1112,7 +1145,9 @@ def test_attach_volume_asg_tags(aws_client):
         Filters=[{"Name": "tag-key", "Values": ["ChaosToolkitDetached"]}]
     )
     client.attach_volume.assert_called_with(
-        Device="/dev/sdb", InstanceId="i-00000000000000001", VolumeId="vol-00000001"
+        Device="/dev/sdb",
+        InstanceId="i-00000000000000001",
+        VolumeId="vol-00000001",
     )
     assert results[0]["DeviceName"] == "/dev/sdb"
 
@@ -1157,7 +1192,9 @@ def test_asg_stop_random_instance_name(aws_client):
     ex = None
     for i in instance_calls:
         try:
-            client.stop_instances.assert_called_with(Force=False, InstanceIds=[i])
+            client.stop_instances.assert_called_with(
+                Force=False, InstanceIds=[i]
+            )
             return None
         except AssertionError as e:
             ex = e.args
@@ -1217,7 +1254,9 @@ def test_asg_stop_random_instance_tags(aws_client):
     ex = None
     for i in instance_calls:
         try:
-            client.stop_instances.assert_called_with(Force=False, InstanceIds=sorted(i))
+            client.stop_instances.assert_called_with(
+                Force=False, InstanceIds=sorted(i)
+            )
             return None
         except AssertionError as e:
             ex = e.args

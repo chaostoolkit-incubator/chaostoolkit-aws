@@ -123,7 +123,10 @@ def test_delete_cache_clusters_snapshot(aws_client):
             {
                 "CacheClusterId": "MyTestCacheCluster",
                 "CacheClusterStatus": "available",
-                "CacheNodes": [{"CacheNodeId": "0001"}, {"CacheNodeId": "0002"}],
+                "CacheNodes": [
+                    {"CacheNodeId": "0001"},
+                    {"CacheNodeId": "0002"},
+                ],
             }
         ]
     }
@@ -136,7 +139,8 @@ def test_delete_cache_clusters_snapshot(aws_client):
     }
 
     results = delete_cache_clusters(
-        cluster_ids=["MyTestCacheCluster"], final_snapshot_id="MyClusterFinalSnap"
+        cluster_ids=["MyTestCacheCluster"],
+        final_snapshot_id="MyClusterFinalSnap",
     )
     client.describe_cache_clusters.assert_called_with(
         CacheClusterId="MyTestCacheCluster", ShowCacheNodeInfo=True
@@ -159,7 +163,10 @@ def test_delete_cache_clusters_no_snapshot(aws_client):
             {
                 "CacheClusterId": "MyTestCacheCluster",
                 "CacheClusterStatus": "available",
-                "CacheNodes": [{"CacheNodeId": "0001"}, {"CacheNodeId": "0002"}],
+                "CacheNodes": [
+                    {"CacheNodeId": "0001"},
+                    {"CacheNodeId": "0002"},
+                ],
             }
         ]
     }
@@ -175,7 +182,9 @@ def test_delete_cache_clusters_no_snapshot(aws_client):
     client.describe_cache_clusters.assert_called_with(
         CacheClusterId="MyTestCacheCluster", ShowCacheNodeInfo=True
     )
-    client.delete_cache_cluster.assert_called_with(CacheClusterId="MyTestCacheCluster")
+    client.delete_cache_cluster.assert_called_with(
+        CacheClusterId="MyTestCacheCluster"
+    )
     assert results[0]["CacheClusterId"] == "MyTestCacheCluster"
     assert results[0]["CacheClusterStatus"] == "deleting"
 
@@ -230,7 +239,10 @@ def test_delete_replication_group_no_snapshot(aws_client):
         ]
     }
     client.delete_replication_group.return_value = {
-        "ReplicationGroup": {"ReplicationGroupId": group_ids[0], "Status": "deleting"}
+        "ReplicationGroup": {
+            "ReplicationGroupId": group_ids[0],
+            "Status": "deleting",
+        }
     }
 
     results = delete_replication_groups(group_ids=group_ids)

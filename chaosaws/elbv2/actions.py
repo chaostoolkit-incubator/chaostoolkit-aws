@@ -27,7 +27,9 @@ def deregister_target(
     client = aws_client("elbv2", configuration, secrets)
     tg_arn = get_target_group_arns(tg_names=[tg_name], client=client)
     tg_health = get_targets_health_description(tg_arns=tg_arn, client=client)
-    random_target = random.choice(tg_health[tg_name]["TargetHealthDescriptions"])
+    random_target = random.choice(
+        tg_health[tg_name]["TargetHealthDescriptions"]
+    )
 
     logger.debug(
         "Deregistering target {} from target group {}".format(
@@ -47,7 +49,9 @@ def deregister_target(
         )
     except ClientError as e:
         raise FailedActivity(
-            "Exception detaching {}: {}".format(tg_name, e.response["Error"]["Message"])
+            "Exception detaching {}: {}".format(
+                tg_name, e.response["Error"]["Message"]
+            )
         )
 
 
@@ -83,7 +87,9 @@ def set_security_groups(
     load_balancers = get_load_balancer_arns(load_balancer_names, client)
 
     if load_balancers.get("network", []):
-        raise FailedActivity("Cannot change security groups of network load balancers.")
+        raise FailedActivity(
+            "Cannot change security groups of network load balancers."
+        )
 
     results = []
     for load_balancer in load_balancers["application"]:
@@ -130,7 +136,9 @@ def set_subnets(
             ...
         ]
     """
-    subnet_ids = get_subnets(subnet_ids, aws_client("ec2", configuration, secrets))
+    subnet_ids = get_subnets(
+        subnet_ids, aws_client("ec2", configuration, secrets)
+    )
 
     client = aws_client("elbv2", configuration, secrets)
     load_balancers = get_load_balancer_arns(load_balancer_names, client)
@@ -140,7 +148,9 @@ def set_subnets(
 
     results = []
     for load_balancer in load_balancers["application"]:
-        response = client.set_subnets(LoadBalancerArn=load_balancer, Subnets=subnet_ids)
+        response = client.set_subnets(
+            LoadBalancerArn=load_balancer, Subnets=subnet_ids
+        )
         response["LoadBalancerArn"] = load_balancer
         results.append(response)
     return results
@@ -239,7 +249,9 @@ def get_load_balancer_arns(
         if load_balancer not in results["Names"]
     ]
     if missing_lbs:
-        raise FailedActivity(f"Unable to locate load balancer(s): {missing_lbs}")
+        raise FailedActivity(
+            f"Unable to locate load balancer(s): {missing_lbs}"
+        )
 
     if not results:
         raise FailedActivity(
@@ -284,22 +296,30 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
         ....
     }
     """
-    logger.debug(f"Target group ARN: {str(tg_arns)} Getting health descriptions")
+    logger.debug(
+        f"Target group ARN: {str(tg_arns)} Getting health descriptions"
+    )
     tg_health_descr = {}
 
     for tg in tg_arns:
         tg_health_descr[tg] = {}
         tg_health_descr[tg]["TargetGroupArn"] = tg_arns[tg]
-        tg_health_descr[tg]["TargetHealthDescriptions"] = client.describe_target_health(
-            TargetGroupArn=tg_arns[tg]
-        )["TargetHealthDescriptions"]
-    logger.debug(f"Health descriptions for target group(s) are: {str(tg_health_descr)}")
+        tg_health_descr[tg][
+            "TargetHealthDescriptions"
+        ] = client.describe_target_health(TargetGroupArn=tg_arns[tg])[
+            "TargetHealthDescriptions"
+        ]
+    logger.debug(
+        f"Health descriptions for target group(s) are: {str(tg_health_descr)}"
+    )
     return tg_health_descr
 
 
 def get_security_groups(sg_ids: List[str], client: boto3.client) -> List[str]:
     try:
-        response = client.describe_security_groups(GroupIds=sg_ids)["SecurityGroups"]
+        response = client.describe_security_groups(GroupIds=sg_ids)[
+            "SecurityGroups"
+        ]
         results = [r["GroupId"] for r in response]
     except ClientError as e:
         raise FailedActivity(e.response["Error"]["Message"])

@@ -16,7 +16,12 @@ from chaoslib.discovery.discover import (
     initialize_discovery_result,
 )
 from chaoslib.exceptions import InterruptExecution
-from chaoslib.types import Configuration, DiscoveredActivities, Discovery, Secrets
+from chaoslib.types import (
+    Configuration,
+    DiscoveredActivities,
+    Discovery,
+    Secrets,
+)
 
 __version__ = "0.31.1"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
@@ -58,7 +63,9 @@ def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
     See: https://boto3.readthedocs.io/en/latest/guide/configuration.html#guide-configuration
     """  # noqa: E501
     creds = dict(
-        aws_access_key_id=None, aws_secret_access_key=None, aws_session_token=None
+        aws_access_key_id=None,
+        aws_secret_access_key=None,
+        aws_session_token=None,
     )
 
     if secrets:
@@ -70,7 +77,9 @@ def get_credentials(secrets: Secrets = None) -> Dict[str, str]:
 
 
 def aws_client(
-    resource_name: str, configuration: Configuration = None, secrets: Secrets = None
+    resource_name: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ):
     """
     Create a boto3 client for the given resource.
@@ -125,7 +134,9 @@ def aws_client(
             )
         )
 
-        aws_assume_role_session_name = configuration.get("aws_assume_role_session_name")
+        aws_assume_role_session_name = configuration.get(
+            "aws_assume_role_session_name"
+        )
         if not aws_assume_role_session_name:
             aws_assume_role_session_name = "ChaosToolkit"
             logger.debug(
@@ -236,7 +247,9 @@ def signed_api_call(
             method, endpoint, headers=headers, auth=auth, params=params
         )
 
-    return requests.request(method, endpoint, headers=headers, auth=auth, json=params)
+    return requests.request(
+        method, endpoint, headers=headers, auth=auth, json=params
+    )
 
 
 def discover(discover_system: bool = True) -> Discovery:
@@ -246,7 +259,9 @@ def discover(discover_system: bool = True) -> Discovery:
     """
     logger.info("Discovering capabilities from chaostoolkit-aws")
 
-    discovery = initialize_discovery_result("chaostoolkit-aws", __version__, "aws")
+    discovery = initialize_discovery_result(
+        "chaostoolkit-aws", __version__, "aws"
+    )
     discovery["activities"].extend(load_exported_activities())
 
     return discovery
@@ -288,7 +303,9 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.fis.actions"))
     activities.extend(discover_probes("chaosaws.s3.probes"))
     activities.extend(discover_actions("chaosaws.s3.actions"))
-    activities.extend(discover_activities("chaosaws.s3.controls.upload", "control"))
+    activities.extend(
+        discover_activities("chaosaws.s3.controls.upload", "control")
+    )
     activities.extend(discover_probes("chaosaws.xray.probes"))
     activities.extend(discover_probes("chaosaws.incidents.probes"))
     return activities

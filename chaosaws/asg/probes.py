@@ -58,7 +58,9 @@ def describe_auto_scaling_groups(
 
 
 def desired_equals_healthy(
-    asg_names: List[str], configuration: Configuration = None, secrets: Secrets = None
+    asg_names: List[str],
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> bool:
     """
     If desired number matches the number of healthy instances
@@ -68,11 +70,15 @@ def desired_equals_healthy(
     """
 
     if not asg_names:
-        raise FailedActivity("Non-empty list of auto scaling groups is required")
+        raise FailedActivity(
+            "Non-empty list of auto scaling groups is required"
+        )
 
     client = aws_client("autoscaling", configuration, secrets)
 
-    groups_descr = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
+    groups_descr = client.describe_auto_scaling_groups(
+        AutoScalingGroupNames=asg_names
+    )
 
     return is_desired_equals_healthy(groups_descr)
 
@@ -122,7 +128,9 @@ def wait_desired_equals_healthy(
     """
 
     if not asg_names:
-        raise FailedActivity("Non-empty list of auto scaling groups is required")
+        raise FailedActivity(
+            "Non-empty list of auto scaling groups is required"
+        )
 
     client = aws_client("autoscaling", configuration, secrets)
 
@@ -386,7 +394,9 @@ def instance_count_by_health(
 # Private functions
 ###############################################################################
 def discover_scaling_groups(
-    client: boto3.client, asgs: List[str] = None, tags: List[Dict[str, Any]] = None
+    client: boto3.client,
+    asgs: List[str] = None,
+    tags: List[Dict[str, Any]] = None,
 ) -> AWSResponse:
     if not any([asgs, tags]):
         raise FailedActivity(
@@ -402,12 +412,18 @@ def discover_scaling_groups(
         paginator = client.get_paginator("describe_tags")
         for p in paginator.paginate(Filters=tag_filter):
             asgs.extend(
-                [t["ResourceId"] for t in p["Tags"] if t["ResourceId"] not in asgs]
+                [
+                    t["ResourceId"]
+                    for t in p["Tags"]
+                    if t["ResourceId"] not in asgs
+                ]
             )
 
     results = {"AutoScalingGroups": []}
     for group in breakup_iterable(asgs, 50):
-        response = client.describe_auto_scaling_groups(AutoScalingGroupNames=group)
+        response = client.describe_auto_scaling_groups(
+            AutoScalingGroupNames=group
+        )
         results["AutoScalingGroups"].extend(response["AutoScalingGroups"])
     return results
 
@@ -418,7 +434,9 @@ def get_asg_by_name(asg_names: List[str], client: boto3.client) -> AWSResponse:
     for p in paginator.paginate(AutoScalingGroupNames=asg_names):
         results["AutoScalingGroups"].extend(p["AutoScalingGroups"])
 
-    valid_asgs = [a["AutoScalingGroupName"] for a in results["AutoScalingGroups"]]
+    valid_asgs = [
+        a["AutoScalingGroupName"] for a in results["AutoScalingGroups"]
+    ]
     invalid_asgs = [a for a in asg_names if a not in valid_asgs]
 
     if invalid_asgs:
@@ -434,9 +452,9 @@ def get_asg_by_tags(
 
     # fetch all ASGs using paginator
     # TODO: simplify this function (similar to actions) & update unit tests
-    page_iterator = client.get_paginator("describe_auto_scaling_groups").paginate(
-        PaginationConfig={"PageSize": 100}
-    )
+    page_iterator = client.get_paginator(
+        "describe_auto_scaling_groups"
+    ).paginate(PaginationConfig={"PageSize": 100})
 
     asg_descrs = {"AutoScalingGroups": []}
 
@@ -449,13 +467,17 @@ def get_asg_by_tags(
         map(
             lambda g: {
                 "Name": g["AutoScalingGroupName"],
-                "Tags": set(map(lambda t: "=".join([t["Key"], t["Value"]]), g["Tags"])),
+                "Tags": set(
+                    map(lambda t: "=".join([t["Key"], t["Value"]]), g["Tags"])
+                ),
             },
             asg_descrs["AutoScalingGroups"],
         )
     )
 
-    filtered_groups = [g["Name"] for g in group_sets if filter_set.issubset(g["Tags"])]
+    filtered_groups = [
+        g["Name"] for g in group_sets if filter_set.issubset(g["Tags"])
+    ]
 
     logger.debug(f"filtered groups: {filtered_groups}")
 

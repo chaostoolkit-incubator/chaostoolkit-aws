@@ -54,7 +54,9 @@ def invoke_function(
     try:
         response = client.invoke(**request_kwargs)
     except Exception as x:
-        raise FailedActivity(f"failed invoking function '{function_name}': '{str(x)}'")
+        raise FailedActivity(
+            f"failed invoking function '{function_name}': '{str(x)}'"
+        )
     if "Payload" in response:
         # The payload is of type StreamingBody and
         # cannot be directly serialized into JSON
@@ -91,7 +93,9 @@ def put_function_concurrency(
 
 
 def delete_function_concurrency(
-    function_name: str, configuration: Configuration = None, secrets: Secrets = None
+    function_name: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> AWSResponse:
     """
     Removes concurrency limit applied to the specified Lambda
@@ -135,7 +139,9 @@ def put_function_memory_size(
 
 
 def delete_event_source_mapping(
-    event_uuid: str, configuration: Configuration = None, secrets: Secrets = None
+    event_uuid: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> AWSResponse:
     """
     Delete an event source mapping
@@ -169,7 +175,9 @@ def toggle_event_source_mapping_state(
     """
     client = aws_client("lambda", configuration, secrets)
     try:
-        return client.update_event_source_mapping(UUID=event_uuid, Enabled=enabled)
+        return client.update_event_source_mapping(
+            UUID=event_uuid, Enabled=enabled
+        )
     except ClientError as e:
         raise FailedActivity(e.response["Error"]["Message"])
 

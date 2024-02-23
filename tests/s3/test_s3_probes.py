@@ -55,7 +55,8 @@ def test_object_exists_true(test_client: aws_client):
     client.get_object.return_value = read_configs("get_object_1.json")
 
     response = object_exists(
-        bucket_name="Test-Bucket-1", object_key="another/random/path/to/file.json"
+        bucket_name="Test-Bucket-1",
+        object_key="another/random/path/to/file.json",
     )
 
     assert response
@@ -70,11 +71,14 @@ def test_object_exists_false(test_client: aws_client):
     test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
     client.get_object.side_effect = mock_client_error(
-        op="GetObject", Code="NoSuchKey", Message="The specified key does not exist."
+        op="GetObject",
+        Code="NoSuchKey",
+        Message="The specified key does not exist.",
     )
 
     response = object_exists(
-        bucket_name="Test-Bucket-1", object_key="another/random/path/to/invalid.json"
+        bucket_name="Test-Bucket-1",
+        object_key="another/random/path/to/invalid.json",
     )
 
     assert not response
@@ -91,7 +95,8 @@ def test_object_exists_invalid_bucket(test_client: aws_client):
 
     with pytest.raises(FailedActivity) as x:
         object_exists(
-            bucket_name="Test-Bucket-99", object_key="another/random/path/to/file.json"
+            bucket_name="Test-Bucket-99",
+            object_key="another/random/path/to/file.json",
         )
 
     assert 'Bucket "Test-Bucket-99" does not exist!' in str(x)
@@ -124,7 +129,9 @@ def test_object_version_exists_false(test_client: aws_client):
     test_client.return_value = client
     client.list_buckets.return_value = read_configs("list_buckets_1.json")
     client.get_object.side_effect = mock_client_error(
-        op="GetObject", Code="InvalidArgument", Message="Invalid version id specified"
+        op="GetObject",
+        Code="InvalidArgument",
+        Message="Invalid version id specified",
     )
 
     response = object_exists(
@@ -150,7 +157,9 @@ def test_bucket_versioning_suspended_true(test_client: aws_client):
         "get_bucket_versioning_1.json"
     )
 
-    response = versioning_status(bucket_name="Test-Bucket-1", status="Suspended")
+    response = versioning_status(
+        bucket_name="Test-Bucket-1", status="Suspended"
+    )
     assert response
 
 

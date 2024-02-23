@@ -47,9 +47,9 @@ class TestEmrProbesMoto:
         c = client.list_clusters()
         clusters = c["Clusters"]
         self.cluster_id = clusters[0]["Id"]
-        self.instance_groups = client.list_instance_groups(ClusterId=self.cluster_id)[
-            "InstanceGroups"
-        ]
+        self.instance_groups = client.list_instance_groups(
+            ClusterId=self.cluster_id
+        )["InstanceGroups"]
 
     def test_describe_cluster(self):
         params = {
@@ -154,7 +154,9 @@ class TestEmrProbesMocked:
         fleet = response["InstanceFleets"]
         assert fleet["Name"] == "TaskFleetNodes"
 
-        client.list_instance_fleets.assert_called_with(ClusterId=self.cluster_id)
+        client.list_instance_fleets.assert_called_with(
+            ClusterId=self.cluster_id
+        )
 
     @patch("chaosaws.emr.probes.aws_client", autospec=True)
     def test_describe_cluster_invalid(self, aws_client):

@@ -66,7 +66,9 @@ def get_incidents(
             filters=filters,
             maxResults=10,
         )
-        logger.debug(f"Found {len(response['incidentRecordSummaries'])} incidents")
+        logger.debug(
+            f"Found {len(response['incidentRecordSummaries'])} incidents"
+        )
     except Exception as e:
         # catchall as boto3 exception management is so poorly documented
         logger.debug("Failed to call AWS SSM Incidents API", exc_info=True)

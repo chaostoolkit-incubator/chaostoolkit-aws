@@ -22,7 +22,9 @@ def test_ecs_service_is_not_deploying(aws_client):
     cluster = "ecs-cluster"
     service = "ecs-service"
     response = service_is_deploying(cluster, service)
-    client.describe_services.assert_called_with(cluster=cluster, services=[service])
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service]
+    )
     assert response is False
 
 
@@ -31,14 +33,18 @@ def test_ecs_service_is_deploying(aws_client):
     client = MagicMock()
     client.describe_services = MagicMock(
         return_value={
-            "services": [{"deployments": [{"status": "PRIMARY"}, {"status": "ACTIVE"}]}]
+            "services": [
+                {"deployments": [{"status": "PRIMARY"}, {"status": "ACTIVE"}]}
+            ]
         }
     )
     aws_client.return_value = client
     cluster = "ecs-cluster"
     service = "ecs-service"
     response = service_is_deploying(cluster, service)
-    client.describe_services.assert_called_with(cluster=cluster, services=[service])
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service]
+    )
     assert response is True
 
 
@@ -57,7 +63,9 @@ def test_error_checking_ecs_service_is_not_deploying(aws_client):
     with pytest.raises(FailedActivity) as exceptionInfo:
         service_is_deploying(cluster, service)
 
-    client.describe_services.assert_called_with(cluster=cluster, services=[service])
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service]
+    )
     assert "Error retrieving service data from AWS" in str(exceptionInfo.value)
 
 
@@ -79,7 +87,9 @@ def test_are_all_tasks_running_true(aws_client):
     cluster = "ecs-cluster"
     service = "MyGenericService"
     response = are_all_desired_tasks_running(cluster, service)
-    client.describe_services.assert_called_with(cluster=cluster, services=[service])
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service]
+    )
     assert response
 
 
@@ -101,7 +111,9 @@ def test_are_all_tasks_running_false(aws_client):
     cluster = "ecs-cluster"
     service = "MyGenericService"
     response = are_all_desired_tasks_running(cluster, service)
-    client.describe_services.assert_called_with(cluster=cluster, services=[service])
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service]
+    )
     assert not response
 
 
@@ -114,7 +126,9 @@ def test_are_all_tasks_running_exception(aws_client):
     service = "MyGenericService"
     with pytest.raises(FailedActivity) as e:
         are_all_desired_tasks_running(cluster, service)
-    client.describe_services.assert_called_with(cluster=cluster, services=[service])
+    client.describe_services.assert_called_with(
+        cluster=cluster, services=[service]
+    )
     assert "Error retrieving service data from AWS" in str(e.value)
 
 
@@ -162,12 +176,17 @@ def test_describe_tasks(aws_client):
     client = MagicMock()
     aws_client.return_value = client
     client.get_paginator.return_value.paginate.return_value = [
-        {"taskArns": ["arn:aws:ecs:region:012345678910:task/MyCluster/123456789"]}
+        {
+            "taskArns": [
+                "arn:aws:ecs:region:012345678910:task/MyCluster/123456789"
+            ]
+        }
     ]
     client.describe_tasks.return_value = {
         "tasks": [
             {
-                "clusterArn": "arn:aws:ecs:region:012345678910:cluster/" "MyCluster",
+                "clusterArn": "arn:aws:ecs:region:012345678910:cluster/"
+                "MyCluster",
                 "taskArn": "arn:aws:ecs:region:012345678910:task/MyCluster/"
                 "123456789",
                 "version": 22,
@@ -175,7 +194,9 @@ def test_describe_tasks(aws_client):
         ]
     }
     response = describe_tasks(cluster="MyCluster")
-    client.get_paginator.return_value.paginate.assert_called_with(cluster="MyCluster")
+    client.get_paginator.return_value.paginate.assert_called_with(
+        cluster="MyCluster"
+    )
     client.describe_tasks.assert_called_with(
         cluster="MyCluster",
         tasks=["arn:aws:ecs:region:012345678910:task/MyCluster/123456789"],

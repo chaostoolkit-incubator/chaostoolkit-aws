@@ -1,4 +1,0 @@
-aws-requests-auth
-boto3
-chaostoolkit-lib>=1.42.0
-requests

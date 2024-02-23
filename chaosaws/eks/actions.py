@@ -24,12 +24,17 @@ def create_cluster(
     client = aws_client("eks", configuration, secrets)
     logger.debug(f"Creating EKS cluster: {name}")
     return client.create_cluster(
-        name=name, version=version, roleArn=role_arn, resourcesVpcConfig=vpc_config
+        name=name,
+        version=version,
+        roleArn=role_arn,
+        resourcesVpcConfig=vpc_config,
     )
 
 
 def delete_cluster(
-    name: str = None, configuration: Configuration = None, secrets: Secrets = None
+    name: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> AWSResponse:
     """
     Delete the given EKS cluster.

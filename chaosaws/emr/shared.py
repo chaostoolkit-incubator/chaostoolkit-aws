@@ -65,7 +65,10 @@ def get_instance_fleet(
     fleets = {"InstanceFleets": None}
 
     def _list(marker: str = None):
-        params = {"ClusterId": cluster_id, **({"Marker": marker} if marker else {})}
+        params = {
+            "ClusterId": cluster_id,
+            **({"Marker": marker} if marker else {}),
+        }
 
         try:
             response = client.list_instance_fleets(**params)
@@ -90,7 +93,10 @@ def get_instance_group(
     groups = {"InstanceGroups": None}
 
     def _list(marker: str = None):
-        params = {"ClusterId": cluster_id, **({"Marker": marker} if marker else {})}
+        params = {
+            "ClusterId": cluster_id,
+            **({"Marker": marker} if marker else {}),
+        }
         try:
             response = client.list_instance_groups(**params)
             for r in response["InstanceGroups"]:

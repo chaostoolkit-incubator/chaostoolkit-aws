@@ -78,7 +78,9 @@ def describe_cluster(
     response = client.describe_clusters(clusters=[cluster])
 
     if not response.get("clusters", []):
-        raise FailedActivity("Error retrieving information for cluster %s" % (cluster))
+        raise FailedActivity(
+            "Error retrieving information for cluster %s" % (cluster)
+        )
     return response
 
 
@@ -167,7 +169,9 @@ def describe_tasks(
             tasks.append(t)
 
     if not tasks:
-        raise FailedActivity("Unable to find any tasks for cluster %s" % (cluster))
+        raise FailedActivity(
+            "Unable to find any tasks for cluster %s" % (cluster)
+        )
 
     response = client.describe_tasks(cluster=cluster, tasks=tasks)
     return response

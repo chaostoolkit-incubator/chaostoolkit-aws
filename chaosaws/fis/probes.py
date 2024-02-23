@@ -8,7 +8,9 @@ __all__ = ["get_experiment"]
 
 
 def get_experiment(
-    experiment_id: str, configuration: Configuration = None, secrets: Secrets = None
+    experiment_id: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
 ) -> AWSResponse:
     """
     Gets information about the specified experiment.

@@ -18,7 +18,10 @@ def list_buckets(client: boto3.client) -> List[str]:
 
 
 def get_object(
-    client: boto3.client, bucket_name: str, object_key: str, version_id: str = None
+    client: boto3.client,
+    bucket_name: str,
+    object_key: str,
+    version_id: str = None,
 ) -> AWSResponse:
     """Get an object in a S3 bucket
 
@@ -47,7 +50,10 @@ def validate_bucket_exists(client: boto3.client, bucket_name: str) -> bool:
 
 
 def validate_object_exists(
-    client: boto3.client, bucket_name: str, object_key: str, version_id: str = None
+    client: boto3.client,
+    bucket_name: str,
+    object_key: str,
+    version_id: str = None,
 ) -> bool:
     try:
         get_object(client, bucket_name, object_key, version_id)

@@ -98,7 +98,9 @@ def get_traces(
         secrets,
     )
     quantity = min(quantity, 5)
-    trace_ids = [s["Id"] for s in summaries.get("TraceSummaries", [])[-quantity:]]
+    trace_ids = [
+        s["Id"] for s in summaries.get("TraceSummaries", [])[-quantity:]
+    ]
     client = aws_client("xray", configuration, secrets)
     try:
         response = client.batch_get_traces(TraceIds=trace_ids)

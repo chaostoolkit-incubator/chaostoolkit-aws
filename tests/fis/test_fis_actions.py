@@ -19,16 +19,22 @@ def test_that_fis_action_modules___all___attribute_exposed_correctly():
 
 
 @patch("chaosaws.fis.actions.aws_client", autospec=True)
-def test_that_start_experiment_invoked_correctly_if_only_given_template_id(aws_client):
+def test_that_start_experiment_invoked_correctly_if_only_given_template_id(
+    aws_client,
+):
     client = MagicMock()
     aws_client.return_value = client
 
     start_experiment(experiment_template_id="an-id")
-    client.start_experiment.assert_called_once_with(experimentTemplateId="an-id")
+    client.start_experiment.assert_called_once_with(
+        experimentTemplateId="an-id"
+    )
 
 
 @patch("chaosaws.fis.actions.aws_client", autospec=True)
-def test_that_start_experiment_invoked_correctly_if_given_all_params(aws_client):
+def test_that_start_experiment_invoked_correctly_if_given_all_params(
+    aws_client,
+):
     client = MagicMock()
     aws_client.return_value = client
 
@@ -70,7 +76,10 @@ def test_that_start_experiment_fails_if_exception_raised(aws_client):
 
     with pytest.raises(FailedActivity) as ex:
         start_experiment(experiment_template_id="an-id")
-    assert str(ex.value) == "Start Experiment failed, reason was: Something went wrong"
+    assert (
+        str(ex.value)
+        == "Start Experiment failed, reason was: Something went wrong"
+    )
 
 
 @patch("chaosaws.fis.actions.aws_client", autospec=True)
@@ -85,7 +94,9 @@ def test_that_start_experiment_returns_client_response(aws_client):
 
 
 @patch("chaosaws.fis.actions.aws_client", autospec=True)
-def test_that_stop_experiment_invoked_correctly_when_given_experiment_id(aws_client):
+def test_that_stop_experiment_invoked_correctly_when_given_experiment_id(
+    aws_client,
+):
     client = MagicMock()
     aws_client.return_value = client
 
@@ -119,7 +130,10 @@ def test_that_stop_experiment_fails_if_exception_raised(aws_client):
 
     with pytest.raises(FailedActivity) as ex:
         stop_experiment(experiment_id="an-id")
-    assert str(ex.value) == "Stop Experiment failed, reason was: Something went wrong"
+    assert (
+        str(ex.value)
+        == "Stop Experiment failed, reason was: Something went wrong"
+    )
 
 
 @patch("chaosaws.fis.actions.aws_client", autospec=True)

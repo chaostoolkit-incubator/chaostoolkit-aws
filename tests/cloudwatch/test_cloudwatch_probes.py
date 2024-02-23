@@ -51,7 +51,9 @@ def test_cloudwatch_get_alarm_state_value_not_found(aws_client):
 
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
-def test_cloudwatch_get_metric_statistics_dimensions_ok(aws_client, mock_datetime):
+def test_cloudwatch_get_metric_statistics_dimensions_ok(
+    aws_client, mock_datetime
+):
     client = MagicMock()
     aws_client.return_value = client
     mock_datetime.utcnow.return_value = datetime(
@@ -68,7 +70,9 @@ def test_cloudwatch_get_metric_statistics_dimensions_ok(aws_client, mock_datetim
     statistic = "Sum"
     extended_statistic = None
     unit = "Count"
-    client.get_metric_statistics.return_value = {"Datapoints": [{statistic: 4753.0}]}
+    client.get_metric_statistics.return_value = {
+        "Datapoints": [{statistic: 4753.0}]
+    }
 
     result = get_metric_statistics(
         namespace=namespace,
@@ -114,7 +118,9 @@ def test_cloudwatch_get_metric_statistics_ok(aws_client, mock_datetime):
     statistic = "Sum"
     extended_statistic = None
     unit = "Count"
-    client.get_metric_statistics.return_value = {"Datapoints": [{statistic: 4753.0}]}
+    client.get_metric_statistics.return_value = {
+        "Datapoints": [{statistic: 4753.0}]
+    }
 
     result = get_metric_statistics(
         namespace=namespace,
@@ -143,7 +149,9 @@ def test_cloudwatch_get_metric_statistics_ok(aws_client, mock_datetime):
 
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
-def test_cloudwatch_get_metric_statistics_extended_ok(aws_client, mock_datetime):
+def test_cloudwatch_get_metric_statistics_extended_ok(
+    aws_client, mock_datetime
+):
     client = MagicMock()
     aws_client.return_value = client
     mock_datetime.utcnow.return_value = datetime(
@@ -189,7 +197,9 @@ def test_cloudwatch_get_metric_statistics_extended_ok(aws_client, mock_datetime)
 
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
-def test_cloudwatch_get_metric_statistics_no_datapoints(aws_client, mock_datetime):
+def test_cloudwatch_get_metric_statistics_no_datapoints(
+    aws_client, mock_datetime
+):
     client = MagicMock()
     aws_client.return_value = client
     mock_datetime.utcnow.return_value = datetime(
@@ -235,7 +245,9 @@ def test_cloudwatch_get_metric_statistics_no_datapoints(aws_client, mock_datetim
 
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
-def test_cloudwatch_get_metric_statistics_bad_response(aws_client, mock_datetime):
+def test_cloudwatch_get_metric_statistics_bad_response(
+    aws_client, mock_datetime
+):
     client = MagicMock()
     aws_client.return_value = client
     mock_datetime.utcnow.return_value = datetime(
@@ -251,7 +263,9 @@ def test_cloudwatch_get_metric_statistics_bad_response(aws_client, mock_datetime
     statistic = "Sum"
     extended_statistic = None
     unit = "Count"
-    client.get_metric_statistics.return_value = {"Datapoints": [{"some": "value"}]}
+    client.get_metric_statistics.return_value = {
+        "Datapoints": [{"some": "value"}]
+    }
 
     with pytest.raises(FailedActivity):
         get_metric_statistics(
@@ -288,13 +302,18 @@ def test_get_cloudwatch_data_average_dimensions(m_client, m_datetime):
     client = MagicMock()
     m_client.return_value = client
     client.get_metric_data.return_value = response_data
-    m_datetime.utcnow.return_value = datetime(2020, 1, 1, 17, 00, tzinfo=timezone.utc)
+    m_datetime.utcnow.return_value = datetime(
+        2020, 1, 1, 17, 00, tzinfo=timezone.utc
+    )
 
     args = {
         "namespace": "AWS/ApplicationELB",
         "metric_name": "ActiveConnectionCount",
         "dimensions": [
-            {"Name": "LoadBalancer", "Value": "app/my_test_alb/0000000000000000"}
+            {
+                "Name": "LoadBalancer",
+                "Value": "app/my_test_alb/0000000000000000",
+            }
         ],
         "period": 60,
         "duration": 300,
@@ -333,12 +352,16 @@ def test_get_cloudwatch_data_average_dimensions(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_average(m_client, m_datetime):
-    with open(os.path.join(module_path, "data", "cloudwatch_data_full.json")) as fh:
+    with open(
+        os.path.join(module_path, "data", "cloudwatch_data_full.json")
+    ) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
     client.get_metric_data.return_value = response_data
-    m_datetime.utcnow.return_value = datetime(2020, 1, 1, 17, 00, tzinfo=timezone.utc)
+    m_datetime.utcnow.return_value = datetime(
+        2020, 1, 1, 17, 00, tzinfo=timezone.utc
+    )
 
     args = {
         "namespace": "AWS/ApplicationELB",
@@ -382,12 +405,16 @@ def test_get_cloudwatch_data_average(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_minimum(m_client, m_datetime):
-    with open(os.path.join(module_path, "data", "cloudwatch_data_full.json")) as fh:
+    with open(
+        os.path.join(module_path, "data", "cloudwatch_data_full.json")
+    ) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
     client.get_metric_data.return_value = response_data
-    m_datetime.utcnow.return_value = datetime(2020, 1, 1, 17, 00, tzinfo=timezone.utc)
+    m_datetime.utcnow.return_value = datetime(
+        2020, 1, 1, 17, 00, tzinfo=timezone.utc
+    )
 
     args = {
         "namespace": "AWS/ApplicationELB",
@@ -431,12 +458,16 @@ def test_get_cloudwatch_data_minimum(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_maximum(m_client, m_datetime):
-    with open(os.path.join(module_path, "data", "cloudwatch_data_full.json")) as fh:
+    with open(
+        os.path.join(module_path, "data", "cloudwatch_data_full.json")
+    ) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
     client.get_metric_data.return_value = response_data
-    m_datetime.utcnow.return_value = datetime(2020, 1, 1, 17, 00, tzinfo=timezone.utc)
+    m_datetime.utcnow.return_value = datetime(
+        2020, 1, 1, 17, 00, tzinfo=timezone.utc
+    )
 
     args = {
         "namespace": "AWS/ApplicationELB",
@@ -480,12 +511,16 @@ def test_get_cloudwatch_data_maximum(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_sum(m_client, m_datetime):
-    with open(os.path.join(module_path, "data", "cloudwatch_data_full.json")) as fh:
+    with open(
+        os.path.join(module_path, "data", "cloudwatch_data_full.json")
+    ) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
     client.get_metric_data.return_value = response_data
-    m_datetime.utcnow.return_value = datetime(2020, 1, 1, 17, 00, tzinfo=timezone.utc)
+    m_datetime.utcnow.return_value = datetime(
+        2020, 1, 1, 17, 00, tzinfo=timezone.utc
+    )
 
     args = {
         "namespace": "AWS/ApplicationELB",
@@ -529,12 +564,16 @@ def test_get_cloudwatch_data_sum(m_client, m_datetime):
 @patch("chaosaws.cloudwatch.probes.datetime", autospec=True)
 @patch("chaosaws.cloudwatch.probes.aws_client", autospec=True)
 def test_get_cloudwatch_data_no_results(m_client, m_datetime):
-    with open(os.path.join(module_path, "data", "cloudwatch_data_none.json")) as fh:
+    with open(
+        os.path.join(module_path, "data", "cloudwatch_data_none.json")
+    ) as fh:
         response_data = json.loads(fh.read(), object_hook=datetime_parser)
     client = MagicMock()
     m_client.return_value = client
     client.get_metric_data.return_value = response_data
-    m_datetime.utcnow.return_value = datetime(2020, 1, 1, 17, 00, tzinfo=timezone.utc)
+    m_datetime.utcnow.return_value = datetime(
+        2020, 1, 1, 17, 00, tzinfo=timezone.utc
+    )
 
     args = {
         "namespace": "AWS/ApplicationELB",

@@ -7,7 +7,12 @@ from chaoslib.types import Configuration, Secrets
 from chaosaws import aws_client
 from chaosaws.types import AWSResponse
 
-__all__ = ["create_document", "send_command", "delete_document", "put_parameter"]
+__all__ = [
+    "create_document",
+    "send_command",
+    "delete_document",
+    "put_parameter",
+]
 
 
 def create_document(
@@ -73,7 +78,9 @@ def send_command(
     """
 
     if not any([document_name]):
-        raise ActivityFailed("To run commands," "you must specify the document_name")
+        raise ActivityFailed(
+            "To run commands," "you must specify the document_name"
+        )
 
     try:
         client = aws_client("ssm", configuration, secrets)
@@ -111,7 +118,9 @@ def delete_document(
     """
 
     if not any(name):
-        raise ActivityFailed("To create a document," "you must specify the  name")
+        raise ActivityFailed(
+            "To create a document," "you must specify the  name"
+        )
 
     try:
         client = aws_client("ssm", configuration, secrets)
@@ -185,7 +194,9 @@ def put_parameter(
         raise ActivityFailed("To create a parameter, you must specify the name")
 
     if not value:
-        raise ActivityFailed("To create a parameter, you must specify the value")
+        raise ActivityFailed(
+            "To create a parameter, you must specify the value"
+        )
 
     try:
         client = aws_client("ssm", configuration, secrets)
@@ -205,4 +216,6 @@ def put_parameter(
         return client.put_parameter(**kwargs)
     except ClientError as e:
         error_message = e.response["Error"]["Message"]
-        raise ActivityFailed(f"Failed to put  parameter '{name}': '{error_message}'")
+        raise ActivityFailed(
+            f"Failed to put  parameter '{name}': '{error_message}'"
+        )

@@ -39,7 +39,8 @@ def reboot_cache_clusters(
         node_ids = validate_cluster_nodes(c, node_ids)
         results.append(
             client.reboot_cache_cluster(
-                CacheClusterId=c["CacheClusterId"], CacheNodeIdsToReboot=node_ids
+                CacheClusterId=c["CacheClusterId"],
+                CacheNodeIdsToReboot=node_ids,
             )["CacheCluster"]
         )
     return results
@@ -93,7 +94,9 @@ def delete_replication_groups(
 
     results = []
     for r in replication_groups:
-        logger.debug("Deleting Replication Group: %s" % (r["ReplicationGroupId"]))
+        logger.debug(
+            "Deleting Replication Group: %s" % (r["ReplicationGroupId"])
+        )
         if retain_primary_cluster:
             logger.debug("Deleting only read replicas.")
 
@@ -105,7 +108,9 @@ def delete_replication_groups(
         if final_snapshot_id:
             params["FinalSnapshotIdentifier"] = final_snapshot_id
 
-        results.append(client.delete_replication_group(**params)["ReplicationGroup"])
+        results.append(
+            client.delete_replication_group(**params)["ReplicationGroup"]
+        )
     return results
 
 

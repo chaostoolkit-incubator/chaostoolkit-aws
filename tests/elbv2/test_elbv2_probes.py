@@ -33,7 +33,11 @@ def test_targets_health_count(aws_client):
     }
     client.describe_target_health.side_effect = [
         {"TargetHealthDescriptions": [{"TargetHealth": {"State": "healthy"}}]},
-        {"TargetHealthDescriptions": [{"TargetHealth": {"State": "unhealthy"}}]},
+        {
+            "TargetHealthDescriptions": [
+                {"TargetHealth": {"State": "unhealthy"}}
+            ]
+        },
     ]
     response = targets_health_count(tg_names=tg_names)
     assert {"healthy": 1} in response.values()
@@ -92,7 +96,11 @@ def test_all_targets_healthy_false(aws_client):
     }
     client.describe_target_health.side_effect = [
         {"TargetHealthDescriptions": [{"TargetHealth": {"State": "healthy"}}]},
-        {"TargetHealthDescriptions": [{"TargetHealth": {"State": "unhealthy"}}]},
+        {
+            "TargetHealthDescriptions": [
+                {"TargetHealth": {"State": "unhealthy"}}
+            ]
+        },
     ]
     response = all_targets_healthy(tg_names=tg_names)
     assert response is False

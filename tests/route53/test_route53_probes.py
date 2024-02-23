@@ -37,7 +37,9 @@ def test_get_hosted_zone(m_client):
 def test_get_hosted_zone_not_found(m_client):
     mock_response = ClientError(
         operation_name="get_hosted_zone",
-        error_response={"Error": {"Message": "Test Error", "Code": "NoSuchHostedZone"}},
+        error_response={
+            "Error": {"Message": "Test Error", "Code": "NoSuchHostedZone"}
+        },
     )
     client = MagicMock()
     m_client.return_value = client
@@ -55,7 +57,9 @@ def test_get_health_check_status(m_client):
     m_client.return_value = client
     client.get_health_check_status.return_value = mock_response
 
-    response = get_health_check_status(check_id="00000000-0000-0000-0000-000000000000")
+    response = get_health_check_status(
+        check_id="00000000-0000-0000-0000-000000000000"
+    )
 
     client.get_health_check_status.assert_called_with(
         HealthCheckId="00000000-0000-0000-0000-000000000000"
@@ -100,11 +104,15 @@ def test_get_dns_answer(m_client):
     client.test_dns_answer.return_value = mock_response
 
     response = get_dns_answer(
-        zone_id="AAAAAAAAAAAAA", record_name="aws.testrecord.com", record_type="A"
+        zone_id="AAAAAAAAAAAAA",
+        record_name="aws.testrecord.com",
+        record_type="A",
     )
 
     client.test_dns_answer.assert_called_with(
-        HostedZoneId="AAAAAAAAAAAAA", RecordName="aws.testrecord.com", RecordType="A"
+        HostedZoneId="AAAAAAAAAAAAA",
+        RecordName="aws.testrecord.com",
+        RecordType="A",
     )
 
     assert response["ResponseCode"] == "NOERROR"
@@ -124,6 +132,8 @@ def test_get_dns_answer_not_found(m_client):
 
     with pytest.raises(FailedActivity) as e:
         get_dns_answer(
-            zone_id="BBBBBBBBBBBBB", record_name="aws.testrecord.com", record_type="A"
+            zone_id="BBBBBBBBBBBBB",
+            record_name="aws.testrecord.com",
+            record_type="A",
         )
     assert "Test Error" in str(e)

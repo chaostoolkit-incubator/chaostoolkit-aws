@@ -114,7 +114,10 @@ def test_wait_desired_equals_healthy_true(aws_client):
             }
         ]
     }
-    assert wait_desired_equals_healthy(asg_names=asg_names, timeout=0.1) in [0, 2]
+    assert wait_desired_equals_healthy(asg_names=asg_names, timeout=0.1) in [
+        0,
+        2,
+    ]
 
 
 @patch("chaosaws.asg.probes.aws_client", autospec=True)
@@ -128,13 +131,18 @@ def test_wait_desired_equals_healthy_timeout(aws_client):
                 {
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "Initializing"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "Initializing",
+                        }
                     ],
                 }
             ]
         }
     ]
-    assert wait_desired_equals_healthy(asg_names=asg_names, timeout=0) is maxsize
+    assert (
+        wait_desired_equals_healthy(asg_names=asg_names, timeout=0) is maxsize
+    )
 
 
 @patch("chaosaws.asg.probes.aws_client", autospec=True)
@@ -180,7 +188,10 @@ def test_desired_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup1",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Healthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Healthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -194,7 +205,10 @@ def test_desired_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup2",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -212,7 +226,10 @@ def test_desired_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup3",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -258,7 +275,10 @@ def test_desired_equals_healthy_tags_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup1",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -272,7 +292,10 @@ def test_desired_equals_healthy_tags_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup2",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -290,7 +313,10 @@ def test_desired_equals_healthy_tags_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup3",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -336,7 +362,10 @@ def test_wait_desired_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup1",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Healthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Healthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -350,7 +379,10 @@ def test_wait_desired_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup2",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -368,7 +400,10 @@ def test_wait_desired_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup3",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -414,7 +449,10 @@ def test_wait_desired_equals_healthy_tags_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup1",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -428,7 +466,10 @@ def test_wait_desired_equals_healthy_tags_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup2",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -446,7 +487,10 @@ def test_wait_desired_equals_healthy_tags_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup3",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -492,7 +536,10 @@ def test_wait_desired_not_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup1",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -506,7 +553,10 @@ def test_wait_desired_not_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup2",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -524,7 +574,10 @@ def test_wait_desired_not_equals_healthy_tags_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup3",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -537,7 +590,10 @@ def test_wait_desired_not_equals_healthy_tags_true(aws_client):
             ]
         },
     ]
-    assert wait_desired_not_equals_healthy_tags(tags=tags, timeout=0.2) in [0, 2]
+    assert wait_desired_not_equals_healthy_tags(tags=tags, timeout=0.2) in [
+        0,
+        2,
+    ]
 
 
 @patch("chaosaws.asg.probes.aws_client", autospec=True)
@@ -570,7 +626,10 @@ def test_wait_desired_not_equals_healthy_tags_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup1",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -584,7 +643,10 @@ def test_wait_desired_not_equals_healthy_tags_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup2",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Unhealthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Unhealthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -611,7 +673,10 @@ def test_is_scaling_in_progress_true(aws_client):
                 "AutoScalingGroupName": "AutoScalingGroup1",
                 "DesiredCapacity": 1,
                 "Instances": [
-                    {"HealthStatus": "Healthy", "LifecycleState": "OutOfService"}
+                    {
+                        "HealthStatus": "Healthy",
+                        "LifecycleState": "OutOfService",
+                    }
                 ],
                 "Tags": [
                     {
@@ -630,7 +695,10 @@ def test_is_scaling_in_progress_true(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup1",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Healthy", "LifecycleState": "OutOfService"}
+                        {
+                            "HealthStatus": "Healthy",
+                            "LifecycleState": "OutOfService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -676,7 +744,10 @@ def test_is_scaling_in_progress_false(aws_client):
                     "AutoScalingGroupName": "AutoScalingGroup1",
                     "DesiredCapacity": 1,
                     "Instances": [
-                        {"HealthStatus": "Healthy", "LifecycleState": "InService"}
+                        {
+                            "HealthStatus": "Healthy",
+                            "LifecycleState": "InService",
+                        }
                     ],
                     "Tags": [
                         {
@@ -709,7 +780,8 @@ def test_is_process_suspended_names_true(aws_client):
         }
     ]
     assert (
-        process_is_suspended(asg_names=asg_names, process_names=process_names) is True
+        process_is_suspended(asg_names=asg_names, process_names=process_names)
+        is True
     )
     assert client.suspend
 
@@ -731,7 +803,8 @@ def test_is_process_suspended_names_false(aws_client):
         }
     ]
     assert (
-        process_is_suspended(asg_names=asg_names, process_names=process_names) is False
+        process_is_suspended(asg_names=asg_names, process_names=process_names)
+        is False
     )
     assert client.suspend
 
@@ -878,7 +951,9 @@ def test_has_subnets_tags_valid(aws_client):
             },
         ]
     }
-    response = has_subnets(subnets=["subnet-012345678", "subnet-123456789"], tags=tags)
+    response = has_subnets(
+        subnets=["subnet-012345678", "subnet-123456789"], tags=tags
+    )
     assert response is True
 
 
@@ -990,7 +1065,9 @@ def test_has_subnets_tags_invalid(aws_client):
             },
         ]
     }
-    response = has_subnets(subnets=["subnet-012345678", "subnet-123456789"], tags=tags)
+    response = has_subnets(
+        subnets=["subnet-012345678", "subnet-123456789"], tags=tags
+    )
     assert response is False
 
 
@@ -1103,7 +1180,10 @@ def test_instance_healthy_count_names(aws_client):
                 "Instances": [
                     {"InstanceId": "i-012345678901", "HealthStatus": "Healthy"},
                     {"InstanceId": "i-012345678902", "HealthStatus": "Healthy"},
-                    {"InstanceId": "i-012345678903", "HealthStatus": "Unhealthy"},
+                    {
+                        "InstanceId": "i-012345678903",
+                        "HealthStatus": "Unhealthy",
+                    },
                 ],
             }
         ]
@@ -1139,7 +1219,10 @@ def test_instance_healthy_count_tags(aws_client):
                 "Instances": [
                     {"InstanceId": "i-012345678901", "HealthStatus": "Healthy"},
                     {"InstanceId": "i-012345678902", "HealthStatus": "Healthy"},
-                    {"InstanceId": "i-012345678903", "HealthStatus": "Unhealthy"},
+                    {
+                        "InstanceId": "i-012345678903",
+                        "HealthStatus": "Unhealthy",
+                    },
                 ],
                 "Tags": [
                     {
@@ -1173,7 +1256,10 @@ def test_instance_unhealthy_count_names(aws_client):
                 "Instances": [
                     {"InstanceId": "i-012345678901", "HealthStatus": "Healthy"},
                     {"InstanceId": "i-012345678902", "HealthStatus": "Healthy"},
-                    {"InstanceId": "i-012345678903", "HealthStatus": "Unhealthy"},
+                    {
+                        "InstanceId": "i-012345678903",
+                        "HealthStatus": "Unhealthy",
+                    },
                 ],
             }
         ]
@@ -1210,7 +1296,10 @@ def test_instance_unhealthy_count_tags(aws_client):
                 "Instances": [
                     {"InstanceId": "i-012345678901", "HealthStatus": "Healthy"},
                     {"InstanceId": "i-012345678902", "HealthStatus": "Healthy"},
-                    {"InstanceId": "i-012345678903", "HealthStatus": "Unhealthy"},
+                    {
+                        "InstanceId": "i-012345678903",
+                        "HealthStatus": "Unhealthy",
+                    },
                 ],
                 "Tags": [
                     {

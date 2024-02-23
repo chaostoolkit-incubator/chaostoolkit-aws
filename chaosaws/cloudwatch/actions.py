@@ -40,7 +40,11 @@ def put_rule(
     client = aws_client("events", configuration, secrets)
     kwargs = {
         "Name": rule_name,
-        **({"ScheduleExpression": schedule_expression} if schedule_expression else {}),
+        **(
+            {"ScheduleExpression": schedule_expression}
+            if schedule_expression
+            else {}
+        ),
         **({"EventPattern": event_pattern} if event_pattern else {}),
         **({"State": state} if state else {}),
         **({"Description": description} if description else {}),
@@ -179,7 +183,9 @@ def _remove_rule_targets(
     return client.remove_targets(Rule=rule_name, Ids=target_ids)
 
 
-def _get_rule_target_ids(rule_name: str, client: boto3.client, limit: int = None):
+def _get_rule_target_ids(
+    rule_name: str, client: boto3.client, limit: int = None
+):
     """
     Return all targets for a provided CloudWatch rule name.
     """
