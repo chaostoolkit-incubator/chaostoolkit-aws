@@ -26,7 +26,7 @@
 
 ---
 
-Welcome to the Amazon Web Services -(WS) extension for Chaos Toolkit. The
+Welcome to the Amazon Web Services (AWS) extension for Chaos Toolkit. The
 package aggregates activities to target your AWS infrastructure and explore
 your resilience via Chaos Engineering experiments.
 
