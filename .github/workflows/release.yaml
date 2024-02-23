@@ -27,6 +27,11 @@ jobs:
         PDM_BUILD_SCM_VERSION: ${{github.ref_name}}
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Upload packages as artifacts
+      uses: actions/upload-artifact@v2-preview
+      with:
+        name: chaostoolkit-aws-packages
+        path: dist/chaostoolkit_aws-*
 
   create-gh-release:
     runs-on: ubuntu-22.04
