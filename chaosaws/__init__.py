@@ -1,7 +1,7 @@
 import logging
 import os
 from datetime import datetime, timedelta, timezone
-from importlib.metadata import version
+from importlib.metadata import version, PackageNotFoundError
 from typing import Any, Dict, List, Optional, Union
 
 import boto3
@@ -23,8 +23,12 @@ from chaoslib.types import (
     Secrets,
 )
 
-__version__ = "0.31.1"
 __all__ = ["__version__", "discover", "aws_client", "signed_api_call"]
+
+try:
+    __version__ = version("chaostoolkit-aws")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 
 def get_logger() -> logging.Logger:
