@@ -9,7 +9,6 @@
 - Use existing AWS FIS policies `AWSFaultInjectionSimulatorNetworkAccess`,
   `AWSFaultInjectionSimulatorEC2Access` instead of creating new ones
 - Drop `logzero`
-- Drop support for Python 3.7 which has been EOL since June 2023
 - Fixed EMR test to use the appropriate `moto`
 - Switched tp [pdm](https://pdm-project.org/latest/) away from `setuptools` to
   manage the package. This will offer a more cohesive experience and will
