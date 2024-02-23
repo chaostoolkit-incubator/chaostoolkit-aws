@@ -2,7 +2,16 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.32.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.32.1...HEAD
+
+## [0.32.1][] - 2024-02-23
+
+[0.32.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.32.0...0.32.1
+
+### Fixed
+
+- Use `boto3.lambda.get_function_concurrency` to retrieve the reserved
+  `ReservedConcurrentExecutions` from a lambda function
 
 ## [0.32.0][] - 2024-02-23
 

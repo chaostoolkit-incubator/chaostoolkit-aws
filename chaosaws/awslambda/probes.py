@@ -23,8 +23,8 @@ def get_function_concurrency(
     Get configuration information of lambda by its function name
     """
     client = aws_client("lambda", configuration, secrets)
-    result = client.get_function(FunctionName=function_name)
-    return result["Concurrency"]["ReservedConcurrentExecutions"]
+    result = client.get_function_concurrency(FunctionName=function_name)
+    return result["ReservedConcurrentExecutions"]
 
 
 def get_function_timeout(

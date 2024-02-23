@@ -35,7 +35,9 @@ def test_aws_lambda_get_function_concurrency(aws_client):
     aws_client.return_value = client
     lambda_function_name = "my-lambda-function"
     get_function_concurrency(lambda_function_name)
-    client.get_function.assert_called_with(FunctionName=lambda_function_name)
+    client.get_function_concurrency.assert_called_with(
+        FunctionName=lambda_function_name
+    )
 
 
 @patch("chaosaws.awslambda.probes.aws_client", autospec=True)
