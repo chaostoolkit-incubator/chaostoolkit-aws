@@ -17,6 +17,10 @@
 - Drop Python 3.7 support as it has been EOL since June 2023
 - Updated GH actions to use PDM and the trusted publisher workflow from Pypi
 
+### Added
+
+- Code of Conduct
+
 ## [0.31.1][] - 2024-01-22
 
 [0.31.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.31.0...0.31.1
