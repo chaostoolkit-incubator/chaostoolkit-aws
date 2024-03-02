@@ -1,0 +1,160 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Manages a role for Chaostoolkit experiments",
+  "Parameters": {
+    "AuthorisedAccountId": {
+      "Description": "Additional account to be able to assume a role (optional)",
+      "Type": "String",
+      "Default": ""
+    }
+  },
+  "Conditions": {
+    "AdditionalAccount": {
+      "Fn::Not": [{
+        "Fn::Equals": [
+          {
+            "Ref": "AuthorisedAccountId"
+          },
+          ""
+        ]
+      }]
+    }
+  },
+  "Resources": {
+    "ChaosEngineeringRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Fn::If": [
+                "AdditionalAccount",
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:iam::",
+                          {
+                            "Ref": "AuthorisedAccountId"
+                          },
+                          ":root"
+                        ]
+                      ]
+                    }
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "chaos_tests_permissions",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "autoscaling:DescribeAutoScalingGroups",
+                    "autoscaling:ResumeProcesses",
+                    "autoscaling:DetachInstances",
+                    "autoscaling:UpdateAutoScalingGroup",
+                    "autoscaling:DescribeTags",
+                    "cloudwatch:DescribeAlarms",
+                    "cloudwatch:GetMetricStatistics",
+                    "ec2:DescribeTags",
+                    "ec2:CreateTags",
+                    "ec2:DescribeInstances",
+                    "ec2:StopInstances",
+                    "ec2:DescribeVolumes",
+                    "ec2:DescribeSubnets",
+                    "ec2:DescribeClassicLinkInstances",
+                    "ec2:DetachVolume",
+                    "ec2:AttachVolume",
+                    "ec2:CancelSpotInstanceRequests",
+                    "ec2:DescribeSecurityGroups",
+                    "ec2:TerminateInstances",
+                    "ec2:StartInstances",
+                    "ec2:RebootInstances",
+                    "ec2:AuthorizeSecurityGroupIngress",
+                    "ec2:RevokeSecurityGroupIngress",
+                    "ecs:StopTask",
+                    "ecs:UpdateService",
+                    "ecs:DeleteService",
+                    "ecs:DeleteCluster",
+                    "ecs:DeregisterContainerInstance",
+                    "ecs:ListServices",
+                    "ecs:ListTasks",
+                    "ecs:DescribeServices",
+                    "ecs:DescribeClusters",
+                    "ecs:DescribeTasks",
+                    "eks:CreateCluster",
+                    "eks:DeleteCluster",
+                    "eks:DescribeCluster",
+                    "eks:ListClusters",
+                    "elasticache:RebootCacheCluster",
+                    "elasticache:DeleteCacheCluster",
+                    "elasticache:DeleteReplicationGroup",
+                    "elasticache:DescribeCacheClusters",
+                    "elasticache:DescribeReplicationGroups",
+                    "elasticloadbalancing:DescribeLoadBalancers",
+                    "elasticloadbalancing:DescribeTargetGroups",
+                    "elasticloadbalancing:DescribeTargetHealth",
+                    "elasticloadbalancing:DeleteLoadBalancer",
+                    "elasticloadbalancing:DeregisterTargets",
+                    "elasticloadbalancing:SetSecurityGroups",
+                    "elasticloadbalancing:SetSubnets",
+                    "events:PutRule",
+                    "events:PutTargets",
+                    "events:DisableRule",
+                    "events:EnableRule",
+                    "events:DeleteRule",
+                    "events:RemoveTargets",
+                    "events:ListTargetsByRule",
+                    "lambda:InvokeFunction",
+                    "lambda:PutFunctionConcurrency",
+                    "lambda:DeleteFunctionConcurrency",
+                    "lambda:UpdateFunctionConfiguration",
+                    "lambda:GetFunction",
+                    "lambda:GetFunctionConfiguration",
+                    "rds:RebootDBInstance",
+                    "rds:StopDBInstance",
+                    "rds:StopDBCluster",
+                    "rds:DeleteDBInstance",
+                    "rds:DeleteDBCluster",
+                    "rds:DeleteDBClusterEndpoint",
+                    "rds:DescribeDBClusters"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "Path": "/"
+      }
+    }
+  },
+  "Outputs": {
+    "ChaosEngineeringRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "ChaosEngineeringRole",
+          "Arn"
+        ]
+      }
+    }
+  }
+}
