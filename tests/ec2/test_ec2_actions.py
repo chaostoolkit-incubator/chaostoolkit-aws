@@ -8,8 +8,10 @@ from chaosaws.ec2.actions import (
     attach_volume,
     authorize_security_group_ingress,
     detach_random_volume,
+    remove_tags_from_instances,
     restart_instances,
     revoke_security_group_ingress,
+    set_tags_on_instances,
     start_instances,
     stop_instance,
     stop_instances,
@@ -1133,4 +1135,54 @@ def test_revoke_security_group_ingress_with_cidr_ip(aws_client):
                 "UserIdGroupPairs": [{}],
             }
         ],
+    )
+
+
+@patch("chaosaws.ec2.actions.aws_client", autospec=True)
+def test_set_tags_on_instances(aws_client):
+    tags = "a=b,c=d"
+    expected_tags = [{"Key": "a", "Value": "b"}, {"Key": "c", "Value": "d"}]
+
+    client = MagicMock()
+    aws_client.return_value = client
+    inst_id_1 = "i-1234567890abcdef0"
+    client.describe_instances.return_value = {
+        "Reservations": [
+            {
+                "Instances": [
+                    {"InstanceId": inst_id_1, "InstanceLifecycle": "normal"}
+                ]
+            }
+        ]
+    }
+
+    set_tags_on_instances(tags, percentage=10)
+
+    client.create_tags.assert_called_with(
+        Resources=[inst_id_1], Tags=expected_tags
+    )
+
+
+@patch("chaosaws.ec2.actions.aws_client", autospec=True)
+def test_remove_tags_from_instances(aws_client):
+    tags = "a=b,c=d"
+    expected_tags = [{"Key": "a", "Value": "b"}, {"Key": "c", "Value": "d"}]
+
+    client = MagicMock()
+    aws_client.return_value = client
+    inst_id_1 = "i-1234567890abcdef0"
+    client.describe_instances.return_value = {
+        "Reservations": [
+            {
+                "Instances": [
+                    {"InstanceId": inst_id_1, "InstanceLifecycle": "normal"}
+                ]
+            }
+        ]
+    }
+
+    remove_tags_from_instances(tags)
+
+    client.delete_tags.assert_called_with(
+        Resources=[inst_id_1], Tags=expected_tags
     )

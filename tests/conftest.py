@@ -12,5 +12,4 @@ if NEED_TO_CONFIGURE_LOGGER:
 
     @pytest.fixture(scope="session", autouse=True)
     def setup_logger() -> None:
-        print("#######################")
         configure_logger(verbose=True)

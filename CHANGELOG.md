@@ -4,6 +4,11 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.32.1...HEAD
 
+### Added
+
+* The `set_tags_on_instances` and `remove_tags_from_instances` actions on the
+  EC2 package
+
 ## [0.32.1][] - 2024-02-23
 
 [0.32.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.32.0...0.32.1

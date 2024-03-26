@@ -9,7 +9,12 @@ from botocore.exceptions import ClientError
 from chaoslib.exceptions import ActivityFailed, FailedActivity
 from chaoslib.types import Configuration, Secrets
 
-from chaosaws import aws_client, convert_tags, get_logger
+from chaosaws import (
+    aws_client,
+    convert_tags,
+    get_logger,
+    tags_as_key_value_pairs,
+)
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -22,6 +27,8 @@ __all__ = [
     "detach_random_volume",
     "attach_volume",
     "stop_instances_by_incremental_steps",
+    "set_tags_on_instances",
+    "remove_tags_from_instances",
 ]
 
 logger = get_logger()
@@ -496,6 +503,107 @@ def stop_instances_by_incremental_steps(
     return responses
 
 
+def set_tags_on_instances(
+    tags: Union[str, List[Dict[str, str]]],
+    percentage: int = 100,
+    az: str = None,
+    filters: List[Dict[str, Any]] = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Sets some tags on the instances matching the `filters`. The set of instances
+    may be filtered down by availability-zone too.
+
+    The `tags`can be passed as a dictionary of key, value pair respecting
+    the usual AWS form: [{"Key": "...", "Value": "..."}, ...] or as a string
+    of key value pairs such as "k1=v1,k2=v2"
+
+    The `percentage` parameter (between 0 and 100) allows you to select only a
+    certain amount of instances amongst those matching the filters.
+
+    If no filters are given and `percentage` remains to 100, the entire set
+    of instances in an AZ will be tagged. If no AZ is provided, your entire
+    set of instances in the region will be tagged. This can be a lot of
+    instances and would not be appropriate. Always to use the filters to
+    target a significant subset.
+
+    See also: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2/client/create_tags.html
+    """  # noqa E501
+    client = aws_client("ec2", configuration, secrets)
+
+    if isinstance(tags, str):
+        tags = tags_as_key_value_pairs(convert_tags(tags) if tags else [])
+
+    if not tags:
+        raise FailedActivity("Missing tags to be set")
+
+    filters = filters or []
+    if az:
+        filters.append({"Name": "availability-zone", "Values": [az]})
+
+    instances = list_instances_by_type(filters, client)
+
+    instance_ids = [inst_id for inst_id in instances.get("normal", [])]
+
+    total = len(instance_ids)
+    # always force at least one instance
+    count = max(1, round(total * percentage / 100))
+    target_instances = random.sample(instance_ids, count)
+
+    if not target_instances:
+        raise FailedActivity(f"No instances in availability zone: {az}")
+
+    logger.debug(
+        "Picked EC2 instances '{}' from AZ '{}'".format(
+            str(target_instances), az
+        )
+    )
+
+    response = client.create_tags(Resources=target_instances, Tags=tags)
+
+    return response
+
+
+def remove_tags_from_instances(
+    tags: Union[str, List[Dict[str, str]]],
+    az: str = None,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Remove tags from instances
+
+    Usually mirrors `set_tags_on_instances`.
+    """
+    client = aws_client("ec2", configuration, secrets)
+
+    if isinstance(tags, str):
+        tags = tags_as_key_value_pairs(convert_tags(tags) if tags else [])
+
+    filters = []
+    for tag in tags:
+        filters.append({"Name": f"tag:{tag['Key']}", "Values": [tag["Value"]]})
+
+    if az:
+        filters.append({"Name": "availability-zone", "Values": [az]})
+
+    instances = client.describe_instances(Filters=filters)
+
+    instance_ids = []
+    for reservation in instances["Reservations"]:
+        for inst in reservation["Instances"]:
+            instance_ids.append(inst["InstanceId"])
+
+    logger.debug(
+        "Found EC2 instances '{}' from AZ '{}'".format(str(instance_ids), az)
+    )
+
+    response = client.delete_tags(Resources=instance_ids, Tags=tags)
+
+    return response
+
+
 ###############################################################################
 # Private functions
 ###############################################################################
@@ -604,7 +712,7 @@ def get_instance_type_from_response(response: Dict) -> Dict:
     """
     Transform list of instance IDs to a dict with IDs by instance type
     """
-    instances_type = defaultdict(List)
+    instances_type = defaultdict(list)
     # reservations are instances that were started together
 
     for reservation in response["Reservations"]:
