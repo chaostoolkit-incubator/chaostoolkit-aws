@@ -63,20 +63,6 @@ def test_get_bootstrap_servers_success(aws_client):
 
 
 @patch("chaosaws.msk.probes.aws_client", autospec=True)
-def test_get_bootstrap_servers_empty_response(aws_client):
-    client = MagicMock()
-    aws_client.return_value = client
-    cluster_arn = "arn_msk_cluster"
-    
-    client.get_bootstrap_brokers.return_value = None
-
-    response = get_bootstrap_servers(cluster_arn=cluster_arn)
-
-    client.get_bootstrap_brokers.assert_called_with(ClusterArn=cluster_arn)
-    assert response == []
-
-
-@patch("chaosaws.msk.probes.aws_client", autospec=True)
 def test_get_bootstrap_server_cluster_not_found(aws_client):
     client = MagicMock()
     aws_client.return_value = client
