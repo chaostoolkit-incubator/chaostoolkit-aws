@@ -2,6 +2,7 @@ from typing import List
 
 from chaoslib.types import Configuration, Secrets
 from chaoslib.exceptions import FailedActivity
+
 from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
@@ -22,8 +23,8 @@ def describe_msk_cluster(
     logger.debug(f"Describing MSK cluster: {cluster_arn}")
     try:
         return client.describe_cluster(ClusterArn=cluster_arn)
-    except client.exceptions.NotFoundException as e:
-        raise FailedActivity("The specified cluster was not found") from e
+    except client.exceptions.NotFoundException:
+        raise FailedActivity("The specified cluster was not found")
 
 
 def get_bootstrap_servers(
@@ -39,5 +40,5 @@ def get_bootstrap_servers(
     try:
         response = client.get_bootstrap_brokers(ClusterArn=cluster_arn)
         return response["BootstrapBrokerString"].split(",") if response else []
-    except client.exceptions.NotFoundException as e:
-        raise FailedActivity("The specified cluster was not found") from e
+    except client.exceptions.NotFoundException:
+        raise FailedActivity("The specified cluster was not found")

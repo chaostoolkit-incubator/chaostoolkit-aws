@@ -1,11 +1,11 @@
 # Changelog
 
+## [Unreleased][]
+
 ### Added
 
 * MSK probes `chaosaws.msk.probes.describe_msk_cluster`  `chaosaws.msk.probes.get_bootstrap_servers`
 * MSK actions `chaosaws.msk.actions.reboot_msk_broker`  `chaosaws.msk.actions.delete_cluster`
-
-## [Unreleased][]
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.33.0...HEAD
 
