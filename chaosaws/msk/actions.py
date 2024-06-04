@@ -30,7 +30,7 @@ def reboot_msk_broker(
             BrokerIds=broker_ids
         )
     except client.exceptions.NotFoundException:
-        raise FailedActivity(f"The specified cluster was not found" )
+        raise FailedActivity("The specified cluster was not found" )
 
 
 def delete_cluster(
@@ -46,4 +46,4 @@ def delete_cluster(
     try:
         return client.delete_cluster(ClusterArn=cluster_arn)
     except client.exceptions.NotFoundException:
-        raise FailedActivity(f"The specified cluster was not found")
+        raise FailedActivity("The specified cluster was not found")
