@@ -307,6 +307,8 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosaws.fis.actions"))
     activities.extend(discover_probes("chaosaws.s3.probes"))
     activities.extend(discover_actions("chaosaws.s3.actions"))
+    activities.extend(discover_probes("chaosaws.msk.probes"))
+    activities.extend(discover_actions("chaosaws.msk.actions"))
     activities.extend(
         discover_activities("chaosaws.s3.controls.upload", "control")
     )
