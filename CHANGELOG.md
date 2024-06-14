@@ -169,6 +169,7 @@ Allow no tags in `start_availability_zone_power_interruption_scenario`
 
 ### Changed
 
+- Fix typos in SSM actions descriptions
 - Update EC2 update_min_instances description
 - Handle `unit=""` as `unit=None` in `cloudwatch.probes.get_metric_statistics`
 - Moved to `ruff` to lint the package
