@@ -16,16 +16,14 @@ def test_reboot_msk_broker_success(aws_client):
     cluster_arn = "arn_msk_cluster"
     broker_ids = ["1"]
     client.reboot_broker.return_value = {
-        "ResponseMetadata": {
-            "HTTPStatusCode": 200
-        }
+        "ResponseMetadata": {"HTTPStatusCode": 200}
     }
 
-    response = reboot_msk_broker(cluster_arn=cluster_arn,
-                                 broker_ids=broker_ids)
+    response = reboot_msk_broker(cluster_arn=cluster_arn, broker_ids=broker_ids)
 
-    client.reboot_broker.assert_called_with(ClusterArn=cluster_arn,
-                                            BrokerIds=broker_ids)
+    client.reboot_broker.assert_called_with(
+        ClusterArn=cluster_arn, BrokerIds=broker_ids
+    )
     assert response["ResponseMetadata"]["HTTPStatusCode"] == 200
 
 
@@ -38,18 +36,14 @@ def test_reboot_msk_broker_not_found(aws_client):
 
     client.exceptions = MagicMock()
     client.exceptions.NotFoundException = NotFoundException
-    client.reboot_broker.side_effect = NotFoundException(
-        "Cluster not found"
-    )
+    client.reboot_broker.side_effect = NotFoundException("Cluster not found")
 
     expected_error_message = "The specified cluster was not found"
 
     with pytest.raises(FailedActivity) as exc_info:
         reboot_msk_broker(cluster_arn=cluster_arn, broker_ids=broker_ids)
 
-    assert expected_error_message in str(
-        exc_info.value
-        )
+    assert expected_error_message in str(exc_info.value)
 
 
 @patch("chaosaws.msk.actions.aws_client", autospec=True)
@@ -58,9 +52,7 @@ def test_delete_cluster_success(aws_client):
     aws_client.return_value = client
     cluster_arn = "arn_msk_cluster"
     client.delete_cluster.return_value = {
-        "ResponseMetadata": {
-            "HTTPStatusCode": 200
-        }
+        "ResponseMetadata": {"HTTPStatusCode": 200}
     }
 
     response = delete_cluster(cluster_arn=cluster_arn)
@@ -77,15 +69,11 @@ def test_delete_cluster_not_found(aws_client):
 
     client.exceptions = MagicMock()
     client.exceptions.NotFoundException = NotFoundException
-    client.delete_cluster.side_effect = NotFoundException(
-        "Cluster not found"
-    )
+    client.delete_cluster.side_effect = NotFoundException("Cluster not found")
 
     expected_error_message = "The specified cluster was not found"
 
     with pytest.raises(FailedActivity) as exc_info:
         delete_cluster(cluster_arn=cluster_arn)
 
-    assert expected_error_message in str(
-        exc_info.value
-        )
+    assert expected_error_message in str(exc_info.value)

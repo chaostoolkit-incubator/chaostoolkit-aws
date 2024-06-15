@@ -139,11 +139,11 @@ def get_targets_health_description(tg_arns: Dict, client: boto3.client) -> Dict:
     for tg in tg_arns:
         tg_health_descr[tg] = {}
         tg_health_descr[tg]["TargetGroupArn"] = tg_arns[tg]
-        tg_health_descr[tg][
-            "TargetHealthDescriptions"
-        ] = client.describe_target_health(TargetGroupArn=tg_arns[tg])[
-            "TargetHealthDescriptions"
-        ]
+        tg_health_descr[tg]["TargetHealthDescriptions"] = (
+            client.describe_target_health(
+                TargetGroupArn=tg_arns[tg]
+            )["TargetHealthDescriptions"]
+        )
     logger.debug(
         f"Health descriptions for target group(s) are: {str(tg_health_descr)}"
     )

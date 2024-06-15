@@ -23,14 +23,13 @@ def reboot_msk_broker(
     client = aws_client("kafka", configuration, secrets)
     logger.debug(
         f"Rebooting MSK brokers: {broker_ids} in cluster {cluster_arn}"
-        )
+    )
     try:
         return client.reboot_broker(
-            ClusterArn=cluster_arn,
-            BrokerIds=broker_ids
+            ClusterArn=cluster_arn, BrokerIds=broker_ids
         )
     except client.exceptions.NotFoundException:
-        raise FailedActivity("The specified cluster was not found" )
+        raise FailedActivity("The specified cluster was not found")
 
 
 def delete_cluster(

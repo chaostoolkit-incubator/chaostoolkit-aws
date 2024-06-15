@@ -32,18 +32,14 @@ def test_describe_msk_cluster_not_found(aws_client):
 
     client.exceptions = MagicMock()
     client.exceptions.NotFoundException = NotFoundException
-    client.describe_cluster.side_effect = NotFoundException(
-        "Cluster not found"
-    )
+    client.describe_cluster.side_effect = NotFoundException("Cluster not found")
 
     expected_error_message = "The specified cluster was not found"
 
     with pytest.raises(FailedActivity) as exc_info:
         describe_msk_cluster(cluster_arn=cluster_arn)
-    
-    assert expected_error_message in str(
-        exc_info.value
-        )
+
+    assert expected_error_message in str(exc_info.value)
 
 
 @patch("chaosaws.msk.probes.aws_client", autospec=True)
@@ -79,6 +75,4 @@ def test_get_bootstrap_server_cluster_not_found(aws_client):
     with pytest.raises(FailedActivity) as exc_info:
         get_bootstrap_servers(cluster_arn=cluster_arn)
 
-    assert expected_error_message in str(
-        exc_info.value
-        )
+    assert expected_error_message in str(exc_info.value)

@@ -182,9 +182,9 @@ def get_metric_data(
     }
 
     if dimensions:
-        args["MetricDataQueries"][0]["MetricStat"]["Metric"][
-            "Dimensions"
-        ] = dimensions
+        args["MetricDataQueries"][0]["MetricStat"]["Metric"]["Dimensions"] = (
+            dimensions
+        )
     elif dimension_name and dimension_value:
         args["MetricDataQueries"][0]["MetricStat"]["Metric"]["Dimensions"] = [
             {"Name": dimension_name, "Value": dimension_value}
