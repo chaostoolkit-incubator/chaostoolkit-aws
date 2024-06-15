@@ -21,6 +21,10 @@ __all__ = [
     "toggle_event_source_mapping_state",
     "add_layer",
     "remove_layer",
+    "add_latency",
+    "remove_latency",
+    "add_error",
+    "remove_error",
 ]
 logger = get_logger()
 

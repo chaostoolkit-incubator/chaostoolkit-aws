@@ -2,7 +2,15 @@
 
 ## [Unreleased][]
 
-[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.35.0...HEAD
+[Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.35.1...HEAD
+
+## [0.35.1][] - 2024-06-15
+
+[0.35.1]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.35.0...0.35.1
+
+### Fixed
+
+* Export actions in awslambda
 
 ## [0.35.0][] - 2024-06-15
 
