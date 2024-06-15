@@ -4,6 +4,15 @@
 
 [Unreleased]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.33.0...HEAD
 
+### Added
+
+* `chaosaws.awslambda.actions.add_layer` and `remove_layer` to manage a
+   function's layers
+* `chaosaws.awslambda.actions.add_latency` and `remove_latency` to introduce
+   latency into a function
+* `chaosaws.awslambda.actions.add_error` and `remove_error` to introduce
+   error into a function (pending https://github.com/aws-cli-tools/chaos-lambda-extension/issues/14)
+
 ## [0.34.0][] - 2024-06-10
 
 [0.34.0]: https://github.com/chaostoolkit-incubator/chaostoolkit-aws/compare/0.33.0...0.34.0

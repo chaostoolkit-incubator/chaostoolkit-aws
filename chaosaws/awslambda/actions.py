@@ -8,7 +8,7 @@ from botocore.exceptions import ClientError
 from chaoslib.exceptions import FailedActivity
 from chaoslib.types import Configuration, Secrets
 
-from chaosaws import aws_client
+from chaosaws import aws_client, get_logger
 from chaosaws.types import AWSResponse
 
 __all__ = [
@@ -19,7 +19,10 @@ __all__ = [
     "put_function_memory_size",
     "delete_event_source_mapping",
     "toggle_event_source_mapping_state",
+    "add_layer",
+    "remove_layer",
 ]
+logger = get_logger()
 
 
 def invoke_function(
@@ -177,6 +180,224 @@ def toggle_event_source_mapping_state(
     try:
         return client.update_event_source_mapping(
             UUID=event_uuid, Enabled=enabled
+        )
+    except ClientError as e:
+        raise FailedActivity(e.response["Error"]["Message"])
+
+
+def add_layer(
+    function_name: str,
+    layer: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Add a new layer
+
+    :param function_name: Function name
+    :param layer: The layer name
+    :param configuration: AWS configuration data
+    :param secrets: AWS secrets
+    :return: AWSResponse
+    """
+    client = aws_client("lambda", configuration, secrets)
+    try:
+        return client.update_function_configuration(
+            FunctionName=function_name, Layers=[layer]
+        )
+    except ClientError as e:
+        raise FailedActivity(e.response["Error"]["Message"])
+
+
+def remove_layer(
+    function_name: str,
+    layer: str,
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Remove a layer version
+
+    :param function_name: Function name
+    :param layer: The layer name
+    :param configuration: AWS configuration data
+    :param secrets: AWS secrets
+    :return: AWSResponse
+    """
+    client = aws_client("lambda", configuration, secrets)
+    try:
+        cfg = client.get_function_configuration(FunctionName=function_name)
+
+        layers = cfg.get("Layers", [])
+        for layr in layers:
+            if layr["Arn"] == layer:
+                layers.remove(layr)
+                break
+
+        return client.update_function_configuration(
+            FunctionName=function_name, Layers=layers
+        )
+    except ClientError as e:
+        raise FailedActivity(e.response["Error"]["Message"])
+
+
+def add_latency(
+    function_name: str,
+    latency: int = 1,
+    probability: float = 0.9,
+    layer: str = "arn:aws:lambda:us-east-1:871265522301:layer:chaos-lambda-extension-x86_64-unknown-linux-gnu-release:12",  # noqa E501
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Introduce latency from a lambda by using the Chaos Lambda Extension
+    https://github.com/aws-cli-tools/chaos-lambda-extension
+
+    The `latency`is in seconds between 1 and 900. The probability represents
+    the likelihood of the fault to be injected on a particular exchange.
+
+    You can set the layer depending on your lambda architecture and region:
+    see https://github.com/aws-cli-tools/chaos-lambda-extension/blob/main/LAYERS.md
+    """  # noqa E501
+    client = aws_client("lambda", configuration, secrets)
+    try:
+        cfg = client.get_function_configuration(FunctionName=function_name)
+
+        envvars = cfg.get("Environment", {}).get("Variables", {})
+        envvars.update(
+            {
+                "AWS_LAMBDA_EXEC_WRAPPER": "/opt/bootstrap",
+                "CHAOSTOOLKIT_EXPERIMENT": "true",
+                "CHAOS_EXTENSION__LAMBDA__ENABLE_LATENCY": "true",
+                "CHAOS_EXTENSION__LAMBDA__LATENCY_VALUE": f"{latency}",
+                "CHAOS_EXTENSION__LAMBDA__LATENCY_PROBABILITY": f"{probability}",  # noqa E501
+            }
+        )
+
+        return client.update_function_configuration(
+            FunctionName=function_name,
+            Layers=[layer],
+            Environment={"Variables": envvars},
+        )
+    except ClientError as e:
+        raise FailedActivity(e.response["Error"]["Message"])
+
+
+def remove_latency(
+    function_name: str,
+    layer: str = "arn:aws:lambda:us-east-1:871265522301:layer:chaos-lambda-extension-x86_64-unknown-linux-gnu-release:12",  # noqa E501
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Remove latency and resources introduced with the `add_latency` action.
+    """
+    client = aws_client("lambda", configuration, secrets)
+    try:
+        cfg = client.get_function_configuration(FunctionName=function_name)
+
+        layers = cfg.get("Layers", [])
+        for layr in layers:
+            if layr["Arn"] == layer:
+                layers.remove(layr)
+                break
+
+        envvars = cfg.get("Environment", {}).get("Variables", {})
+        for v in envvars.copy():
+            if v in (
+                "AWS_LAMBDA_EXEC_WRAPPER",
+                "CHAOS_EXTENSION__LAMBDA__ENABLE_LATENCY",
+                "CHAOS_EXTENSION__LAMBDA__LATENCY_PROBABILITY",
+                "CHAOSTOOLKIT_EXPERIMENT",
+            ):
+                envvars.pop(v, None)
+
+        return client.update_function_configuration(
+            FunctionName=function_name,
+            Layers=layers,
+            Environment={"Variables": envvars},
+        )
+    except ClientError as e:
+        raise FailedActivity(e.response["Error"]["Message"])
+
+
+def add_error(
+    function_name: str,
+    body: str = '{"statusCode": 500, "body": "Greeting from Chaos Toolkit"}',  # noqa E501
+    probability: float = 0.9,
+    layer: str = "arn:aws:lambda:us-east-1:871265522301:layer:chaos-lambda-extension-x86_64-unknown-linux-gnu-release:12",  # noqa E501
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Introduce error from a lambda by using the Chaos Lambda Extension
+    https://github.com/aws-cli-tools/chaos-lambda-extension
+
+    The `error` is the body passed as a json encoded string. The probability
+    represents the likelihood of the fault to be injected on a particular
+    exchange.
+
+    You can set the layer depending on your lambda architecture and region:
+    see https://github.com/aws-cli-tools/chaos-lambda-extension/blob/main/LAYERS.md
+    """  # noqa E501
+    client = aws_client("lambda", configuration, secrets)
+    try:
+        cfg = client.get_function_configuration(FunctionName=function_name)
+
+        envvars = cfg.get("Environment", {}).get("Variables", {})
+        envvars.update(
+            {
+                "AWS_LAMBDA_EXEC_WRAPPER": "/opt/bootstrap",
+                "CHAOSTOOLKIT_EXPERIMENT": "true",
+                "CHAOS_EXTENSION__RESPONSE__ENABLE_CHANGE_RESPONSE_BODY": "true",  # noqa E501
+                "CHAOS_EXTENSION__RESPONSE__DEFAULT_RESPONSE": f"{body}",
+                "CHAOS_EXTENSION__RESPONSE__CHANGE_RESPONSE_PROBABILITY": f"{probability}",  # noqa E501
+            }
+        )
+
+        return client.update_function_configuration(
+            FunctionName=function_name,
+            Layers=[layer],
+            Environment={"Variables": envvars},
+        )
+    except ClientError as e:
+        raise FailedActivity(e.response["Error"]["Message"])
+
+
+def remove_error(
+    function_name: str,
+    layer: str = "arn:aws:lambda:us-east-1:871265522301:layer:chaos-lambda-extension-x86_64-unknown-linux-gnu-release:12",  # noqa E501
+    configuration: Configuration = None,
+    secrets: Secrets = None,
+) -> AWSResponse:
+    """
+    Remove error and resources introduced with the `add_error` action.
+    """
+    client = aws_client("lambda", configuration, secrets)
+    try:
+        cfg = client.get_function_configuration(FunctionName=function_name)
+
+        layers = cfg.get("Layers", [])
+        for layr in layers:
+            if layr["Arn"] == layer:
+                layers.remove(layr)
+                break
+
+        envvars = cfg.get("Environment", {}).get("Variables", {})
+        for v in envvars.copy():
+            if v in (
+                "AWS_LAMBDA_EXEC_WRAPPER",
+                "CHAOS_EXTENSION__RESPONSE__ENABLE_CHANGE_RESPONSE_BODY",
+                "CHAOS_EXTENSION__RESPONSE__DEFAULT_RESPONSE",
+                "CHAOS_EXTENSION__RESPONSE__CHANGE_RESPONSE_PROBABILITY",
+                "CHAOSTOOLKIT_EXPERIMENT",
+            ):
+                envvars.pop(v, None)
+
+        return client.update_function_configuration(
+            FunctionName=function_name,
+            Layers=layers,
+            Environment={"Variables": envvars},
         )
     except ClientError as e:
         raise FailedActivity(e.response["Error"]["Message"])
